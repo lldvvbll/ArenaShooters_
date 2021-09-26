@@ -21,9 +21,6 @@ class ARENASHOOTERS_API UASInventoryUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	void Bind();
-
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -41,6 +38,16 @@ protected:
 
 	void OnAddInventoryItem(const TWeakObjectPtr<UASItem>& NewItem);
 	void OnRemoveInventoryItem(const TWeakObjectPtr<UASItem>& InItem);
+
+	UFUNCTION()
+	void BackToGame();
+
+public:
+	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnConstructedEvent, UUserWidget*);
+	FOnConstructedEvent OnConstructed;
+
+	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnDestructedEvent, UUserWidget*);
+	FOnDestructedEvent OnDestructed;
 
 private:
 	UPROPERTY()

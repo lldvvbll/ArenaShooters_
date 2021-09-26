@@ -76,8 +76,9 @@ public:
 
 	bool RemoveItem(UASItem* InItem);
 
-	void OnShowInventoryWidget(bool bShown);
-	bool IsShownInventoryWidget() const;
+	void OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget);
+	void OnDestructedFullScreenWidget(UUserWidget* DestructedWidget);
+	bool IsShownFullScreenWidget() const;
 
 	void PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon);
 	void PickUpArmor(EArmorSlotType SlotType, UASArmor* NewArmor);
@@ -330,7 +331,7 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_bChangeWeapon)
 	bool bChangeWeapon;
 
-	bool bShownInventoryWidget;
+	bool bShownFullScreenWidget;
 
 	UPROPERTY(ReplicatedUsing = OnRep_bUseHealingKit)
 	bool bUseHealingKit;

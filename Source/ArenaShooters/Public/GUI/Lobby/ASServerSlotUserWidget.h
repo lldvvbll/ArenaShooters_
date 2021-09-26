@@ -23,7 +23,7 @@ protected:
 
 	UFUNCTION()
 	void JoinServer();
-
+	
 private:
 	FOnlineSessionSearchResult SearchResult;
 

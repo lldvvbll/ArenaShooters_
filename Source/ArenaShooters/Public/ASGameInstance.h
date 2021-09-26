@@ -7,6 +7,7 @@
 #include "ASGameInstance.generated.h"
 
 class FOnlineSessionSearch;
+class FOnlineSessionSearchResult;
 
 namespace EOnJoinSessionCompleteResult
 {
@@ -22,6 +23,7 @@ public:
 	virtual void Init() override;
 
 	void SearchServer();
+	void JoinServer(const FOnlineSessionSearchResult& SearchResult);
 
 protected:
 	virtual void OnStart() override;

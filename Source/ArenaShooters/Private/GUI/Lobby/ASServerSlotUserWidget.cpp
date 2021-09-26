@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "OnlineSessionSettings.h"
+#include "ASGameInstance.h"
 
 void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& NewSearchResult)
 {
@@ -38,11 +39,6 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	{
 		PingTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d ms"), SearchResult.PingInMs)));		
 	}
-
-	if (JoinButton != nullptr)
-	{
-		JoinButton->SetIsEnabled(true);
-	}
 }
 
 void UASServerSlotUserWidget::NativeConstruct()
@@ -57,12 +53,14 @@ void UASServerSlotUserWidget::NativeConstruct()
 
 	if (JoinButton != nullptr)
 	{
-		JoinButton->SetIsEnabled(false);
 		JoinButton->OnClicked.AddDynamic(this, &UASServerSlotUserWidget::JoinServer);
 	}
 }
 
 void UASServerSlotUserWidget::JoinServer()
 {
-	AS_LOG_S(Warning);
+	if (auto GameInst = GetGameInstance<UASGameInstance>())
+	{
+		GameInst->JoinServer(SearchResult);
+	}
 }

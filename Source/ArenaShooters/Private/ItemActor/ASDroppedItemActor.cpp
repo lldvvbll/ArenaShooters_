@@ -14,7 +14,7 @@
 #include "DataAssets/ItemDataAssets/ASArmorDataAsset.h"
 #include "DataAssets/ItemDataAssets/ASAmmoDataAsset.h"
 #include "DataAssets/ItemDataAssets/ASHealingKitDataAsset.h"
-#include "ASItemFactory.h"
+#include "GameMode/ASItemFactoryComponent.h"
 
 AASDroppedItemActor::AASDroppedItemActor()
 {
@@ -143,7 +143,7 @@ void AASDroppedItemActor::BeginPlay()
 			if (ItemDataAsset == nullptr)
 				continue;
 
-			ASItems.Emplace(AASItemFactory::NewASItem(GetWorld(), this, ItemDataAsset, Count));
+			ASItems.Emplace(UASItemFactoryComponent::NewASItem(GetWorld(), this, ItemDataAsset, Count));
 		}
 	}	
 }

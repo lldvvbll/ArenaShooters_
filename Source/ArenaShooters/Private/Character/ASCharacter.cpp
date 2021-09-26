@@ -26,7 +26,7 @@
 #include "ItemActor/ASDroppedItemActor.h"
 #include "GameFramework/PlayerInput.h"
 #include "Character/ASAnimInstance.h"
-#include "ASItemFactory.h"
+#include "GameMode/ASItemFactoryComponent.h"
 
 AASCharacter::AASCharacter()
 {
@@ -46,7 +46,7 @@ AASCharacter::AASCharacter()
 	MaxAimKeyHoldTime = 0.3f;
 	ShootingStance = EShootingStanceType::None;
 	bPressedShootButton = false;
-	bShownInventoryWidget = false;
+	bShownFullScreenWidget = false;
 	CurrentBulletSpread = TNumericLimits<float>::Max();
 	MinBulletSpread = TNumericLimits<float>::Max();
 	MaxBulletSpread = TNumericLimits<float>::Max();
@@ -549,26 +549,24 @@ bool AASCharacter::RemoveItem(UASItem* InItem)
 	return ASInventory->RemoveItem(InItem).Value;
 }
 
-void AASCharacter::OnShowInventoryWidget(bool bShown)
+void AASCharacter::OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget)
 {
-	if (bShown)
+	if (ShootingStance != EShootingStanceType::None)
 	{
-		if (ShootingStance != EShootingStanceType::None)
-		{
-			ServerChangeShootingStance(EShootingStanceType::None);
-		}
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
 
-		bShownInventoryWidget = true;
-	}
-	else
-	{
-		bShownInventoryWidget = false;
-	}
+	bShownFullScreenWidget = true;
 }
 
-bool AASCharacter::IsShownInventoryWidget() const
+void AASCharacter::OnDestructedFullScreenWidget(UUserWidget* DestructedWidget)
 {
-	return bShownInventoryWidget;
+	bShownFullScreenWidget = false;
+}
+
+bool AASCharacter::IsShownFullScreenWidget() const
+{
+	return bShownFullScreenWidget;
 }
 
 void AASCharacter::PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon)
@@ -1141,12 +1139,13 @@ void AASCharacter::ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotT
 	}
 	else
 	{
+		// todo: delete
 		FPrimaryAssetId& WeaponAssetId = (WeaponSlotType == EWeaponSlotType::Main) ? TestARAssetId : TestPistolAssetId;
 
 		if (auto WeaponDataAsset = UASAssetManager::Get().GetDataAsset<UASWeaponDataAsset>(WeaponAssetId))
 		{
 			UASItem* OldWeapon = nullptr;
-			if (ASInventory->InsertWeapon(WeaponSlotType, AASItemFactory::NewASItem<UASWeapon>(GetWorld(), this, WeaponDataAsset), OldWeapon))
+			if (ASInventory->InsertWeapon(WeaponSlotType, UASItemFactoryComponent::NewASItem<UASWeapon>(GetWorld(), this, WeaponDataAsset), OldWeapon))
 			{
 				if (OldWeapon != nullptr)
 				{
@@ -1266,7 +1265,7 @@ void AASCharacter::OnRep_ShootingStance(EShootingStanceType OldShootingStance)
 bool AASCharacter::CanAimOrScope() const
 {
 	return (ShootingStance == EShootingStanceType::None) && (GetUsingWeaponType() != EWeaponType::None) && 
-		!GetCharacterMovement()->IsFalling() && !bReloading && !bDead && !bChangeWeapon && !bShownInventoryWidget &&
+		!GetCharacterMovement()->IsFalling() && !bReloading && !bDead && !bChangeWeapon && !bShownFullScreenWidget &&
 		!bUseHealingKit;
 }
 

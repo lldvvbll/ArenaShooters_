@@ -10,6 +10,7 @@ class UButton;
 class UCircularThrobber;
 class UScrollBox;
 class UASServerSlotUserWidget;
+class UASMainMenuUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API UASServerBrowserUserWidget : public UUserWidget
@@ -18,6 +19,7 @@ class ARENASHOOTERS_API UASServerBrowserUserWidget : public UUserWidget
 	
 public:
 	void SearchServer();
+	void SetMainMenuWidget(UASMainMenuUserWidget* InMainMenuWidget);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -32,6 +34,9 @@ protected:
 	void OnSearchSessionResult(const TArray<FOnlineSessionSearchResult>& NewSessionResults);
 
 protected:
+	UPROPERTY()
+	UASMainMenuUserWidget* MainMenuWidget;
+
 	UPROPERTY()
 	UButton* BackButton;
 

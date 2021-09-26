@@ -3,10 +3,10 @@
 
 #include "GUI/Lobby/ASServerBrowserUserWidget.h"
 #include "GUI/Lobby/ASServerSlotUserWidget.h"
+#include "GUI/Lobby/ASMainMenuUserWidget.h"
 #include "Components/Button.h"
 #include "Components/CircularThrobber.h"
 #include "Components/ScrollBox.h"
-#include "ASLobbyPlayerController.h"
 #include "ASGameInstance.h"
 
 void UASServerBrowserUserWidget::SearchServer()
@@ -30,6 +30,11 @@ void UASServerBrowserUserWidget::SearchServer()
 	{
 		GameInst->SearchServer();
 	}
+}
+
+void UASServerBrowserUserWidget::SetMainMenuWidget(UASMainMenuUserWidget* InMainMenuWidget)
+{
+	MainMenuWidget = InMainMenuWidget;
 }
 
 void UASServerBrowserUserWidget::NativeConstruct()
@@ -60,8 +65,6 @@ void UASServerBrowserUserWidget::NativeConstruct()
 	{
 		OnSearchSessionResultDelegateHandle = GameInst->OnSearchSessionResult.AddUObject(this, &UASServerBrowserUserWidget::OnSearchSessionResult);
 	}
-
-	SearchServer();
 }
 
 void UASServerBrowserUserWidget::NativeDestruct()
@@ -76,12 +79,10 @@ void UASServerBrowserUserWidget::NativeDestruct()
 
 void UASServerBrowserUserWidget::OnClickedBackButton()
 {
-	if (auto LobbyPlayerController = GetOwningPlayer<AASLobbyPlayerController>())
+	if (MainMenuWidget != nullptr)
 	{
-		LobbyPlayerController->ShowMainMenu();
+		MainMenuWidget->ShowMainMenu();
 	}
-
-	RemoveFromParent();
 }
 
 void UASServerBrowserUserWidget::OnClickedRefreshButton()

@@ -4,7 +4,7 @@
 #include "Item/ASItem.h"
 #include "DataAssets/ItemDataAssets/ASItemDataAsset.h"
 #include "Net/UnrealNetwork.h"
-#include "ASItemFactory.h"
+#include "GameMode/ASItemFactoryComponent.h"
 
 void UASItem::BeginDestroy()
 {
@@ -78,7 +78,7 @@ void UASItem::SetCount(int32 NewCount)
 
 	if (Count <= 0 && IsBundleItem())
 	{
-		AASItemFactory::DeleteItem(GetWorld(), this);
+		UASItemFactoryComponent::DeleteItem(GetWorld(), this);
 	}
 }
 

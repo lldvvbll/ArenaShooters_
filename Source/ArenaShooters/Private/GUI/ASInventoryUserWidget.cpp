@@ -3,7 +3,7 @@
 
 #include "GUI/ASInventoryUserWidget.h"
 #include "Character/ASCharacter.h"
-#include "ASPlayerController.h"
+#include "Controller/ASPlayerController.h"
 #include "GUI/ASWeaponSlotUserWidget.h"
 #include "GUI/ASArmorSlotUserWidget.h"
 #include "GUI/ASItemScrollBoxWrapperUserWidget.h"
@@ -12,32 +12,6 @@
 #include "Item/ASWeapon.h"
 #include "Item/ASArmor.h"
 #include "ItemActor/ASDroppedItemActor.h"
-
-void UASInventoryUserWidget::Bind()
-{
-	AASCharacter* ASChar = GetASCharacter();
-	if (ASChar == nullptr)
-	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
-		return;
-	}
-
-	ASInventoryComp = ASChar->GetInventoryComponent();
-	if (ASInventoryComp == nullptr)
-	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
-		return;
-	}
-
-	ASChar->OnGroundItemAdd.AddUObject(this, &UASInventoryUserWidget::AddItemsToGroundScrollBox);
-	ASChar->OnGroundItemRemove.AddUObject(this, &UASInventoryUserWidget::RemoveItemsFromGroundScrollBox);
-
-	ASInventoryComp->OnAddInventoryItem.AddUObject(this, &UASInventoryUserWidget::OnAddInventoryItem);
-	ASInventoryComp->OnRemoveInventoryItem.AddUObject(this, &UASInventoryUserWidget::OnRemoveInventoryItem);
-
-	ASInventoryComp->OnInsertWeapon.AddUObject(this, &UASInventoryUserWidget::OnChangedWeapon);
-	ASInventoryComp->OnInsertArmor.AddUObject(this, &UASInventoryUserWidget::OnChangedArmor);
-}
 
 void UASInventoryUserWidget::NativeConstruct()
 {
@@ -52,7 +26,10 @@ void UASInventoryUserWidget::NativeConstruct()
 
 	if (AASCharacter* ASChar = GetASCharacter())
 	{
-		ASChar->OnShowInventoryWidget(true);
+		ASInventoryComp = ASChar->GetInventoryComponent();
+
+		ASChar->OnGroundItemAdd.AddUObject(this, &UASInventoryUserWidget::AddItemsToGroundScrollBox);
+		ASChar->OnGroundItemRemove.AddUObject(this, &UASInventoryUserWidget::RemoveItemsFromGroundScrollBox);
 
 		OnChangedWeapon(EWeaponSlotType::Main, nullptr);
 		OnChangedWeapon(EWeaponSlotType::Sub, nullptr);
@@ -60,22 +37,32 @@ void UASInventoryUserWidget::NativeConstruct()
 		OnChangedArmor(EArmorSlotType::Jacket, nullptr);
 
 		AddItemsToGroundScrollBox(ASChar->GetGroundItems());
+
+		if (ASInventoryComp != nullptr)
+		{
+			ASInventoryComp->OnAddInventoryItem.AddUObject(this, &UASInventoryUserWidget::OnAddInventoryItem);
+			ASInventoryComp->OnRemoveInventoryItem.AddUObject(this, &UASInventoryUserWidget::OnRemoveInventoryItem);
+			ASInventoryComp->OnInsertWeapon.AddUObject(this, &UASInventoryUserWidget::OnChangedWeapon);
+			ASInventoryComp->OnInsertArmor.AddUObject(this, &UASInventoryUserWidget::OnChangedArmor);
+
+			AddItemsToInventoryScrollBox(ASInventoryComp->GetInventoryItems());
+		}
 	}
 
-	if (ASInventoryComp != nullptr)
-	{
-		AddItemsToInventoryScrollBox(ASInventoryComp->GetInventoryItems());
-	}
+	// Tab, ESC
+	FOnInputAction BackToGameAction;
+	BackToGameAction.BindDynamic(this, &UASInventoryUserWidget::BackToGame);
+	ListenForInputAction(FName(TEXT("ShowInventory")), EInputEvent::IE_Pressed, true, BackToGameAction);
+	ListenForInputAction(FName(TEXT("ShowGameMenu")), EInputEvent::IE_Pressed, true, BackToGameAction);
+
+	OnConstructed.Broadcast(this);
 }
 
 void UASInventoryUserWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 
-	if (AASCharacter* ASChar = GetASCharacter())
-	{
-		ASChar->OnShowInventoryWidget(false);
-	}	
+	OnDestructed.Broadcast(this);
 }
 
 FReply UASInventoryUserWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -90,7 +77,7 @@ AASCharacter* UASInventoryUserWidget::GetASCharacter() const
 	auto PlayerController = Cast<AASPlayerController>(GetOwningPlayer());
 	if (PlayerController == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return nullptr;
 	}
 
@@ -101,7 +88,7 @@ void UASInventoryUserWidget::AddItemsToGroundScrollBox(const TArray<TWeakObjectP
 {
 	if (GroundItemScrollBoxWrapperWidget == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -112,7 +99,7 @@ void UASInventoryUserWidget::RemoveItemsFromGroundScrollBox(const TArray<TWeakOb
 {
 	if (GroundItemScrollBoxWrapperWidget == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -123,7 +110,7 @@ void UASInventoryUserWidget::AddItemsToInventoryScrollBox(const TArray<TWeakObje
 {
 	if (InventoryItemScrollBoxWrapperWidget == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -134,7 +121,7 @@ void UASInventoryUserWidget::OnChangedWeapon(EWeaponSlotType SlotType, UASWeapon
 {
 	if (ASInventoryComp == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -150,12 +137,12 @@ void UASInventoryUserWidget::OnChangedWeapon(EWeaponSlotType SlotType, UASWeapon
 			}
 			else
 			{
-				AS_LOG_SCREEN_S(5.0f, FColor::Red);
+				AS_LOG_S(Error);
 			}
 		}
 		else
 		{
-			AS_LOG_SCREEN_S(5.0f, FColor::Red);
+			AS_LOG_S(Error);
 		}
 		break;
 	case EWeaponSlotType::Sub:
@@ -168,12 +155,12 @@ void UASInventoryUserWidget::OnChangedWeapon(EWeaponSlotType SlotType, UASWeapon
 			}
 			else
 			{
-				AS_LOG_SCREEN_S(5.0f, FColor::Red);
+				AS_LOG_S(Error);
 			}
 		}
 		else
 		{
-			AS_LOG_SCREEN_S(5.0f, FColor::Red);
+			AS_LOG_S(Error);
 		}
 		break;
 	default:
@@ -196,12 +183,12 @@ void UASInventoryUserWidget::OnChangedArmor(EArmorSlotType SlotType, UASArmor* R
 			}
 			else
 			{
-				AS_LOG_SCREEN_S(5.0f, FColor::Red);
+				AS_LOG_S(Error);
 			}
 		}
 		else
 		{
-			AS_LOG_SCREEN_S(5.0f, FColor::Red);
+			AS_LOG_S(Error);
 		}
 		break;
 	case EArmorSlotType::Jacket:
@@ -214,12 +201,12 @@ void UASInventoryUserWidget::OnChangedArmor(EArmorSlotType SlotType, UASArmor* R
 			}
 			else
 			{
-				AS_LOG_SCREEN_S(5.0f, FColor::Red);
+				AS_LOG_S(Error);
 			}
 		}
 		else
 		{
-			AS_LOG_SCREEN_S(5.0f, FColor::Red);
+			AS_LOG_S(Error);
 		}
 		break;
 	default:
@@ -232,7 +219,7 @@ void UASInventoryUserWidget::OnAddInventoryItem(const TWeakObjectPtr<UASItem>& N
 {
 	if (InventoryItemScrollBoxWrapperWidget == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -243,9 +230,14 @@ void UASInventoryUserWidget::OnRemoveInventoryItem(const TWeakObjectPtr<UASItem>
 {
 	if (InventoryItemScrollBoxWrapperWidget == nullptr)
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
 	InventoryItemScrollBoxWrapperWidget->RemoveItemsFromScrollBox({ InItem });
+}
+
+void UASInventoryUserWidget::BackToGame()
+{
+	RemoveFromParent();
 }
