@@ -12,14 +12,24 @@ void UASGameInstance::Init()
 {
 	Super::Init();
 
-	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (SessionInterface.IsValid())
+	IOnlineSubsystem* OS = IOnlineSubsystem::Get();
+	if (OS != nullptr)
 	{
-		AS_LOG(Warning, TEXT("OnlineSubsystem: %s"), *IOnlineSubsystem::Get()->GetSubsystemName().ToString());
+		IOnlineSessionPtr SessionInterface = OS->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			AS_LOG(Warning, TEXT("OnlineSubsystem: %s"), *(OS->GetSubsystemName().ToString()));
 
-		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UASGameInstance::OnCreateSessionComplete);
-		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UASGameInstance::OnFindSessionComplete);
-		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UASGameInstance::OnJoinSessionComplete);
+			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UASGameInstance::OnCreateSessionComplete);
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UASGameInstance::OnFindSessionComplete);
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UASGameInstance::OnJoinSessionComplete);
+			SessionInterface->OnRegisterPlayersCompleteDelegates.AddUObject(this, &UASGameInstance::OnRegisterPlayersComplete);
+			SessionInterface->OnUnregisterPlayersCompleteDelegates.AddUObject(this, &UASGameInstance::OnUnregisterPlayersComplete);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}		
 	}
 	else
 	{
@@ -37,13 +47,17 @@ void UASGameInstance::SearchServer()
 		SessionSearch->TimeoutInSeconds = 60.0f;
 
 		//if (FString(FCommandLine::Get()).Find(TEXT("-searchlan")) != INDEX_NONE)
-		if (IOnlineSubsystem::Get()->GetSubsystemName() != TEXT("Steam"))
+		if (!IsOnlineSubsystemSteam())
 		{
 			SessionSearch->bIsLanQuery = true;
 			//SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 		}
 
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }
 
@@ -52,7 +66,7 @@ void UASGameInstance::JoinServer(const FOnlineSessionSearchResult& SearchResult)
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
 	if (SessionInterface.IsValid() && SearchResult.IsValid())
 	{
-		SessionInterface->JoinSession(0, FName(TEXT("GameSession")), SearchResult);
+		SessionInterface->JoinSession(0, NAME_GameSession, SearchResult);
 	}
 	else
 	{
@@ -73,11 +87,12 @@ void UASGameInstance::OnStart()
 			SessionSettings.bAllowJoinInProgress = true;
 			SessionSettings.bShouldAdvertise = true;
 			SessionSettings.NumPublicConnections = 16;
-			SessionSettings.Set(FName(TEXT("SERVER_NAME")), FString(TEXT("Test Server Name")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			SessionSettings.Set(SERVER_NAME, FString(TEXT("Test Server Name")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(SETTING_MAPNAME, FString(TEXT("Test Server Map")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-
+			SessionSettings.Set(NUMOPENPUBCONN, FString::FromInt(SessionSettings.NumPublicConnections), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			
 			//if (FString(FCommandLine::Get()).Find(TEXT("-lan")) != INDEX_NONE)
-			if (IOnlineSubsystem::Get()->GetSubsystemName() != TEXT("Steam"))
+			if (!IsOnlineSubsystemSteam())
 			{
 				SessionSettings.bIsLANMatch = true;
 				//SessionSettings.bUsesPresence = true;
@@ -87,7 +102,7 @@ void UASGameInstance::OnStart()
 				SessionSettings.bIsDedicated = true;
 			}
 
-			if (!SessionInterface->CreateSession(0, FName(TEXT("GameSession")), SessionSettings))
+			if (!SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings))
 			{
 				AS_LOG_S(Error);
 			}
@@ -152,20 +167,6 @@ void UASGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 		return;
 	}
 		
-	if (FOnlineSessionSettings* SessionSetting = SessionInterface->GetSessionSettings(SessionName))
-	{
-
-
-		if (!SessionInterface->UpdateSession(SessionName, *SessionSetting))
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-	
 	FString JoinAddress;
 	SessionInterface->GetResolvedConnectString(SessionName, JoinAddress);
 	if (JoinAddress.IsEmpty())
@@ -175,4 +176,71 @@ void UASGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 	}
 
 	PlayerCtrlr->ClientTravel(JoinAddress, ETravelType::TRAVEL_Absolute);
+}
+
+void UASGameInstance::OnRegisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful)
+{
+	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+	if (!SessionInterface.IsValid())
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
+	if (SessionSettings == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FString NumOpenPublicConnections;
+	if (SessionSettings->Get(NUMOPENPUBCONN, NumOpenPublicConnections))
+	{
+		int32 NewNum = FCString::Atoi(*NumOpenPublicConnections) - 1;
+		SessionSettings->Set(NUMOPENPUBCONN, FString::FromInt(NewNum), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionInterface->UpdateSession(SessionName, *SessionSettings);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASGameInstance::OnUnregisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful)
+{
+	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+	if (!SessionInterface.IsValid())
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
+	if (SessionSettings == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FString NumOpenPublicConnections;
+	if (SessionSettings->Get(NUMOPENPUBCONN, NumOpenPublicConnections))
+	{
+		int32 NewNum = FCString::Atoi(*NumOpenPublicConnections) + 1;
+		SessionSettings->Set(NUMOPENPUBCONN, FString::FromInt(NewNum), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionInterface->UpdateSession(SessionName, *SessionSettings);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+bool UASGameInstance::IsOnlineSubsystemSteam() const
+{
+	IOnlineSubsystem* OS = IOnlineSubsystem::Get();
+	if (OS == nullptr)
+		return false;
+
+	return (OS->GetSubsystemName() == TEXT("Steam"));
 }

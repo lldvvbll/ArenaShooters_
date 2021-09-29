@@ -14,7 +14,7 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	if (ServerNameTextBlock != nullptr)
 	{
 		FString ServerName = TEXT("Unknown");
-		SearchResult.Session.SessionSettings.Get(FName(TEXT("SERVER_NAME")), ServerName);
+		SearchResult.Session.SessionSettings.Get(SERVER_NAME, ServerName);
 
 		ServerNameTextBlock->SetText(FText::FromString(ServerName));
 	}
@@ -29,8 +29,21 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 
 	if (PlayersTextBlock != nullptr)
 	{
+		int32 NumOpenPublicConnections = 0;
+
+		FString NumOpenPublicConnectionsStr;
+		if (SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnectionsStr))
+		{
+			NumOpenPublicConnections = FCString::Atoi(*NumOpenPublicConnectionsStr);
+		}
+		else
+		{
+			NumOpenPublicConnections = SearchResult.Session.NumOpenPublicConnections;
+			AS_LOG_S(Error);
+		}
+
 		int32 MaxConnection = SearchResult.Session.SessionSettings.NumPublicConnections;
-		int32 CurConnection = MaxConnection - SearchResult.Session.NumOpenPublicConnections;
+		int32 CurConnection = MaxConnection - NumOpenPublicConnections;
 
 		PlayersTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), CurConnection, MaxConnection)));
 	}

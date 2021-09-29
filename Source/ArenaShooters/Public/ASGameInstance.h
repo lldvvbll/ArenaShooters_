@@ -6,6 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "ASGameInstance.generated.h"
 
+#define NUMOPENPUBCONN "NUMOPENPUBCONN"
+#define SERVER_NAME FName(TEXT("SERVER_NAME"))
+
 class FOnlineSessionSearch;
 class FOnlineSessionSearchResult;
 
@@ -31,6 +34,11 @@ protected:
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	virtual void OnFindSessionComplete(bool bWasSuccessful);
 	virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	virtual void OnRegisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful);
+	virtual void OnUnregisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful);
+
+protected:
+	bool IsOnlineSubsystemSteam() const;
 
 public:
 	DECLARE_EVENT_OneParam(UASGameInstance, FOnSearchSessionResultEvent, const TArray<FOnlineSessionSearchResult>&);

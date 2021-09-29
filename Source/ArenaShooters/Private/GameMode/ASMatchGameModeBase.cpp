@@ -4,6 +4,12 @@
 #include "GameMode/ASMatchGameModeBase.h"
 #include "GameMode/ASMatchGameStateBase.h"
 
+AASMatchGameModeBase::AASMatchGameModeBase()
+{
+	MaxPlayerCount = 16;
+	MinPlayerCount = 2;
+}
+
 void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
@@ -27,4 +33,24 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	{
 		AS_LOG_S(Warning);
 	}
+}
+
+int32 AASMatchGameModeBase::GetMaxPlayerCount() const
+{
+	return MaxPlayerCount;
+}
+
+void AASMatchGameModeBase::SetMaxPlayerCount(int32 Count)
+{
+	MaxPlayerCount = Count;
+}
+
+int32 AASMatchGameModeBase::GetMinPlayerCount() const
+{
+	return MinPlayerCount;
+}
+
+void AASMatchGameModeBase::SetMinPlayerCount(int32 Count)
+{
+	MinPlayerCount = Count;
 }

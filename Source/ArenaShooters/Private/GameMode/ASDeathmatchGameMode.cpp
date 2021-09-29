@@ -3,3 +3,18 @@
 
 #include "GameMode/ASDeathmatchGameMode.h"
 
+void AASDeathmatchGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	if (MinPlayerCount <= NumPlayers)
+	{
+		StartPlay();
+	}
+}
+
+void AASDeathmatchGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+
+}

@@ -10,5 +10,9 @@ UCLASS()
 class ARENASHOOTERS_API AASDeathmatchGameMode : public AASMatchGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
+
 };
