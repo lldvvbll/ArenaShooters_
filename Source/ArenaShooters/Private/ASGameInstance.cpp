@@ -95,12 +95,18 @@ void UASGameInstance::OnStart()
 		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
 		if (SessionInterface.IsValid())
 		{
+			FString LoadedMapName = GetWorld()->GetMapName();
+			if (LoadedMapName.IsEmpty())
+			{
+				LoadedMapName = TEXT("Unknown");
+			}
+
 			FOnlineSessionSettings SessionSettings;
 			SessionSettings.bAllowJoinInProgress = true;
 			SessionSettings.bShouldAdvertise = true;
 			SessionSettings.NumPublicConnections = 16;
 			SessionSettings.Set(SERVER_NAME, FString(TEXT("Test Server Name")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-			SessionSettings.Set(SETTING_MAPNAME, FString(TEXT("Test Server Map")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			SessionSettings.Set(SETTING_MAPNAME, LoadedMapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(NUMOPENPUBCONN, FString::FromInt(SessionSettings.NumPublicConnections), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			
 			//if (FString(FCommandLine::Get()).Find(TEXT("-lan")) != INDEX_NONE)
