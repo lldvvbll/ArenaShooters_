@@ -28,6 +28,9 @@ public:
 	void SearchServer();
 	void JoinServer(const FOnlineSessionSearchResult& SearchResult);
 
+	void SetIsMatchProcess(bool bIsProcess);
+	bool IsMatchProcess() const;
+
 protected:
 	virtual void OnStart() override;
 
@@ -47,4 +50,5 @@ public:
 protected:
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
+	bool bMatchProcess;
 };

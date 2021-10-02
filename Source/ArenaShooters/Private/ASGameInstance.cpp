@@ -35,6 +35,8 @@ void UASGameInstance::Init()
 	{
 		AS_LOG_S(Error);
 	}
+
+	bMatchProcess = false;
 }
 
 void UASGameInstance::SearchServer()
@@ -72,6 +74,16 @@ void UASGameInstance::JoinServer(const FOnlineSessionSearchResult& SearchResult)
 	{
 		AS_LOG_S(Error);
 	}
+}
+
+void UASGameInstance::SetIsMatchProcess(bool bIsProcess)
+{
+	bMatchProcess = bIsProcess;
+}
+
+bool UASGameInstance::IsMatchProcess() const
+{
+	return bMatchProcess;
 }
 
 void UASGameInstance::OnStart()

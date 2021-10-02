@@ -22,13 +22,29 @@ public:
 
 	void SetNumPlayers(int32 NewNum);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnSetPrepareTimer(float PrepareTime);
+	void MulticastOnSetPrepareTimer_Implementation(float PrepareTime);
+
+	void SetMatchProcess(bool bIsMatchProcess);
+	bool IsMatchProcess() const;
+
 protected:
 	UFUNCTION()
 	void OnRep_NumPlayers(int32 OldNum);
 
+	UFUNCTION()
+	void OnRep_bMatchProcess();
+
 public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedNumPlayersEvent, int32);
 	FOnChangedNumPlayersEvent OnChangedNumPlayers;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetPrepareTimeEvent, FDateTime);
+	FOnSetPrepareTimeEvent OnSetPrepareTime;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedMatchProcessEvent, bool)
+	FOnChangedMatchProcessEvent OnChangedMatchProcess;
 
 protected:
 	UPROPERTY(Replicated, EditDefaultsOnly)
@@ -36,4 +52,9 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_NumPlayers)
 	int32 NumPlayers;
+
+	FDateTime StartTimeForProcess;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bMatchProcess)
+	bool bMatchProcess;
 };

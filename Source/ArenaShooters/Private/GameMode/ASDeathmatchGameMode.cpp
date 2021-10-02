@@ -7,10 +7,6 @@ void AASDeathmatchGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (MinPlayerCount <= NumPlayers)
-	{
-		StartPlay();
-	}
 }
 
 void AASDeathmatchGameMode::Logout(AController* Exiting)
