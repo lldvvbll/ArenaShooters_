@@ -60,7 +60,11 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	}
 
 	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
-	if (ASMatchGameState == nullptr)
+	if (ASMatchGameState != nullptr)
+	{
+		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
+	}
+	else
 	{
 		AS_LOG_S(Warning);
 	}

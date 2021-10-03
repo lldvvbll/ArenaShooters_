@@ -10,6 +10,7 @@ class UASCrossHairUserWidget;
 class UASWeapon;
 class UASInventoryUserWidget;
 class UASGameMenuUserWidget;
+class UASPrepareInfoUserWidget;
 
 enum class EFullScreenWidgetType
 {
@@ -65,6 +66,12 @@ protected:
 
 	UPROPERTY()
 	UUserWidget* CurrentFullScreenWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UASPrepareInfoUserWidget> PrepareInfoUserWidgetClass;
+
+	UPROPERTY()
+	UASPrepareInfoUserWidget* PrepareInfoUserWidget;
 
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;

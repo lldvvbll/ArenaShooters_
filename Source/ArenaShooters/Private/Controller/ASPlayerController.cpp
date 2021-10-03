@@ -9,6 +9,8 @@
 #include "GUI/ASInventoryUserWidget.h"
 #include "GUI/ASCrossHairUserWidget.h"
 #include "GUI/ASGameMenuUserWidget.h"
+#include "GameMode/ASMatchGameStateBase.h"
+#include "GUI/ASPrepareInfoUserWidget.h"
 
 AASPlayerController::AASPlayerController()
 {
@@ -51,7 +53,23 @@ void AASPlayerController::BeginPlay()
 		if (CrossHair != nullptr)
 		{
 			CrossHair->AddToViewport();
-		}	
+		}
+
+		if (auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>())
+		{
+			if (!GameState->IsMatchProcess())
+			{
+				PrepareInfoUserWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoUserWidgetClass);
+				if (PrepareInfoUserWidget != nullptr)
+				{
+					GameState->OnSetPrepareTime.AddUObject(PrepareInfoUserWidget, &UASPrepareInfoUserWidget::StartCountDown);
+					GameState->OnChangedNumPlayers.AddUObject(PrepareInfoUserWidget, &UASPrepareInfoUserWidget::SetNumPlayers);
+
+					PrepareInfoUserWidget->SetMaxNumPlayers(GameState->GetMaxNumPlayer());
+					PrepareInfoUserWidget->AddToViewport(1);
+				}
+			}
+		}
 	}
 }
 

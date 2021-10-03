@@ -17,6 +17,7 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AASMatchGameStateBase, ItemFactory);
+	DOREPLIFETIME(AASMatchGameStateBase, MaxNumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, NumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, bMatchProcess);
 }
@@ -24,6 +25,16 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 UASItemFactoryComponent* AASMatchGameStateBase::GetItemFactory()
 {
 	return ItemFactory;
+}
+
+int32 AASMatchGameStateBase::GetMaxNumPlayer() const
+{
+	return MaxNumPlayers;
+}
+
+void AASMatchGameStateBase::SetMaxNumPlayers(int32 NewNum)
+{
+	MaxNumPlayers = NewNum;
 }
 
 void AASMatchGameStateBase::SetNumPlayers(int32 NewNum)

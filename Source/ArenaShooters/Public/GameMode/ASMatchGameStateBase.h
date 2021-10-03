@@ -20,6 +20,9 @@ public:
 
 	UASItemFactoryComponent* GetItemFactory();
 
+	int32 GetMaxNumPlayer() const;
+	void SetMaxNumPlayers(int32 NewNum);
+
 	void SetNumPlayers(int32 NewNum);
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -49,6 +52,9 @@ public:
 protected:
 	UPROPERTY(Replicated, EditDefaultsOnly)
 	UASItemFactoryComponent* ItemFactory;
+
+	UPROPERTY(Replicated)
+	int32 MaxNumPlayers;
 
 	UPROPERTY(ReplicatedUsing = OnRep_NumPlayers)
 	int32 NumPlayers;
