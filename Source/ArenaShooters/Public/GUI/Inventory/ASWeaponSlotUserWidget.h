@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ArenaShooters.h"
-#include "GUI/ASEquipmentSlotUserWidget.h"
+#include "GUI/Inventory/ASEquipmentSlotUserWidget.h"
 #include "Common/ASEnums.h"
 #include "ASWeaponSlotUserWidget.generated.h"
 

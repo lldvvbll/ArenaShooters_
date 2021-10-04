@@ -63,6 +63,7 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	if (ASMatchGameState != nullptr)
 	{
 		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
+		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
 	}
 	else
 	{
@@ -81,19 +82,14 @@ int32 AASMatchGameModeBase::GetMaxPlayerCount() const
 	return MaxPlayerCount;
 }
 
-void AASMatchGameModeBase::SetMaxPlayerCount(int32 Count)
-{
-	MaxPlayerCount = Count;
-}
-
 int32 AASMatchGameModeBase::GetMinPlayerCount() const
 {
 	return MinPlayerCount;
 }
 
-void AASMatchGameModeBase::SetMinPlayerCount(int32 Count)
+int32 AASMatchGameModeBase::GetGoalNumOfKills() const
 {
-	MinPlayerCount = Count;
+	return GoalNumOfKills;
 }
 
 void AASMatchGameModeBase::SetPrepareTimer()

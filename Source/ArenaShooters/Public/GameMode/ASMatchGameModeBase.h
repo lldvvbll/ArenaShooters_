@@ -23,10 +23,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	int32 GetMaxPlayerCount() const;
-	void SetMaxPlayerCount(int32 Count);
-
 	int32 GetMinPlayerCount() const;
-	void SetMinPlayerCount(int32 Count);
+	int32 GetGoalNumOfKills() const;
 
 protected:
 	void SetPrepareTimer();
@@ -51,4 +49,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)
 	int32 MinPlayerCount;
+
+	UPROPERTY(EditDefaultsOnly, Category = Setting)
+	int32 GoalNumOfKills;
 };

@@ -11,6 +11,7 @@ class UASWeapon;
 class UASInventoryUserWidget;
 class UASGameMenuUserWidget;
 class UASPrepareInfoUserWidget;
+class UASHudUserWidget;
 
 enum class EFullScreenWidgetType
 {
@@ -68,10 +69,16 @@ protected:
 	UUserWidget* CurrentFullScreenWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = UI)
-	TSubclassOf<UASPrepareInfoUserWidget> PrepareInfoUserWidgetClass;
+	TSubclassOf<UASPrepareInfoUserWidget> PrepareInfoWidgetClass;
 
 	UPROPERTY()
-	UASPrepareInfoUserWidget* PrepareInfoUserWidget;
+	UASPrepareInfoUserWidget* PrepareInfoWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UASHudUserWidget> HudWidgetClass;
+
+	UPROPERTY()
+	UASHudUserWidget* HudWidget;
 
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;

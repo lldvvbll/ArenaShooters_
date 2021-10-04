@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GUI/ASWeaponSlotUserWidget.h"
+#include "GUI/Inventory/ASWeaponSlotUserWidget.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Item/ASWeapon.h"

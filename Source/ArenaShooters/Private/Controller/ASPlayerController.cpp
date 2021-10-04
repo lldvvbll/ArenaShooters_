@@ -6,11 +6,12 @@
 #include "Character/ASCharacter.h"
 #include "Item/ASWeapon.h"
 #include "ItemActor/ASWeaponActor.h"
-#include "GUI/ASInventoryUserWidget.h"
+#include "GUI/Inventory/ASInventoryUserWidget.h"
 #include "GUI/ASCrossHairUserWidget.h"
 #include "GUI/ASGameMenuUserWidget.h"
 #include "GameMode/ASMatchGameStateBase.h"
 #include "GUI/ASPrepareInfoUserWidget.h"
+#include "GUI/HUD/ASHudUserWidget.h"
 
 AASPlayerController::AASPlayerController()
 {
@@ -55,18 +56,24 @@ void AASPlayerController::BeginPlay()
 			CrossHair->AddToViewport();
 		}
 
+		HudWidget = CreateWidget<UASHudUserWidget>(this, HudWidgetClass);
+		if (HudWidget != nullptr)
+		{
+			HudWidget->AddToViewport();
+		}
+
 		if (auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>())
 		{
 			if (!GameState->IsMatchProcess())
 			{
-				PrepareInfoUserWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoUserWidgetClass);
-				if (PrepareInfoUserWidget != nullptr)
+				PrepareInfoWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoWidgetClass);
+				if (PrepareInfoWidget != nullptr)
 				{
-					GameState->OnSetPrepareTime.AddUObject(PrepareInfoUserWidget, &UASPrepareInfoUserWidget::StartCountDown);
-					GameState->OnChangedNumPlayers.AddUObject(PrepareInfoUserWidget, &UASPrepareInfoUserWidget::SetNumPlayers);
+					GameState->OnSetPrepareTime.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::StartCountDown);
+					GameState->OnChangedNumPlayers.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::SetNumPlayers);
 
-					PrepareInfoUserWidget->SetMaxNumPlayers(GameState->GetMaxNumPlayer());
-					PrepareInfoUserWidget->AddToViewport(1);
+					PrepareInfoWidget->SetMaxNumPlayers(GameState->GetMaxNumPlayer());
+					PrepareInfoWidget->AddToViewport(1);
 				}
 			}
 		}

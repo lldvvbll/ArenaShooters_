@@ -19,6 +19,7 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AASMatchGameStateBase, ItemFactory);
 	DOREPLIFETIME(AASMatchGameStateBase, MaxNumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, NumPlayers);
+	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);	
 	DOREPLIFETIME(AASMatchGameStateBase, bMatchProcess);
 }
 
@@ -32,14 +33,29 @@ int32 AASMatchGameStateBase::GetMaxNumPlayer() const
 	return MaxNumPlayers;
 }
 
-void AASMatchGameStateBase::SetMaxNumPlayers(int32 NewNum)
+void AASMatchGameStateBase::SetMaxNumPlayers(int32 Num)
 {
-	MaxNumPlayers = NewNum;
+	MaxNumPlayers = Num;
 }
 
-void AASMatchGameStateBase::SetNumPlayers(int32 NewNum)
+int32 AASMatchGameStateBase::GetNumPlayers() const
 {
-	NumPlayers = NewNum;
+	return NumPlayers;
+}
+
+void AASMatchGameStateBase::SetNumPlayers(int32 Num)
+{
+	NumPlayers = Num;
+}
+
+int32 AASMatchGameStateBase::GetGoalNumOfKills() const
+{
+	return GoalNumOfKills;
+}
+
+void AASMatchGameStateBase::SetGoalNumOfKills(int32 Num)
+{
+	GoalNumOfKills = Num;
 }
 
 void AASMatchGameStateBase::MulticastOnSetPrepareTimer_Implementation(float PrepareTime)

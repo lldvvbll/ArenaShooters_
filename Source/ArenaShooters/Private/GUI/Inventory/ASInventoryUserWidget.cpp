@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GUI/ASInventoryUserWidget.h"
+#include "GUI/Inventory/ASInventoryUserWidget.h"
 #include "Character/ASCharacter.h"
 #include "Controller/ASPlayerController.h"
-#include "GUI/ASWeaponSlotUserWidget.h"
-#include "GUI/ASArmorSlotUserWidget.h"
-#include "GUI/ASItemScrollBoxWrapperUserWidget.h"
+#include "GUI/Inventory/ASWeaponSlotUserWidget.h"
+#include "GUI/Inventory/ASArmorSlotUserWidget.h"
+#include "GUI/Inventory/ASItemScrollBoxWrapperUserWidget.h"
 #include "Character/ASInventoryComponent.h"
 #include "Item/ASItem.h"
 #include "Item/ASWeapon.h"

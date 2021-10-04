@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GUI/ASEquipmentSlotUserWidget.h"
-#include "GUI/ASItemDragDropOperation.h"
-#include "GUI/ASDragItemUserWidget.h"
+#include "GUI/Inventory/ASEquipmentSlotUserWidget.h"
+#include "GUI/Inventory/ASItemDragDropOperation.h"
+#include "GUI/Inventory/ASDragItemUserWidget.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"

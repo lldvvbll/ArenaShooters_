@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GUI/ASItemScrollBoxWrapperUserWidget.h"
-#include "GUI/ASItemDragDropOperation.h"
-#include "GUI/ASItemUserWidget.h"
-#include "GUI/ASDragItemUserWidget.h"
+#include "GUI/Inventory/ASItemScrollBoxWrapperUserWidget.h"
+#include "GUI/Inventory/ASItemDragDropOperation.h"
+#include "GUI/Inventory/ASItemUserWidget.h"
+#include "GUI/Inventory/ASDragItemUserWidget.h"
 #include "Components/ScrollBox.h"
 #include "Item/ASItem.h"
 #include "Character/ASCharacter.h"

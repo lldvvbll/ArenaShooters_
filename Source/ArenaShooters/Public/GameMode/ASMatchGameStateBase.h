@@ -21,9 +21,13 @@ public:
 	UASItemFactoryComponent* GetItemFactory();
 
 	int32 GetMaxNumPlayer() const;
-	void SetMaxNumPlayers(int32 NewNum);
+	void SetMaxNumPlayers(int32 Num);
 
-	void SetNumPlayers(int32 NewNum);
+	int32 GetNumPlayers() const;
+	void SetNumPlayers(int32 Num);
+
+	int32 GetGoalNumOfKills() const;
+	void SetGoalNumOfKills(int32 Num);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnSetPrepareTimer(float PrepareTime);
@@ -58,6 +62,9 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_NumPlayers)
 	int32 NumPlayers;
+
+	UPROPERTY(Replicated)
+	int32 GoalNumOfKills;
 
 	FDateTime StartTimeForProcess;
 
