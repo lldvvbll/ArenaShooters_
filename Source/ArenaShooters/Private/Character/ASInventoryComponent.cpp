@@ -308,6 +308,7 @@ ItemBoolPair UASInventoryComponent::RemoveItem(UASItem* InItem)
 					InventoryItems[Idx] = nullptr;
 					InventoryItems.RemoveAtSwap(Idx);
 
+					OnRemovedItemFromInventory(InItem);
 					OnRemoveInventoryItem.Broadcast(InItem);
 				}
 			}
@@ -538,6 +539,7 @@ bool UASInventoryComponent::AddItemToInventory(UASItem* NewItem)
 			NewItem->SetOwner(GetOwner());
 			InventoryItems.Emplace(NewItem);
 
+			OnAddedItemToInventory(NewItem);
 			OnAddInventoryItem.Broadcast(NewItem);
 		}
 	}
@@ -546,6 +548,7 @@ bool UASInventoryComponent::AddItemToInventory(UASItem* NewItem)
 		NewItem->SetOwner(GetOwner());
 		InventoryItems.Emplace(NewItem);
 
+		OnAddedItemToInventory(NewItem);
 		OnAddInventoryItem.Broadcast(NewItem);
 	}
 
@@ -574,6 +577,28 @@ bool UASInventoryComponent::Contains(UASItem* InItem) const
 		return true;
 
 	return false;
+}
+
+int32 UASInventoryComponent::GetAmmoCountInInventory(EAmmoType AmmoType) const
+{
+	int32 Count = 0;
+
+	if (AmmoType != EAmmoType::None)
+	{
+		for (auto& Item : InventoryItems)
+		{
+			auto Ammo = Cast<UASAmmo>(Item);
+			if (!IsValid(Ammo))
+				continue;
+
+			if (Ammo->GetAmmoType() == AmmoType)
+			{
+				Count += Ammo->GetCount();
+			}
+		}
+	}
+
+	return Count;
 }
 
 TArray<UASAmmo*> UASInventoryComponent::GetAmmos(EAmmoType AmmoType) const
@@ -778,7 +803,69 @@ void UASInventoryComponent::OnSelectedWeaponChanged(UASWeapon* OldWeapon, UASWea
 	if (IsValid(NewWeapon))
 	{
 		ReattachWeaponActor(NewWeapon, GetProperWeaponSocketName(NewWeapon->GetWeaponType(), true));
+
+		if (OnChangedInventoryAmmoCount.IsBound())
+		{
+			OnChangedInventoryAmmoCount.Broadcast(GetAmmoCountInInventory(NewWeapon->GetAmmoType()));
+		}
+	}
+	else
+	{
+		OnChangedInventoryAmmoCount.Broadcast(0);
+	}
+}
+
+void UASInventoryComponent::OnAddedItemToInventory(UASItem* AddedItem)
+{
+	if (IsValid(AddedItem))
+	{
+		AddedItem->OnChangeCount.AddUObject(this, &UASInventoryComponent::OnChangedInventoryItemCount);
+
+		auto Ammo = Cast<UASAmmo>(AddedItem);
+		if (IsValid(Ammo))
+		{
+			OnChangedAmmoCountInInventory(Ammo->GetAmmoType());
+		}
+	}
+}
+
+void UASInventoryComponent::OnRemovedItemFromInventory(UASItem* RemovedItem)
+{
+	if (IsValid(RemovedItem))
+	{
+		RemovedItem->OnChangeCount.RemoveAll(this);
+
+		auto Ammo = Cast<UASAmmo>(RemovedItem);
+		if (IsValid(Ammo))
+		{
+			OnChangedAmmoCountInInventory(Ammo->GetAmmoType());
+		}		
+	}
+}
+
+void UASInventoryComponent::OnChangedInventoryItemCount(UASItem* Item)
+{
+	if (!IsValid(Item))
+		return;
+
+	auto Ammo = Cast<UASAmmo>(Item);
+	if (IsValid(Ammo))
+	{
+		OnChangedAmmoCountInInventory(Ammo->GetAmmoType());
+		return;
 	}	
+}
+
+void UASInventoryComponent::OnChangedAmmoCountInInventory(EAmmoType AmmoType)
+{
+	if (AmmoType != EAmmoType::None && IsValid(SelectedWeapon))
+	{
+		if (SelectedWeapon->GetAmmoType() == AmmoType &&
+			OnChangedInventoryAmmoCount.IsBound())
+		{
+			OnChangedInventoryAmmoCount.Broadcast(GetAmmoCountInInventory(AmmoType));
+		}
+	}
 }
 
 void UASInventoryComponent::SpawnWeaponActor(UASWeapon& Weapon, const FName& AttachSocket)
@@ -885,6 +972,18 @@ void UASInventoryComponent::OnRep_ArmorSlots(TArray<UASItem*>& OldArmorSlots)
 void UASInventoryComponent::OnRep_SelectedWeapon(UASWeapon* OldWeapon)
 {
 	OnChangedSelectedWeapon.Broadcast(OldWeapon, SelectedWeapon);
+
+	if (IsValid(SelectedWeapon))
+	{
+		if (OnChangedInventoryAmmoCount.IsBound())
+		{
+			OnChangedInventoryAmmoCount.Broadcast(GetAmmoCountInInventory(SelectedWeapon->GetAmmoType()));
+		}
+	}
+	else
+	{
+		OnChangedInventoryAmmoCount.Broadcast(0);
+	}
 }
 
 UASItem* UASInventoryComponent::FindItemFromInventory(UClass* InClass) const
@@ -907,6 +1006,7 @@ void UASInventoryComponent::OnRep_InventoryItems(TArray<UASItem*>& OldInventoryI
 	{
 		if (!InventoryItems.Contains(OldItem))
 		{
+			OnRemovedItemFromInventory(OldItem);
 			OnRemoveInventoryItem.Broadcast(OldItem);
 		}
 	}
@@ -915,6 +1015,7 @@ void UASInventoryComponent::OnRep_InventoryItems(TArray<UASItem*>& OldInventoryI
 	{
 		if (!OldInventoryItems.Contains(NewItem))
 		{
+			OnAddedItemToInventory(NewItem);
 			OnAddInventoryItem.Broadcast(NewItem);
 		}
 	}

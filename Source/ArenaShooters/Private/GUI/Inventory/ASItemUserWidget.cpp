@@ -19,7 +19,7 @@ void UASItemUserWidget::SetItem(const TWeakObjectPtr<UASItem>& NewItem)
 
 	if (!Item.IsValid())
 	{
-		AS_LOG_SCREEN_S(5.0f, FColor::Red);
+		AS_LOG_S(Error);
 		return;
 	}
 
@@ -112,7 +112,7 @@ void UASItemUserWidget::NativeOnDragDetected(const FGeometry& InGeometry, const 
 	}
 }
 
-void UASItemUserWidget::OnChangeItemCount(int32 NewCount)
+void UASItemUserWidget::OnChangeItemCount(UASItem* InItem)
 {
 	if (CountTextBlock != nullptr)
 	{

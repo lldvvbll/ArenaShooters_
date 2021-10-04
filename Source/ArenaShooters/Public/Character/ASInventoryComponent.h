@@ -65,6 +65,7 @@ public:
 	TArray<TWeakObjectPtr<UASItem>> GetInventoryItems() const;
 	bool Contains(UASItem* InItem) const;
 
+	int32 GetAmmoCountInInventory(EAmmoType AmmoType) const;
 	TArray<UASAmmo*> GetAmmos(EAmmoType AmmoType) const;
 	TArray<UASHealingKit*> GetHealingKits() const;
 
@@ -81,6 +82,10 @@ private:
 	void OnWeaponRemoved(EWeaponSlotType SlotType, UASWeapon* RemovedWeapon);
 	void OnArmorRemoved(UASArmor* RemovedArmor);
 	void OnSelectedWeaponChanged(UASWeapon* OldWeapon, UASWeapon* NewWeapon);
+	void OnAddedItemToInventory(UASItem* AddedItem);
+	void OnRemovedItemFromInventory(UASItem* RemovedItem);
+	void OnChangedInventoryItemCount(UASItem* Item);
+	void OnChangedAmmoCountInInventory(EAmmoType AmmoType);
 
 	void SpawnWeaponActor(UASWeapon& Weapon, const FName& AttachSocket);
 	void SpawnArmorActor(UASArmor& Armor, const FName& AttachSocket);
@@ -116,6 +121,9 @@ public:
 
 	DECLARE_EVENT_TwoParams(UASInventoryComponent, FOnChangedSelectedWeaponEvent, const TWeakObjectPtr<UASWeapon>&, const TWeakObjectPtr<UASWeapon>&);
 	FOnChangedSelectedWeaponEvent OnChangedSelectedWeapon;
+
+	DECLARE_EVENT_OneParam(UASInventoryComponent, FOnChangedInventoryAmmoCountEvent, int32);
+	FOnChangedInventoryAmmoCountEvent OnChangedInventoryAmmoCount;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Meta = (AllowPrivateAccess = true))

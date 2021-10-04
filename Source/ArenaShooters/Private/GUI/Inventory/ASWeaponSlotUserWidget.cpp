@@ -57,7 +57,6 @@ void UASWeaponSlotUserWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
 
-	AS_LOG_SCREEN(1.0f, FColor::Yellow, TEXT("NativeOnMouseEnter"));
 }
 
 bool UASWeaponSlotUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

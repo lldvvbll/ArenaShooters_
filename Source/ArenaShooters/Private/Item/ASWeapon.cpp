@@ -127,8 +127,6 @@ void UASWeapon::SetLastFireTick()
 
 void UASWeapon::OnRep_CurrentFireMode()
 {
-	AS_LOG_SCREEN(1.0f, FColor::Yellow, TEXT("Current Fire Mode: %s"), (CurrentFireMode == EFireMode::SemiAuto ? TEXT("SemiAuto") : TEXT("FullAuto")));
-
 	OnFireModeChanged.Broadcast(CurrentFireMode);
 }
 

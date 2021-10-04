@@ -73,7 +73,7 @@ void UASItem::SetCount(int32 NewCount)
 
 	if (Owner.IsValid() && Owner->GetLocalRole() == ROLE_Authority)
 	{
-		OnChangeCount.Broadcast(Count);
+		OnChangeCount.Broadcast(this);
 	}
 
 	if (Count <= 0 && IsBundleItem())
@@ -109,5 +109,5 @@ bool UASItem::IsBundleItem() const
 
 void UASItem::OnRep_Count()
 {
-	OnChangeCount.Broadcast(Count);
+	OnChangeCount.Broadcast(this);
 }

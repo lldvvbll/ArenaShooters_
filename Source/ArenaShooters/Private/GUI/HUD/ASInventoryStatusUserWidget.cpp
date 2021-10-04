@@ -18,7 +18,7 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 	JacketProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("JacketProgressBar")));
 	FireModeTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FireModeTextBlock")));
 	CurrentAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentAmmoTextBlock")));
-	TotalAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TotalAmmoTextBlock")));
+	InventoryAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TotalAmmoTextBlock")));
 
 	if (auto Ctrlr = GetOwningPlayer<AASPlayerController>())
 	{
@@ -29,10 +29,22 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 			{
 				InventoryComp->OnChangedSelectedWeapon.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedSelectedWeapon);
 				InventoryComp->OnInsertArmor.AddUObject(this, &UASInventoryStatusUserWidget::OnInsertArmor);
+				InventoryComp->OnChangedInventoryAmmoCount.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedInventoryAmmoCount);
 
-				OnChangedSelectedWeapon(nullptr, InventoryComp->GetSelectedWeapon());
+				TWeakObjectPtr<UASWeapon> NewWeapon = InventoryComp->GetSelectedWeapon();
+
+				OnChangedSelectedWeapon(nullptr, NewWeapon);
 				OnInsertArmor(EArmorSlotType::Helmet, nullptr);
 				OnInsertArmor(EArmorSlotType::Jacket, nullptr);
+
+				if (NewWeapon.IsValid())
+				{
+					OnChangedInventoryAmmoCount(InventoryComp->GetAmmoCountInInventory(NewWeapon->GetAmmoType()));
+				}
+				else
+				{
+					OnChangedInventoryAmmoCount(0);
+				}
 			}
 			else
 			{
@@ -52,7 +64,34 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 
 void UASInventoryStatusUserWidget::OnChangedSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon)
 {
-	AS_LOG_S(Warning);
+	if (OldWeapon.IsValid())
+	{
+		OldWeapon->OnFireModeChanged.Remove(OnChangedFireModeDelegateHandle);
+		OldWeapon->OnCurrentAmmoCountChanged.Remove(OnChangedCurrentAmmoCountDelegateHandle);
+	}
+
+	if (NewWeapon.IsValid())
+	{
+		OnChangedFireModeDelegateHandle = NewWeapon->OnFireModeChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedFireMode);
+		OnChangedCurrentAmmoCountDelegateHandle = NewWeapon->OnCurrentAmmoCountChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedCurrentAmmoCount);
+		
+		if (FireModeTextBlock != nullptr)
+		{
+			FireModeTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
+
+		OnChangedFireMode(NewWeapon->GetFireMode());
+		OnChangedCurrentAmmoCount(NewWeapon->GetCurrentAmmoCount());
+	}
+	else
+	{
+		if (FireModeTextBlock != nullptr)
+		{
+			FireModeTextBlock->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		OnChangedCurrentAmmoCount(0);
+	}
 }
 
 void UASInventoryStatusUserWidget::OnInsertArmor(EArmorSlotType SlotType, UASArmor* Armor)
@@ -154,4 +193,44 @@ void UASInventoryStatusUserWidget::OnChangedArmorDurability(float Durability, fl
 		checkNoEntry();
 		break;
 	}
+}
+
+void UASInventoryStatusUserWidget::OnChangedFireMode(EFireMode NewFireMode)
+{
+	if (FireModeTextBlock == nullptr)
+		return;
+
+	FText FireModeText;
+	switch (NewFireMode)
+	{
+	case EFireMode::SemiAuto:
+		FireModeText = FText::FromString(TEXT("SemiAuto"));
+		break;
+	case EFireMode::FullAuto:
+		FireModeText = FText::FromString(TEXT("FullAuto"));
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
+
+	FireModeTextBlock->SetText(FireModeText);
+}
+
+void UASInventoryStatusUserWidget::OnChangedCurrentAmmoCount(int32 NewCount)
+{
+	if (CurrentAmmoTextBlock == nullptr)
+		return;
+
+	CurrentAmmoTextBlock->SetText(FText::FromString(FString::FromInt(NewCount)));
+}
+
+void UASInventoryStatusUserWidget::OnChangedInventoryAmmoCount(int32 NewCount)
+{
+	if (InventoryAmmoTextBlock == nullptr)
+		return;
+
+	InventoryAmmoTextBlock->SetText(FText::FromString(FString::FromInt(NewCount)));
+
+	AS_LOG_S(Warning);
 }

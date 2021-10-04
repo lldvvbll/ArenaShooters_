@@ -44,7 +44,7 @@ public:
 	void OnRep_Count();
 
 public:
-	DECLARE_EVENT_OneParam(UASInventoryComponent, FOnChangeCountEvent, int32);
+	DECLARE_EVENT_OneParam(UASInventoryComponent, FOnChangeCountEvent, UASItem*);
 	FOnChangeCountEvent OnChangeCount;
 
 protected:

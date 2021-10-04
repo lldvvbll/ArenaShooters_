@@ -27,6 +27,9 @@ protected:
 	void BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType, FDelegateHandle& InOnChangedArmorDurabilityDelegateHandle);
 
 	void OnChangedArmorDurability(float Durability, float MaxDurability, int32 SlotTypeInt);
+	void OnChangedFireMode(EFireMode NewFireMode);
+	void OnChangedCurrentAmmoCount(int32 NewCount);
+	void OnChangedInventoryAmmoCount(int32 NewCount);
 
 protected:
 	UPROPERTY()
@@ -42,11 +45,13 @@ protected:
 	UTextBlock* CurrentAmmoTextBlock;
 
 	UPROPERTY()
-	UTextBlock* TotalAmmoTextBlock;
+	UTextBlock* InventoryAmmoTextBlock;
 
 	UPROPERTY()
 	UASInventoryComponent* InventoryComp;
 
 	FDelegateHandle OnChangedHelmetDurabilityDelegateHandle;
 	FDelegateHandle OnChangedJacketDurabilityDelegateHandle;
+	FDelegateHandle OnChangedFireModeDelegateHandle;
+	FDelegateHandle OnChangedCurrentAmmoCountDelegateHandle;
 };

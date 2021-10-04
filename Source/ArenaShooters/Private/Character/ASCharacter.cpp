@@ -939,8 +939,8 @@ void AASCharacter::Reload()
 	if (!CurWeapon.IsValid() || !CurWeapon->CanReload())
 		return;
 
-	TArray<UASAmmo*> Ammos = ASInventory->GetAmmos(CurWeapon->GetAmmoType());
-	if (Ammos.Num() <= 0)
+	int32 InventoryAmmoCount = ASInventory->GetAmmoCountInInventory(CurWeapon->GetAmmoType());
+	if (InventoryAmmoCount <= 0)
 		return;
 
 	ServerBeginReload();
@@ -1439,8 +1439,8 @@ void AASCharacter::ServerBeginReload_Implementation()
 	if (!CurWeapon.IsValid() || !CurWeapon->CanReload())
 		return;
 
-	TArray<UASAmmo*> Ammos = ASInventory->GetAmmos(CurWeapon->GetAmmoType());
-	if (Ammos.Num() <= 0)
+	int32 InventoryAmmoCount = ASInventory->GetAmmoCountInInventory(CurWeapon->GetAmmoType());
+	if (InventoryAmmoCount <= 0)
 		return;
 
 	if (bSprinted)
@@ -1488,7 +1488,10 @@ void AASCharacter::ServerCompleteReload_Implementation()
 	if (FDateTime::Now() - ReloadStartTime >= SelectedWeapon->GetReloadTime())
 	{
 		TArray<UASAmmo*> Ammos = ASInventory->GetAmmos(SelectedWeapon->GetAmmoType());
-		SelectedWeapon->Reload(Ammos);
+		if (!SelectedWeapon->Reload(Ammos))
+		{
+			AS_LOG_S(Error);
+		}
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ASItemUserWidget.generated.h"
 
+class UASItem;
 class UASItemScrollBoxWrapperUserWidget;
 class UASDragItemUserWidget;
 class UASItem;
@@ -26,7 +27,7 @@ protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
-	void OnChangeItemCount(int32 NewCount);
+	void OnChangeItemCount(UASItem* InItem);
 
 private:
 	UPROPERTY()
