@@ -25,6 +25,8 @@ public:
 	TWeakObjectPtr<AASArmorActor>& GetActor();
 	const TWeakObjectPtr<AASArmorActor>& GetActor() const;
 
+	float GetMaxDurability() const;
+
 	float GetCurrentDurability() const;
 	void SetCurrentDurability(float NewDurability);
 	void ModifyDurability(float Value);
@@ -32,9 +34,17 @@ public:
 	bool IsCoveringBone(const FName& BoneName) const;
 
 protected:
+	UFUNCTION()
+	void OnRep_CurrentDurability();
+
+public:
+	DECLARE_EVENT_TwoParams(UASArmor, FOnChangedDurabilityEvent, float, float);
+	FOnChangedDurabilityEvent OnChangedDurability;
+
+protected:
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TWeakObjectPtr<AASArmorActor> ASArmorActor;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentDurability)
 	float CurrentDurability;
 };

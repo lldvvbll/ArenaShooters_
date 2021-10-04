@@ -41,6 +41,14 @@ const TWeakObjectPtr<AASArmorActor>& UASArmor::GetActor() const
 	return ASArmorActor;
 }
 
+float UASArmor::GetMaxDurability() const
+{
+	auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
+	check(ArmorDA);
+
+	return (ArmorDA != nullptr ? ArmorDA->MaxDurability : 0.0f);
+}
+
 float UASArmor::GetCurrentDurability() const
 {
 	return CurrentDurability;
@@ -48,15 +56,10 @@ float UASArmor::GetCurrentDurability() const
 
 void UASArmor::SetCurrentDurability(float NewDurability)
 {
-	auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
-	check(ArmorDA);
+	float MaxDurability = GetMaxDurability();
+	CurrentDurability = FMath::Clamp<float>(NewDurability, 0.0f, MaxDurability);
 
-	CurrentDurability = FMath::Clamp<float>(NewDurability, 0.0f, (ArmorDA != nullptr ? ArmorDA->MaxDurability : 100.0f));
-
-	if (CurrentDurability < KINDA_SMALL_NUMBER)
-	{
-		AS_LOG(Warning, TEXT("Armor is broken!"));
-	}
+	OnChangedDurability.Broadcast(CurrentDurability, MaxDurability);
 }
 
 void UASArmor::ModifyDurability(float Value)
@@ -97,5 +100,10 @@ bool UASArmor::IsCoveringBone(const FName& BoneName) const
 		return false;
 
 	return ArmorDA->CoveringBoneNames.Contains(BoneName);
+}
+
+void UASArmor::OnRep_CurrentDurability()
+{
+	OnChangedDurability.Broadcast(CurrentDurability, GetMaxDurability());
 }
 

@@ -57,18 +57,97 @@ void UASInventoryStatusUserWidget::OnChangedSelectedWeapon(const TWeakObjectPtr<
 
 void UASInventoryStatusUserWidget::OnInsertArmor(EArmorSlotType SlotType, UASArmor* Armor)
 {
-	AS_LOG_S(Warning);
-
 	switch (SlotType)
 	{
 	case EArmorSlotType::Helmet:
 		{
+			if (Armor != nullptr)
+			{
+				Armor->OnChangedDurability.Remove(OnChangedHelmetDurabilityDelegateHandle);
+			}
 
-		}
+			BindProgressBarToArmor(HelmetProgressBar, SlotType, OnChangedHelmetDurabilityDelegateHandle);
+		}		
 		break;
 	case EArmorSlotType::Jacket:
 		{
+			if (Armor != nullptr)
+			{
+				Armor->OnChangedDurability.Remove(OnChangedJacketDurabilityDelegateHandle);
+			}
 
+			BindProgressBarToArmor(JacketProgressBar, SlotType, OnChangedJacketDurabilityDelegateHandle);
+		}
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
+}
+
+void UASInventoryStatusUserWidget::BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType,
+	FDelegateHandle& InOnChangedArmorDurabilityDelegateHandle)
+{
+	if (InventoryComp == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (ProgressBar == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	ItemPtrBoolPair ItemPair = InventoryComp->FindItemFromArmorSlot(SlotType);
+	if (!ItemPair.Value)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (UASArmor* Armor = Cast<UASArmor>(ItemPair.Key))
+	{
+		ProgressBar->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+		int32 SlotTypeInt = static_cast<int32>(SlotType);
+		InOnChangedArmorDurabilityDelegateHandle = 
+			Armor->OnChangedDurability.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedArmorDurability, SlotTypeInt);
+
+		OnChangedArmorDurability(Armor->GetCurrentDurability(), Armor->GetMaxDurability(), SlotTypeInt);
+	}
+	else
+	{
+		ProgressBar->SetVisibility(ESlateVisibility::Hidden);
+		ProgressBar->SetPercent(0.0f);
+	}
+}
+
+void UASInventoryStatusUserWidget::OnChangedArmorDurability(float Durability, float MaxDurability, int32 SlotTypeInt)
+{
+	auto SlotType = static_cast<EArmorSlotType>(SlotTypeInt);
+
+	switch (SlotType)
+	{
+	case EArmorSlotType::Helmet:
+		if (HelmetProgressBar != nullptr)
+		{
+			HelmetProgressBar->SetPercent(Durability / MaxDurability);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+		break;
+	case EArmorSlotType::Jacket:
+		if (JacketProgressBar != nullptr)
+		{
+			JacketProgressBar->SetPercent(Durability / MaxDurability);
+		}
+		else
+		{
+			AS_LOG_S(Error);
 		}
 		break;
 	default:

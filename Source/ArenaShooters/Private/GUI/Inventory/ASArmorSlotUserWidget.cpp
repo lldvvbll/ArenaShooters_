@@ -10,20 +10,24 @@
 
 void UASArmorSlotUserWidget::SetASItem(TWeakObjectPtr<UASItem>& NewItem)
 {
+	TWeakObjectPtr<UASItem> OldItem = Item;
+
 	Super::SetASItem(NewItem);
 
-	if (DurabilityTextBlock != nullptr)
+	if (UASArmor* OldArmor = (OldItem.IsValid() ? Cast<UASArmor>(OldItem) : nullptr))
 	{
-		UASArmor* Armor = (Item.IsValid() ? Cast<UASArmor>(Item) : nullptr);
+		OldArmor->OnChangedDurability.Remove(OnChangedArmorDurabilityDelegateHandle);
+	}
 
-		if (Armor != nullptr)
-		{
-			DurabilityTextBlock->SetText(FText::AsNumber(Armor->GetCurrentDurability()));
-		}
-		else
-		{
-			DurabilityTextBlock->SetText(FText::GetEmpty());
-		}		
+	if (UASArmor* NewArmor = (Item.IsValid() ? Cast<UASArmor>(Item) : nullptr))
+	{
+		OnChangedArmorDurabilityDelegateHandle = NewArmor->OnChangedDurability.AddUObject(this, &UASArmorSlotUserWidget::OnChangedArmorDurability);
+
+		OnChangedArmorDurability(NewArmor->GetCurrentDurability(), NewArmor->GetMaxDurability());
+	}
+	else
+	{
+		OnChangedArmorDurability(0.0f, 0.0f);
 	}
 }
 
@@ -73,4 +77,12 @@ bool UASArmorSlotUserWidget::IsSuitableSlot(const TWeakObjectPtr<UASItem>& InIte
 		return false;
 
 	return true;
+}
+
+void UASArmorSlotUserWidget::OnChangedArmorDurability(float Durability, float MaxDurability)
+{
+	if (DurabilityTextBlock != nullptr)
+	{
+		DurabilityTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Durability), FMath::CeilToInt(MaxDurability))));
+	}
 }

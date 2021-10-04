@@ -24,6 +24,10 @@ protected:
 	void OnChangedSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon);
 	void OnInsertArmor(EArmorSlotType SlotType, UASArmor* Armor);
 
+	void BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType, FDelegateHandle& InOnChangedArmorDurabilityDelegateHandle);
+
+	void OnChangedArmorDurability(float Durability, float MaxDurability, int32 SlotTypeInt);
+
 protected:
 	UPROPERTY()
 	UProgressBar* HelmetProgressBar;
@@ -42,4 +46,7 @@ protected:
 
 	UPROPERTY()
 	UASInventoryComponent* InventoryComp;
+
+	FDelegateHandle OnChangedHelmetDurabilityDelegateHandle;
+	FDelegateHandle OnChangedJacketDurabilityDelegateHandle;
 };

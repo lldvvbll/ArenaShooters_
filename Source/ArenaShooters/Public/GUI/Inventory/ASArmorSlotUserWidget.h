@@ -7,6 +7,7 @@
 #include "ASArmorSlotUserWidget.generated.h"
 
 class UTextBlock;
+class UASArmor;
 
 UCLASS()
 class ARENASHOOTERS_API UASArmorSlotUserWidget : public UASEquipmentSlotUserWidget
@@ -22,10 +23,14 @@ protected:
 
 	virtual bool IsSuitableSlot(const TWeakObjectPtr<UASItem>& InItem) override;
 
+	void OnChangedArmorDurability(float Durability, float MaxDurability);
+
 protected:
 	UPROPERTY()
 	UTextBlock* DurabilityTextBlock;
 
 	UPROPERTY(EditAnywhere)
 	EArmorSlotType ArmorSlotType;
+
+	FDelegateHandle OnChangedArmorDurabilityDelegateHandle;
 };
