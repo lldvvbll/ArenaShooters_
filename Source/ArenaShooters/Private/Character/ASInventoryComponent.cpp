@@ -527,12 +527,14 @@ bool UASInventoryComponent::AddItemToInventory(UASItem* NewItem)
 	if (NewItem->IsBundleItem())
 	{
 		int32 NewItemCount = NewItem->GetCount();
-		UASItem* OldItem = FindItemFromInventory(NewItem->GetClass());
+		UASItem* OldItem = FindItemFromInventory(NewItem);
 
 		if (OldItem != nullptr && (OldItem->GetMaxCount() - OldItem->GetCount() >= NewItemCount))
 		{
 			NewItem->ModifyCount(-NewItemCount);
 			OldItem->ModifyCount(NewItemCount);
+
+			OnChangedInventoryItemCount(OldItem);
 		}
 		else
 		{
@@ -986,16 +988,19 @@ void UASInventoryComponent::OnRep_SelectedWeapon(UASWeapon* OldWeapon)
 	}
 }
 
-UASItem* UASInventoryComponent::FindItemFromInventory(UClass* InClass) const
+UASItem* UASInventoryComponent::FindItemFromInventory(UASItem* ComparingItem) const
 {
-	for (auto& ASItem : InventoryItems)
+	if (IsValid(ComparingItem))
 	{
-		if (ASItem == nullptr)
-			continue;
+		for (auto& ASItem : InventoryItems)
+		{
+			if (!IsValid(ASItem))
+				continue;
 
-		if (ASItem->GetClass() == InClass)
-			return ASItem;
-	}
+			if (ASItem->GetPrimaryAssetId() == ComparingItem->GetPrimaryAssetId())
+				return ASItem;
+		}
+	}	
 
 	return nullptr;
 }

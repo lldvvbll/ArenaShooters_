@@ -101,7 +101,7 @@ private:
 	UFUNCTION()
 	void OnRep_SelectedWeapon(UASWeapon* OldWeapon);
 
-	UASItem* FindItemFromInventory(UClass* InClass) const;
+	UASItem* FindItemFromInventory(UASItem* ComparingItem) const;
 
 	UFUNCTION()
 	void OnRep_InventoryItems(TArray<UASItem*>& OldInventoryItems);

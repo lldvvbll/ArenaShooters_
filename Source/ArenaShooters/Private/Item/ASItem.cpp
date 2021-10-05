@@ -27,6 +27,11 @@ bool UASItem::IsSupportedForNetworking() const
 	return true;
 }
 
+FPrimaryAssetId UASItem::GetPrimaryAssetId() const
+{
+	return (DataAsset != nullptr ? DataAsset->GetPrimaryAssetId() : FPrimaryAssetId());
+}
+
 void UASItem::SetDataAsset(UASItemDataAsset* NewDataAsset)
 {
 	DataAsset = NewDataAsset;
