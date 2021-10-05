@@ -6,7 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "ASDamageComponent.generated.h"
 
+class AASCharacter;
 class UASStatusComponent;
+class UASInventoryComponent;
 class AASBullet;
 class UASDamageDataAsset;
 

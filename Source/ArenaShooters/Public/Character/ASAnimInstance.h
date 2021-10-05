@@ -23,9 +23,9 @@ public:
 	UFUNCTION(BlueprintPure, Meta = (BlueprintThreadSafe))
 	bool IsActualSprinted() const;
 
-	void PlayShootMontage();
-	void PlayReloadMontage();
-	void PlayEquipMontage();
+	void PlayShootMontage(EWeaponType WeaponType);
+	void PlayReloadMontage(EWeaponType WeaponType);
+	void PlayEquipMontage(EWeaponType WeaponType);
 	void PlayPickUpItemMontage();
 	void PlayUseHealingKitMontage();
 	void PlayHitReactMontage();

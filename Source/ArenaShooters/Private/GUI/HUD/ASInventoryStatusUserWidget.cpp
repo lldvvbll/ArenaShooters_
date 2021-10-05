@@ -231,6 +231,4 @@ void UASInventoryStatusUserWidget::OnChangedInventoryAmmoCount(int32 NewCount)
 		return;
 
 	InventoryAmmoTextBlock->SetText(FText::FromString(FString::FromInt(NewCount)));
-
-	AS_LOG_S(Warning);
 }

@@ -319,7 +319,7 @@ void AASCharacter::MulticastPlayShootMontage_Implementation()
 
 	if (ASAnimInstance != nullptr)
 	{
-		ASAnimInstance->PlayShootMontage();
+		ASAnimInstance->PlayShootMontage(GetUsingWeaponType());
 
 		OnPlayShootMontage.Broadcast();
 	}
@@ -1167,7 +1167,7 @@ void AASCharacter::OnRep_bChangeWeapon()
 	{
 		if (ASAnimInstance != nullptr)
 		{
-			ASAnimInstance->PlayEquipMontage();
+			ASAnimInstance->PlayEquipMontage(GetUsingWeaponType());
 		}
 	}
 }
@@ -1530,7 +1530,7 @@ void AASCharacter::OnRep_bReloading(bool OldbReloading)
 	{
 		if (ASAnimInstance != nullptr)
 		{
-			ASAnimInstance->PlayReloadMontage();
+			ASAnimInstance->PlayReloadMontage(GetUsingWeaponType());
 		}
 	}
 }

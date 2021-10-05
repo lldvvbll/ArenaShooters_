@@ -59,9 +59,9 @@ bool UASAnimInstance::IsActualSprinted() const
 	return  bSprinted && !bInAir && (CurrentSpeed > 800.0f);
 }
 
-void UASAnimInstance::PlayShootMontage()
+void UASAnimInstance::PlayShootMontage(EWeaponType WeaponType)
 {
-	switch (CurrentWeaponType)
+	switch (WeaponType)
 	{
 	case EWeaponType::Pistol:
 		{
@@ -79,9 +79,9 @@ void UASAnimInstance::PlayShootMontage()
 	}
 }
 
-void UASAnimInstance::PlayReloadMontage()
+void UASAnimInstance::PlayReloadMontage(EWeaponType WeaponType)
 {
-	switch (CurrentWeaponType)
+	switch (WeaponType)
 	{
 	case EWeaponType::Pistol:
 		{
@@ -99,9 +99,9 @@ void UASAnimInstance::PlayReloadMontage()
 	}
 }
 
-void UASAnimInstance::PlayEquipMontage()
+void UASAnimInstance::PlayEquipMontage(EWeaponType WeaponType)
 {
-	switch (CurrentWeaponType)
+	switch (WeaponType)
 	{
 	case EWeaponType::Pistol:
 		{
