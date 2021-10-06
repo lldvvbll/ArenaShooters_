@@ -82,9 +82,6 @@ float UASArmor::TakeDamage(float InDamage)
 			ModifyDurability(-ReducedDamage);
 
 			TakenDamage -= ReducedDamage;
-
-			AS_LOG(Warning, TEXT("%s was taken Damage. %f -> %f (-%f), durability: %f"), 
-				*(ArmorDA->ItemName.ToString()), InDamage, TakenDamage, ReducedDamage, CurrentDurability);
 		}
 	}
 

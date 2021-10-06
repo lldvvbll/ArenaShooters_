@@ -17,10 +17,14 @@ class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
+	void OnChangedCharacterHealth(float NewHealth) const;
+
 protected:
 	UPROPERTY()
 	UASInventoryStatusUserWidget* InventoryStatusWidget;
 
 	UPROPERTY()
 	UProgressBar* HealthProgressBar;
+
+	float MaxCharHealth;
 };

@@ -47,8 +47,6 @@ void UASStatusComponent::SetCurrentHealth(float NewHealth)
 	{
 		OnHealthZero.Broadcast();
 	}
-
-	AS_LOG(Warning, TEXT("Current Health : %f"), CurrentHealth);
 }
 
 void UASStatusComponent::ModifyCurrentHealth(float Value)
