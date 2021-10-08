@@ -8,6 +8,7 @@
 
 class UASGameInstance;
 class AASMatchGameStateBase;
+class AASPlayerController;
 
 UCLASS()
 class ARENASHOOTERS_API AASMatchGameModeBase : public AGameMode
@@ -18,13 +19,17 @@ public:
 	AASMatchGameModeBase();
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual void Logout(AController* Exiting) override;
 	virtual void PreInitializeComponents() override;
+	virtual void InitGameState();
 	virtual void Tick(float DeltaSeconds) override;
 
 	int32 GetMaxPlayerCount() const;
 	int32 GetMinPlayerCount() const;
 	int32 GetGoalNumOfKills() const;
+
+	virtual void FinishMatch();
+
+	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
 protected:
 	void SetPrepareTimer();

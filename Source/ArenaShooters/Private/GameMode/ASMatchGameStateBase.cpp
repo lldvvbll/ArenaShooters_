@@ -4,6 +4,7 @@
 #include "GameMode/ASMatchGameStateBase.h"
 #include "GameMode/ASItemFactoryComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "ASGameInstance.h"
 
 AASMatchGameStateBase::AASMatchGameStateBase()
 {
@@ -20,7 +21,36 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AASMatchGameStateBase, MaxNumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, NumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);	
-	DOREPLIFETIME(AASMatchGameStateBase, bMatchProcess);
+	DOREPLIFETIME(AASMatchGameStateBase, InnerMatchState);
+}
+
+void AASMatchGameStateBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	auto GameInst = GetGameInstance<UASGameInstance>();
+	if (IsValid(GameInst))
+	{
+		SetInnerMatchState(GameInst->GetInnerMatchState());
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
+{
+	Super::AddPlayerState(PlayerState);
+
+	OnChangedNumPlayers.Broadcast(PlayerArray.Num());
+}
+
+void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
+{
+	Super::RemovePlayerState(PlayerState);
+
+	OnChangedNumPlayers.Broadcast(PlayerArray.Num());
 }
 
 UASItemFactoryComponent* AASMatchGameStateBase::GetItemFactory()
@@ -36,16 +66,6 @@ int32 AASMatchGameStateBase::GetMaxNumPlayer() const
 void AASMatchGameStateBase::SetMaxNumPlayers(int32 Num)
 {
 	MaxNumPlayers = Num;
-}
-
-int32 AASMatchGameStateBase::GetNumPlayers() const
-{
-	return NumPlayers;
-}
-
-void AASMatchGameStateBase::SetNumPlayers(int32 Num)
-{
-	NumPlayers = Num;
 }
 
 int32 AASMatchGameStateBase::GetGoalNumOfKills() const
@@ -67,16 +87,51 @@ void AASMatchGameStateBase::MulticastOnSetPrepareTimer_Implementation(float Prep
 	OnSetPrepareTime.Broadcast(StartTimeForProcess);
 }
 
-void AASMatchGameStateBase::SetMatchProcess(bool bIsMatchProcess)
+EInnerMatchState AASMatchGameStateBase::GetInnerMatchState() const
 {
-	bMatchProcess = bIsMatchProcess;
+	return InnerMatchState;
+}
 
-	AS_LOG(Warning, TEXT("bMatchProcess: %d"), bMatchProcess);
+void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
+{
+	InnerMatchState = State;
+
+	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 }
 
 bool AASMatchGameStateBase::IsMatchProcess() const
 {
-	return bMatchProcess;
+	return InnerMatchState == EInnerMatchState::Process;
+}
+
+void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		// server
+
+	}
+	else
+	{
+		// client
+
+		// todo: Kill log
+	}
+}
+
+void AASMatchGameStateBase::OnFinishMatch()
+{
+	auto GameInst = GetGameInstance<UASGameInstance>();
+	if (IsValid(GameInst))
+	{
+		GameInst->SetInnerMatchState(EInnerMatchState::Finish);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	SetInnerMatchState(EInnerMatchState::Finish);
 }
 
 void AASMatchGameStateBase::OnRep_NumPlayers(int32 OldNum)
@@ -86,9 +141,7 @@ void AASMatchGameStateBase::OnRep_NumPlayers(int32 OldNum)
 	OnChangedNumPlayers.Broadcast(NumPlayers);
 }
 
-void AASMatchGameStateBase::OnRep_bMatchProcess()
+void AASMatchGameStateBase::OnRep_InnerMatchState()
 {
-	AS_LOG(Warning, TEXT("bMatchProcess: %d"), bMatchProcess);
-
-	OnChangedMatchProcess.Broadcast(bMatchProcess);
+	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 }

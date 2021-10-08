@@ -96,3 +96,11 @@ enum class EHealingKitType : uint8
 	None,
 	Small,
 };
+
+UENUM()
+enum class EInnerMatchState : uint8
+{
+	Prepare,
+	Process,
+	Finish,
+};

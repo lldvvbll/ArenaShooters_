@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "Engine/GameInstance.h"
+#include "Common/ASEnums.h"
 #include "ASGameInstance.generated.h"
 
 #define NUMOPENPUBCONN "NUMOPENPUBCONN"
@@ -28,7 +29,8 @@ public:
 	void SearchServer();
 	void JoinServer(const FOnlineSessionSearchResult& SearchResult);
 
-	void SetIsMatchProcess(bool bIsProcess);
+	EInnerMatchState GetInnerMatchState() const;
+	void SetInnerMatchState(EInnerMatchState State);
 	bool IsMatchProcess() const;
 
 protected:
@@ -50,5 +52,5 @@ public:
 protected:
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
-	bool bMatchProcess;
+	EInnerMatchState InnerMatchState;
 };

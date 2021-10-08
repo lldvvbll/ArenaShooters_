@@ -4,6 +4,9 @@
 #include "GameMode/ASMatchGameModeBase.h"
 #include "GameMode/ASMatchGameStateBase.h"
 #include "ASGameInstance.h"
+#include "Controller/ASPlayerController.h"
+#include "Controller/ASPlayerState.h"
+#include "Common/ASEnums.h"
 
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
@@ -11,26 +14,14 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	bSetPrepareTimer = false;
 	MaxPlayerCount = 16;
 	MinPlayerCount = 1;
+	GoalNumOfKills = 1;
 }
 
 void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	ASMatchGameState->SetNumPlayers(NumPlayers);
-
-	if (ASGameInstance->IsMatchProcess())
-	{
-		if (ASMatchGameState != nullptr)
-		{
-			ASMatchGameState->SetMatchProcess(true);
-		}
-		else
-		{
-			AS_LOG_S(Warning);
-		}
-	}
-	else
+	if (!ASGameInstance->IsMatchProcess())
 	{
 		if (!bSetPrepareTimer && NumPlayers >= MinPlayerCount)
 		{
@@ -42,32 +33,30 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void AASMatchGameModeBase::Logout(AController* Exiting)
-{
-	Super::Logout(Exiting);
-
-	ASMatchGameState->SetNumPlayers(NumPlayers);
-}
-
 void AASMatchGameModeBase::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
 	ASGameInstance = GetGameInstance<UASGameInstance>();
-	if (ASGameInstance == nullptr)
+	if (!IsValid(ASGameInstance))
 	{
-		AS_LOG_S(Warning);
+		AS_LOG_S(Error);
 	}
+}
+
+void AASMatchGameModeBase::InitGameState()
+{
+	Super::InitGameState();
 
 	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
-	if (ASMatchGameState != nullptr)
+	if (IsValid(ASMatchGameState))
 	{
 		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
 		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
 	}
 	else
 	{
-		AS_LOG_S(Warning);
+		AS_LOG_S(Error);
 	}
 }
 
@@ -92,6 +81,72 @@ int32 AASMatchGameModeBase::GetGoalNumOfKills() const
 	return GoalNumOfKills;
 }
 
+void AASMatchGameModeBase::FinishMatch()
+{
+	if (IsValid(ASGameInstance))
+	{
+		ASGameInstance->SetInnerMatchState(EInnerMatchState::Finish);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	if (IsValid(ASMatchGameState))
+	{
+		ASMatchGameState->OnFinishMatch();
+	}
+}
+
+void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)
+{
+	AASPlayerState* DeadPlayerState = nullptr;
+	if (IsValid(DeadController))
+	{
+		DeadPlayerState = DeadController->GetPlayerState<AASPlayerState>();
+		if (IsValid(DeadPlayerState))
+		{
+			DeadPlayerState->OnDie();
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	AASPlayerState* KillerPlayerState = nullptr;
+	if (IsValid(KillerController))
+	{
+		KillerPlayerState = KillerController->GetPlayerState<AASPlayerState>();
+		if (IsValid(KillerPlayerState))
+		{
+			KillerPlayerState->OnKill();
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	auto ASGameState = GetGameState<AASMatchGameStateBase>();
+	if (IsValid(ASGameState))
+	{
+		ASGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
 void AASMatchGameModeBase::SetPrepareTimer()
 {
 	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::OnCalledPrepareTimer, PrepareTime);
@@ -102,19 +157,19 @@ void AASMatchGameModeBase::SetPrepareTimer()
 	}
 	else
 	{
-		AS_LOG_S(Warning);
+		AS_LOG_S(Error);
 	}
 }
 
 void AASMatchGameModeBase::OnCalledPrepareTimer()
 {
-	if (ASGameInstance != nullptr)
+	if (IsValid(ASGameInstance))
 	{
-		ASGameInstance->SetIsMatchProcess(true);
+		ASGameInstance->SetInnerMatchState(EInnerMatchState::Process);
 	}
 	else
 	{
-		AS_LOG_S(Warning);
+		AS_LOG_S(Error);
 	}
 	
 	RestartGame();

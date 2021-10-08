@@ -7,6 +7,7 @@
 #include "ASDeathmatchGameState.generated.h"
 
 class UASItemFactoryComponent;
+class AASPlayerState;
 
 UCLASS()
 class ARENASHOOTERS_API AASDeathmatchGameState : public AASMatchGameStateBase
@@ -15,4 +16,20 @@ class ARENASHOOTERS_API AASDeathmatchGameState : public AASMatchGameStateBase
 	
 public:
 	AASDeathmatchGameState();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetWinner(AASPlayerState* WonPlayerState);
+
+protected:
+	UFUNCTION()
+	void OnRep_WonPlayerState();
+
+public:
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetWinnerEvent, AASPlayerState*);
+	FOnSetWinnerEvent OnSetWinner;
+
+protected:
+	UPROPERTY(Replicated)
+	AASPlayerState* WonPlayerState;
 };

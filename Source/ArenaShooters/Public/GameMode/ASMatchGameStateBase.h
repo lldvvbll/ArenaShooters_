@@ -4,9 +4,11 @@
 
 #include "ArenaShooters.h"
 #include "GameFramework/GameState.h"
+#include "Common/ASEnums.h"
 #include "ASMatchGameStateBase.generated.h"
 
 class UASItemFactoryComponent;
+class AASPlayerState;
 
 UCLASS()
 class ARENASHOOTERS_API AASMatchGameStateBase : public AGameState
@@ -17,14 +19,15 @@ public:
 	AASMatchGameStateBase();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
+
+	virtual void AddPlayerState(APlayerState* PlayerState) override;
+	virtual void RemovePlayerState(APlayerState* PlayerState) override;
 
 	UASItemFactoryComponent* GetItemFactory();
 
 	int32 GetMaxNumPlayer() const;
 	void SetMaxNumPlayers(int32 Num);
-
-	int32 GetNumPlayers() const;
-	void SetNumPlayers(int32 Num);
 
 	int32 GetGoalNumOfKills() const;
 	void SetGoalNumOfKills(int32 Num);
@@ -33,15 +36,22 @@ public:
 	void MulticastOnSetPrepareTimer(float PrepareTime);
 	void MulticastOnSetPrepareTimer_Implementation(float PrepareTime);
 
-	void SetMatchProcess(bool bIsMatchProcess);
+	EInnerMatchState GetInnerMatchState() const;
+	void SetInnerMatchState(EInnerMatchState State);
 	bool IsMatchProcess() const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState);
+	void MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState);
+
+	virtual void OnFinishMatch();
 
 protected:
 	UFUNCTION()
 	void OnRep_NumPlayers(int32 OldNum);
 
 	UFUNCTION()
-	void OnRep_bMatchProcess();
+	void OnRep_InnerMatchState();
 
 public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedNumPlayersEvent, int32);
@@ -50,8 +60,8 @@ public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetPrepareTimeEvent, FDateTime);
 	FOnSetPrepareTimeEvent OnSetPrepareTime;
 
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedMatchProcessEvent, bool)
-	FOnChangedMatchProcessEvent OnChangedMatchProcess;
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedInnerMatchStateEvent, EInnerMatchState)
+	FOnChangedInnerMatchStateEvent OnChangedInnerMatchState;
 
 protected:
 	UPROPERTY(Replicated, EditDefaultsOnly)
@@ -68,6 +78,6 @@ protected:
 
 	FDateTime StartTimeForProcess;
 
-	UPROPERTY(ReplicatedUsing = OnRep_bMatchProcess)
-	bool bMatchProcess;
+	UPROPERTY(ReplicatedUsing = OnRep_InnerMatchState)
+	EInnerMatchState InnerMatchState;
 };

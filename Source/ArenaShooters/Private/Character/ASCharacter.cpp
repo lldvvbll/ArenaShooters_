@@ -27,6 +27,7 @@
 #include "GameFramework/PlayerInput.h"
 #include "Character/ASAnimInstance.h"
 #include "GameMode/ASItemFactoryComponent.h"
+#include "GameMode/ASMatchGameStateBase.h"
 
 AASCharacter::AASCharacter()
 {
@@ -112,6 +113,26 @@ void AASCharacter::PostInitializeComponents()
 	if (ASInventory != nullptr)
 	{
 		ASInventory->OnChangedSelectedWeapon.AddUObject(this, &AASCharacter::OnChangeSelectedWeapon);
+	}
+}
+
+void AASCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+		if (IsValid(GameState))
+		{
+			GameState->OnChangedInnerMatchState.AddUObject(this, &AASCharacter::OnChangedInnerMatchState);
+
+			OnChangedInnerMatchState(GameState->GetInnerMatchState());
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
 	}
 }
 
@@ -963,6 +984,7 @@ void AASCharacter::HealingKit()
 	if (GetCharacterMovement()->IsFalling() || bDead)
 		return;
 
+	// todo: remove comment
 	//if (ASStatus != nullptr && ASStatus->GetCurrentHealth() >= ASStatus->GetMaxHealth())
 	//	return;
 
@@ -1800,5 +1822,30 @@ void AASCharacter::OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& InOld
 		BulletSpreadRecoverySpeed = 0.0f;
 
 		CurrentBulletSpread = MinBulletSpread;
+	}
+}
+
+void AASCharacter::OnChangedInnerMatchState(EInnerMatchState State)
+{
+	switch (State)
+	{
+	case EInnerMatchState::Prepare:
+		{
+			SetCanBeDamaged(false);
+		}		
+		break;
+	case EInnerMatchState::Process:
+		{
+			SetCanBeDamaged(true);
+		}		
+		break;
+	case EInnerMatchState::Finish:
+		{
+			SetCanBeDamaged(false);
+		}		
+		break;
+	default:
+		checkNoEntry();
+		break;
 	}
 }

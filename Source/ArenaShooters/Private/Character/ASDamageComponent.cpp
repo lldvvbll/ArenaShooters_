@@ -9,6 +9,9 @@
 #include "ASAssetManager.h"
 #include "DataAssets/CharacterDataAssets/ASDamageDataAsset.h"
 #include "Item/ASArmor.h"
+#include "Controller/ASPlayerController.h"
+#include "GameMode/ASMatchGameStateBase.h"
+#include "GameMode/ASMatchGameModeBase.h"
 
 UASDamageComponent::UASDamageComponent()
 {
@@ -71,6 +74,14 @@ void UASDamageComponent::OnTakeDamage(AActor* DamagedActor, float Damage, const 
 
 	if (!bBeforeDead && ASChar->IsDead())
 	{
-		AS_LOG(Warning, TEXT("Char is Dead"));
+		auto GameMode = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
+		if (IsValid(GameMode))
+		{
+			GameMode->OnKillCharacter(Cast<AASPlayerController>(InstigatedBy), ASChar->GetController<AASPlayerController>());
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
 	}
 }

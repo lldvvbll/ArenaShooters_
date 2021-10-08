@@ -32,7 +32,7 @@ public:
 	AASCharacter();
 
 	virtual void PostInitializeComponents() override;
-
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -226,6 +226,8 @@ protected:
 	void MulticastCancelUseHealingKit_Implementation();
 
 	void OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& InOldWeapon, const TWeakObjectPtr<UASWeapon>& InNewWeapon);
+
+	void OnChangedInnerMatchState(EInnerMatchState State);
 
 public:
 	DECLARE_EVENT_OneParam(AASCharacter, FOnScopeEvent, const TWeakObjectPtr<UASWeapon>&)
