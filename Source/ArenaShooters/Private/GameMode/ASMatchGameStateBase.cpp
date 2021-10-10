@@ -5,12 +5,11 @@
 #include "GameMode/ASItemFactoryComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "ASGameInstance.h"
+#include "Controller/ASPlayerState.h"
 
 AASMatchGameStateBase::AASMatchGameStateBase()
 {
 	ItemFactory = CreateDefaultSubobject<UASItemFactoryComponent>(TEXT("ItemFactory"));
-
-	StartTimeForProcess = FDateTime::MaxValue();
 }
 
 void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -19,9 +18,10 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 	DOREPLIFETIME(AASMatchGameStateBase, ItemFactory);
 	DOREPLIFETIME(AASMatchGameStateBase, MaxNumPlayers);
-	DOREPLIFETIME(AASMatchGameStateBase, NumPlayers);
-	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);	
+	DOREPLIFETIME(AASMatchGameStateBase, StartTimeForProcess);
+	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);
 	DOREPLIFETIME(AASMatchGameStateBase, InnerMatchState);
+	DOREPLIFETIME(AASMatchGameStateBase, MatchFinishTime);
 }
 
 void AASMatchGameStateBase::PostInitializeComponents()
@@ -78,13 +78,11 @@ void AASMatchGameStateBase::SetGoalNumOfKills(int32 Num)
 	GoalNumOfKills = Num;
 }
 
-void AASMatchGameStateBase::MulticastOnSetPrepareTimer_Implementation(float PrepareTime)
+void AASMatchGameStateBase::SetStartTimeForProcess(float StartTime)
 {
-	StartTimeForProcess = FDateTime::Now() + FTimespan::FromSeconds(PrepareTime + 1.0f);
+	StartTimeForProcess = StartTime;
 
-	AS_LOG(Warning, TEXT("StartTimeForProcess: %s"), *StartTimeForProcess.ToString());
-
-	OnSetPrepareTime.Broadcast(StartTimeForProcess);
+	OnStartTimeForProcess.Broadcast(StartTimeForProcess);
 }
 
 EInnerMatchState AASMatchGameStateBase::GetInnerMatchState() const
@@ -134,14 +132,50 @@ void AASMatchGameStateBase::OnFinishMatch()
 	SetInnerMatchState(EInnerMatchState::Finish);
 }
 
-void AASMatchGameStateBase::OnRep_NumPlayers(int32 OldNum)
+FDateTime AASMatchGameStateBase::GetMatchFinishTime() const
 {
-	AS_LOG(Warning, TEXT("NumPlayer: %d"), NumPlayers);
+	return MatchFinishTime;
+}
 
-	OnChangedNumPlayers.Broadcast(NumPlayers);
+void AASMatchGameStateBase::SetMatchFinishTime(float FinishTime)
+{
+	MatchFinishTime = FinishTime;
+
+	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
+}
+
+void AASMatchGameStateBase::OnRep_StartTimeForProcess()
+{
+	OnStartTimeForProcess.Broadcast(StartTimeForProcess);
 }
 
 void AASMatchGameStateBase::OnRep_InnerMatchState()
 {
 	OnChangedInnerMatchState.Broadcast(InnerMatchState);
+}
+
+void AASMatchGameStateBase::OnRep_MatchFinishTime()
+{
+	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
+}
+
+AASPlayerState* AASMatchGameStateBase::GetPlayerStateOfTopKillCount() const
+{
+	AASPlayerState* TopPlayer = nullptr;
+	int32 TopNumOfKills = 0;
+	for (auto& PlayerState : PlayerArray)
+	{
+		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
+		if (!IsValid(ASPlayerState))
+			continue;
+
+		int32 KillCount = ASPlayerState->GetKillCount();
+		if (KillCount > TopNumOfKills)
+		{
+			TopPlayer = ASPlayerState;
+			TopNumOfKills = KillCount;
+		}
+	}
+
+	return TopPlayer;
 }

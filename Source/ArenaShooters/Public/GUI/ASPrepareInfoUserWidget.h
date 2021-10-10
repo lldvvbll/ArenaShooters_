@@ -16,7 +16,7 @@ class ARENASHOOTERS_API UASPrepareInfoUserWidget : public UUserWidget
 public:
 	void SetMaxNumPlayers(int32 Num);
 	void SetNumPlayers(int32 Num);
-	void StartCountDown(FDateTime InMatchStartTime);
+	void StartCountDown(float InMatchStartTime);
 
 protected:
 	virtual void NativeConstruct() override;

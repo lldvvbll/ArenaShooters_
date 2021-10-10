@@ -3,6 +3,7 @@
 
 #include "GUI/ASPrepareInfoUserWidget.h"
 #include "Components/TextBlock.h"
+#include "GameMode/ASMatchGameStateBase.h"
 
 void UASPrepareInfoUserWidget::SetMaxNumPlayers(int32 Num)
 {
@@ -20,19 +21,29 @@ void UASPrepareInfoUserWidget::SetNumPlayers(int32 Num)
 	}
 }
 
-void UASPrepareInfoUserWidget::StartCountDown(FDateTime InMatchStartTime)
+void UASPrepareInfoUserWidget::StartCountDown(float InMatchStartTime)
 {
-	bCountDown = true;
-	MatchStartTime = InMatchStartTime;
-
-	if (MatchStartInTextBlock != nullptr)
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
 	{
-		MatchStartInTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+		bCountDown = true;
+
+		float DeltaTime = InMatchStartTime - GameState->GetServerWorldTimeSeconds();
+		MatchStartTime = FDateTime::Now() + FTimespan::FromSeconds(DeltaTime);
+
+		if (MatchStartInTextBlock != nullptr)
+		{
+			MatchStartInTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
+
+		if (CountDownTextBlock != nullptr)
+		{
+			CountDownTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
 	}
-
-	if (CountDownTextBlock != nullptr)
+	else
 	{
-		CountDownTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+		AS_LOG_S(Error);
 	}
 }
 

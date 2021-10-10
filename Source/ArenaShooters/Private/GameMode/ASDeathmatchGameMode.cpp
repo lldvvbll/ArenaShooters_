@@ -5,18 +5,6 @@
 #include "Controller/ASPlayerController.h"
 #include "Controller/ASPlayerState.h"
 
-void AASDeathmatchGameMode::PostLogin(APlayerController* NewPlayer)
-{
-	Super::PostLogin(NewPlayer);
-
-}
-
-void AASDeathmatchGameMode::Logout(AController* Exiting)
-{
-	Super::Logout(Exiting);
-
-}
-
 void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)
 {
 	Super::OnKillCharacter(KillerController, DeadController);
@@ -28,7 +16,7 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 		{
 			if (KillerPlayerState->GetKillCount() >= GoalNumOfKills)
 			{
-				OnAchieveGoal(KillerPlayerState);
+				FinishMatch();
 			}
 		}
 		else
@@ -40,9 +28,4 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 	{
 		AS_LOG_S(Error);
 	}
-}
-
-void AASDeathmatchGameMode::OnAchieveGoal(AASPlayerState* WonPlayerState)
-{
-	FinishMatch();
 }

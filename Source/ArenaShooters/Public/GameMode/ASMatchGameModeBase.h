@@ -28,10 +28,11 @@ public:
 	int32 GetGoalNumOfKills() const;
 
 	virtual void FinishMatch();
-
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
 protected:
+	virtual void HandleMatchHasStarted() override;
+
 	void SetPrepareTimer();
 	void OnCalledPrepareTimer();
 
@@ -45,7 +46,10 @@ protected:
 	FTimerHandle PrepareTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)
-	float PrepareTime;
+	FTimespan PrepareTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = Setting)
+	FTimespan MatchProcessTime;
 
 	bool bSetPrepareTimer;
 
@@ -57,4 +61,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)
 	int32 GoalNumOfKills;
+
+	FTimerHandle MatchFinishTimeHandle;
 };

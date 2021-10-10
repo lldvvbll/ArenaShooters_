@@ -32,9 +32,7 @@ public:
 	int32 GetGoalNumOfKills() const;
 	void SetGoalNumOfKills(int32 Num);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnSetPrepareTimer(float PrepareTime);
-	void MulticastOnSetPrepareTimer_Implementation(float PrepareTime);
+	void SetStartTimeForProcess(float StartTime);
 
 	EInnerMatchState GetInnerMatchState() const;
 	void SetInnerMatchState(EInnerMatchState State);
@@ -46,22 +44,33 @@ public:
 
 	virtual void OnFinishMatch();
 
+	FDateTime GetMatchFinishTime() const;
+	void SetMatchFinishTime(float FinishTime);
+
 protected:
 	UFUNCTION()
-	void OnRep_NumPlayers(int32 OldNum);
+	void OnRep_StartTimeForProcess();
 
 	UFUNCTION()
 	void OnRep_InnerMatchState();
+
+	UFUNCTION()
+	void OnRep_MatchFinishTime();
+
+	AASPlayerState* GetPlayerStateOfTopKillCount() const;
 
 public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedNumPlayersEvent, int32);
 	FOnChangedNumPlayersEvent OnChangedNumPlayers;
 
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetPrepareTimeEvent, FDateTime);
-	FOnSetPrepareTimeEvent OnSetPrepareTime;
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnStartTimeForProcessEvent, float);
+	FOnStartTimeForProcessEvent OnStartTimeForProcess;
 
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedInnerMatchStateEvent, EInnerMatchState)
 	FOnChangedInnerMatchStateEvent OnChangedInnerMatchState;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetMatchFinishTimeEvent, float)
+	FOnSetMatchFinishTimeEvent OnSetMatchFinishTime;
 
 protected:
 	UPROPERTY(Replicated, EditDefaultsOnly)
@@ -70,14 +79,15 @@ protected:
 	UPROPERTY(Replicated)
 	int32 MaxNumPlayers;
 
-	UPROPERTY(ReplicatedUsing = OnRep_NumPlayers)
-	int32 NumPlayers;
-
 	UPROPERTY(Replicated)
 	int32 GoalNumOfKills;
 
-	FDateTime StartTimeForProcess;
+	UPROPERTY(ReplicatedUsing = OnRep_StartTimeForProcess)
+	float StartTimeForProcess;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InnerMatchState)
 	EInnerMatchState InnerMatchState;
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchFinishTime)
+	float MatchFinishTime;
 };

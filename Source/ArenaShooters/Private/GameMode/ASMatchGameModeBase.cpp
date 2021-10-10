@@ -11,6 +11,7 @@
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
 	PrepareTime = 10.0f;
+	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
 	MaxPlayerCount = 16;
 	MinPlayerCount = 1;
@@ -96,6 +97,10 @@ void AASMatchGameModeBase::FinishMatch()
 	{
 		ASMatchGameState->OnFinishMatch();
 	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)
@@ -136,10 +141,37 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 		AS_LOG_S(Error);
 	}
 
-	auto ASGameState = GetGameState<AASMatchGameStateBase>();
-	if (IsValid(ASGameState))
+	if (IsValid(ASMatchGameState))
 	{
-		ASGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState);
+		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASMatchGameModeBase::HandleMatchHasStarted()
+{
+	Super::HandleMatchHasStarted();
+
+	if (IsValid(ASGameInstance))
+	{
+		if (ASGameInstance->IsMatchProcess())
+		{
+			float MatchProcessTimeSec = MatchProcessTime.GetTotalSeconds();
+			GetWorldTimerManager().SetTimer(MatchFinishTimeHandle, this, &AASMatchGameModeBase::FinishMatch, MatchProcessTimeSec);
+
+			if (IsValid(ASMatchGameState))
+			{
+				float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + MatchProcessTimeSec;
+				ASMatchGameState->SetMatchFinishTime(FinishTime);
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
 	}
 	else
 	{
@@ -149,11 +181,13 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 
 void AASMatchGameModeBase::SetPrepareTimer()
 {
-	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::OnCalledPrepareTimer, PrepareTime);
+	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
+	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::OnCalledPrepareTimer, PrepareTimeSec);
 
 	if (ASMatchGameState != nullptr)
 	{
-		ASMatchGameState->MulticastOnSetPrepareTimer(PrepareTime);
+		float StartTime = ASMatchGameState->GetServerWorldTimeSeconds() + PrepareTimeSec;
+		ASMatchGameState->SetStartTimeForProcess(StartTime);
 	}
 	else
 	{

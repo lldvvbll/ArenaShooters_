@@ -17,6 +17,13 @@ void AASDeathmatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	DOREPLIFETIME(AASDeathmatchGameState, WonPlayerState);
 }
 
+void AASDeathmatchGameState::OnFinishMatch()
+{
+	Super::OnFinishMatch();
+
+	SetWinner(GetPlayerStateOfTopKillCount());
+}
+
 void AASDeathmatchGameState::SetWinner(AASPlayerState* InWonPlayerState)
 {
 	WonPlayerState = InWonPlayerState;

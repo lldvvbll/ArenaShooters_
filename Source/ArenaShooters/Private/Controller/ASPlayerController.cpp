@@ -69,7 +69,7 @@ void AASPlayerController::BeginPlay()
 				PrepareInfoWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoWidgetClass);
 				if (PrepareInfoWidget != nullptr)
 				{
-					GameState->OnSetPrepareTime.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::StartCountDown);
+					GameState->OnStartTimeForProcess.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::StartCountDown);
 					GameState->OnChangedNumPlayers.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::SetNumPlayers);
 
 					PrepareInfoWidget->SetMaxNumPlayers(GameState->GetMaxNumPlayer());
