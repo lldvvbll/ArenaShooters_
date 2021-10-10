@@ -8,6 +8,7 @@
 
 class UASInventoryStatusUserWidget;
 class UProgressBar;
+class UTextBlock;
 
 UCLASS()
 class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
@@ -16,7 +17,9 @@ class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+	void OnSetMatchFinishTime(float Time);
 	void OnChangedCharacterHealth(float NewHealth) const;
 
 protected:
@@ -24,7 +27,13 @@ protected:
 	UASInventoryStatusUserWidget* InventoryStatusWidget;
 
 	UPROPERTY()
+	UTextBlock* FinishCountDownTextBlock;
+
+	UPROPERTY()
 	UProgressBar* HealthProgressBar;
 
 	float MaxCharHealth;
+
+	bool bSetMatchFinishTime;
+	FDateTime MatchFinishTime;
 };

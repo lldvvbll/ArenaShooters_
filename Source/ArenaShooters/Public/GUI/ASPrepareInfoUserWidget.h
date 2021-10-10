@@ -36,6 +36,5 @@ protected:
 	UTextBlock* CountDownTextBlock;
 
 	bool bCountDown;
-
 	FDateTime MatchStartTime;
 };

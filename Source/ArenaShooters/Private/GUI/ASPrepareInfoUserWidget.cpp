@@ -68,6 +68,27 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 	{
 		CountDownTextBlock->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
+		{
+			GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
+			GameState->OnChangedNumPlayers.AddUObject(this, &UASPrepareInfoUserWidget::SetNumPlayers);
+
+			SetNumPlayers(GameState->GetNumPlayers());
+			SetMaxNumPlayers(GameState->GetMaxNumPlayer());
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 void UASPrepareInfoUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -79,7 +100,7 @@ void UASPrepareInfoUserWidget::NativeTick(const FGeometry& MyGeometry, float InD
 		if (CountDownTextBlock != nullptr)
 		{
 			FTimespan RemainTime = MatchStartTime - FDateTime::Now();
-			int32 RemainSeconds = RemainTime.GetSeconds();
+			int32 RemainSeconds = RemainTime.GetTotalSeconds();
 			if (RemainSeconds < 0)
 			{
 				RemainSeconds = 0;

@@ -3,17 +3,38 @@
 
 #include "GUI/HUD/ASHudUserWidget.h"
 #include "GUI/HUD/ASInventoryStatusUserWidget.h"
+#include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Controller/ASPlayerController.h"
 #include "Character/ASCharacter.h"
 #include "Character/ASStatusComponent.h"
+#include "GameMode/ASMatchGameStateBase.h"
 
 void UASHudUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	InventoryStatusWidget = Cast<UASInventoryStatusUserWidget>(GetWidgetFromName(TEXT("InventoryStatusWidget")));
+	FinishCountDownTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FinishCountDownTextBlock")));	
 	HealthProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HealthProgressBar")));
+
+	bSetMatchFinishTime = false;
+	MatchFinishTime = FDateTime::MaxValue();
+
+	if (FinishCountDownTextBlock != nullptr)
+	{
+		FinishCountDownTextBlock->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		GameState->OnSetMatchFinishTime.AddUObject(this, &UASHudUserWidget::OnSetMatchFinishTime);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 
 	if (auto ASPlayerController = GetOwningPlayer<AASPlayerController>())
 	{
@@ -34,6 +55,54 @@ void UASHudUserWidget::NativeConstruct()
 		else
 		{
 			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASHudUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (bSetMatchFinishTime)
+	{
+		if (FinishCountDownTextBlock != nullptr)
+		{
+			FTimespan RemainTime = MatchFinishTime - FDateTime::Now();
+
+			int32 RemainMinutes = RemainTime.GetMinutes();
+			if (RemainMinutes < 0)
+			{
+				RemainMinutes = 0;
+			}
+
+			int32 RemainSeconds = RemainTime.GetSeconds();
+			if (RemainSeconds < 0)
+			{
+				RemainSeconds = 0;
+			}
+
+			FinishCountDownTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d : %d"), RemainMinutes, RemainSeconds)));
+		}
+	}
+}
+
+void UASHudUserWidget::OnSetMatchFinishTime(float Time)
+{
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		bSetMatchFinishTime = true;
+
+		float DeltaTime = Time - GameState->GetServerWorldTimeSeconds();
+		MatchFinishTime = FDateTime::Now() + FTimespan::FromSeconds(DeltaTime);
+
+		if (FinishCountDownTextBlock != nullptr)
+		{
+			FinishCountDownTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 	}
 	else

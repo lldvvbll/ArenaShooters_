@@ -28,15 +28,18 @@ void AASMatchGameStateBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	auto GameInst = GetGameInstance<UASGameInstance>();
-	if (IsValid(GameInst))
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		SetInnerMatchState(GameInst->GetInnerMatchState());
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
+		auto GameInst = GetGameInstance<UASGameInstance>();
+		if (IsValid(GameInst))
+		{
+			SetInnerMatchState(GameInst->GetInnerMatchState());
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}	
 }
 
 void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
@@ -56,6 +59,11 @@ void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
 UASItemFactoryComponent* AASMatchGameStateBase::GetItemFactory()
 {
 	return ItemFactory;
+}
+
+int32 AASMatchGameStateBase::GetNumPlayers() const
+{
+	return PlayerArray.Num();
 }
 
 int32 AASMatchGameStateBase::GetMaxNumPlayer() const

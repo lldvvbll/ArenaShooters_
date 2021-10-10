@@ -62,17 +62,14 @@ void AASPlayerController::BeginPlay()
 			HudWidget->AddToViewport();
 		}
 
-		if (auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>())
+		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+		if (IsValid(GameState))
 		{
-			if (!GameState->IsMatchProcess())
+			if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 			{
 				PrepareInfoWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoWidgetClass);
 				if (PrepareInfoWidget != nullptr)
 				{
-					GameState->OnStartTimeForProcess.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::StartCountDown);
-					GameState->OnChangedNumPlayers.AddUObject(PrepareInfoWidget, &UASPrepareInfoUserWidget::SetNumPlayers);
-
-					PrepareInfoWidget->SetMaxNumPlayers(GameState->GetMaxNumPlayer());
 					PrepareInfoWidget->AddToViewport(1);
 				}
 			}

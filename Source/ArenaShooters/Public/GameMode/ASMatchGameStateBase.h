@@ -26,6 +26,8 @@ public:
 
 	UASItemFactoryComponent* GetItemFactory();
 
+	int32 GetNumPlayers() const;
+
 	int32 GetMaxNumPlayer() const;
 	void SetMaxNumPlayers(int32 Num);
 
