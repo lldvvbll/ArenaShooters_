@@ -21,17 +21,6 @@ public:
 
 	virtual void OnFinishMatch() override;
 
-	void SetWinner(AASPlayerState* WonPlayerState);
+	TArray<AASPlayerState*> GetPlayersSortedByKillCount() const;
 
-protected:
-	UFUNCTION()
-	void OnRep_WonPlayerState();
-
-public:
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetWinnerEvent, AASPlayerState*);
-	FOnSetWinnerEvent OnSetWinner;
-
-protected:
-	UPROPERTY(Replicated)
-	AASPlayerState* WonPlayerState;
 };

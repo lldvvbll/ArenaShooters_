@@ -74,6 +74,9 @@ public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetMatchFinishTimeEvent, float)
 	FOnSetMatchFinishTimeEvent OnSetMatchFinishTime;
 
+	DECLARE_EVENT_TwoParams(AASMatchGameStateBase, FOnKillEvent, AASPlayerState*, AASPlayerState*)
+	FOnKillEvent OnKill;
+
 protected:
 	UPROPERTY(Replicated, EditDefaultsOnly)
 	UASItemFactoryComponent* ItemFactory;

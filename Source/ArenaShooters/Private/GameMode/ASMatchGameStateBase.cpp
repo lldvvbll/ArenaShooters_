@@ -123,6 +123,8 @@ void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* Kille
 
 		// todo: Kill log
 	}
+
+	OnKill.Broadcast(KillerPlayerState, DeadPlayerState);
 }
 
 void AASMatchGameStateBase::OnFinishMatch()

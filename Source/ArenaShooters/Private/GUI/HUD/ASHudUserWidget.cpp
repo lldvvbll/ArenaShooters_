@@ -5,6 +5,7 @@
 #include "GUI/HUD/ASInventoryStatusUserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "Components/Border.h"
 #include "Controller/ASPlayerController.h"
 #include "Character/ASCharacter.h"
 #include "Character/ASStatusComponent.h"
@@ -15,15 +16,16 @@ void UASHudUserWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	InventoryStatusWidget = Cast<UASInventoryStatusUserWidget>(GetWidgetFromName(TEXT("InventoryStatusWidget")));
+	FinishCountDownBorder = Cast<UBorder>(GetWidgetFromName(TEXT("FinishCountDownBorder")));
 	FinishCountDownTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FinishCountDownTextBlock")));	
 	HealthProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HealthProgressBar")));
 
 	bSetMatchFinishTime = false;
 	MatchFinishTime = FDateTime::MaxValue();
 
-	if (FinishCountDownTextBlock != nullptr)
+	if (FinishCountDownBorder != nullptr)
 	{
-		FinishCountDownTextBlock->SetVisibility(ESlateVisibility::Hidden);
+		FinishCountDownBorder->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
@@ -100,9 +102,9 @@ void UASHudUserWidget::OnSetMatchFinishTime(float Time)
 		float DeltaTime = Time - GameState->GetServerWorldTimeSeconds();
 		MatchFinishTime = FDateTime::Now() + FTimespan::FromSeconds(DeltaTime);
 
-		if (FinishCountDownTextBlock != nullptr)
+		if (FinishCountDownBorder != nullptr)
 		{
-			FinishCountDownTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+			FinishCountDownBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 	}
 	else

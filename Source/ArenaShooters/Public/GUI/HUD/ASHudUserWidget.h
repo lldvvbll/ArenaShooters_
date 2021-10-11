@@ -9,6 +9,7 @@
 class UASInventoryStatusUserWidget;
 class UProgressBar;
 class UTextBlock;
+class UBorder;
 
 UCLASS()
 class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
@@ -25,6 +26,9 @@ protected:
 protected:
 	UPROPERTY()
 	UASInventoryStatusUserWidget* InventoryStatusWidget;
+
+	UPROPERTY()
+	UBorder* FinishCountDownBorder;
 
 	UPROPERTY()
 	UTextBlock* FinishCountDownTextBlock;

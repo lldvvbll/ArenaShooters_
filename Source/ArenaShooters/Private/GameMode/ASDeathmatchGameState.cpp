@@ -14,24 +14,44 @@ void AASDeathmatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AASDeathmatchGameState, WonPlayerState);
 }
 
 void AASDeathmatchGameState::OnFinishMatch()
 {
 	Super::OnFinishMatch();
 
-	SetWinner(GetPlayerStateOfTopKillCount());
 }
 
-void AASDeathmatchGameState::SetWinner(AASPlayerState* InWonPlayerState)
+TArray<AASPlayerState*> AASDeathmatchGameState::GetPlayersSortedByKillCount() const
 {
-	WonPlayerState = InWonPlayerState;
+	TArray<AASPlayerState*> SortedPlayers;
+	SortedPlayers.Reserve(PlayerArray.Num());
 
-	OnSetWinner.Broadcast(WonPlayerState);
-}
+	for (auto& Player : PlayerArray)
+	{
+		auto ASPlayerState = Cast<AASPlayerState>(Player);
+		if (IsValid(ASPlayerState))
+		{
+			SortedPlayers.Emplace(ASPlayerState);
+		}		
+	}
 
-void AASDeathmatchGameState::OnRep_WonPlayerState()
-{
-	OnSetWinner.Broadcast(WonPlayerState);
+	SortedPlayers.Sort(
+		[](const AASPlayerState& Left, const AASPlayerState& Right)
+		{
+			int32 LeftKillCount = Left.GetKillCount();
+			int32 RightKillCount = Right.GetKillCount();
+			if (LeftKillCount > RightKillCount)
+			{
+				return true;
+			}
+			else if (LeftKillCount < RightKillCount)
+			{
+				return false;
+			}
+
+			return Left.GetDeathCount() < Right.GetDeathCount();
+		});
+
+	return SortedPlayers;
 }
