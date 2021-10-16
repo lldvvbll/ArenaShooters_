@@ -117,7 +117,7 @@ void UASMainMenuUserWidget::OnEscKeyPressed()
 		switch (MainMenuWidgetSwitcher->GetActiveWidgetIndex())
 		{
 		case EWidgetIndex::MainMenu:
-			RemoveFromParent();
+			//RemoveFromParent();
 			break;
 		case EWidgetIndex::FindServer:
 		case EWidgetIndex::KeySettings:

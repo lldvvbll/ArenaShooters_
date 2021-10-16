@@ -23,10 +23,9 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 			GoalNumOfKillsTextBlock->SetText(FText::FromString(FString::FromInt(GameState->GetGoalNumOfKills())));
 		}
 
-		GameState->OnKill.AddUObject(this, &UASDeathMatchRankingUserWidget::OnKill);
-		GameState->OnChangedNumPlayers.AddUObject(this, &UASDeathMatchRankingUserWidget::OnChangedNumPlayers);
+		GameState->OnUpdatedRanking.AddUObject(this, &UASDeathMatchRankingUserWidget::UpdatePlayerRanking);
 
-		UpdatePlayerRanking();
+		UpdatePlayerRanking(GameState->GetRankedPlayerStates());
 	}
 	else
 	{
@@ -34,17 +33,22 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 	}
 }
 
-void UASDeathMatchRankingUserWidget::OnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState)
+void UASDeathMatchRankingUserWidget::NativeDestruct()
 {
-	UpdatePlayerRanking();
+	Super::NativeDestruct();
+
+	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
+	if (IsValid(GameState))
+	{
+		GameState->OnUpdatedRanking.RemoveAll(this);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
-void UASDeathMatchRankingUserWidget::OnChangedNumPlayers(int32 PlayerNum)
-{
-	UpdatePlayerRanking();
-}
-
-void UASDeathMatchRankingUserWidget::UpdatePlayerRanking()
+void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPlayerState>& RankedPlayerStates)
 {
 	if (RankScrollBox == nullptr)
 	{
@@ -68,17 +72,23 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking()
 		return;
 	}
 
-	TArray<AASPlayerState*> Players = GameState->GetPlayersSortedByKillCount();
-	
-	int32 MyIdx = Players.Find(MyPlayerState);
-	if (MyIdx == INDEX_NONE)
+	int32 MyIdx = INDEX_NONE;
+	for (int32 Idx = 0; Idx < RankedPlayerStates.Num(); ++Idx)
 	{
-		AS_LOG_S(Error);
-		return;
+		if (IsValid(RankedPlayerStates[Idx].PlayerState) &&
+			RankedPlayerStates[Idx].PlayerState->GetPlayerId() == MyPlayerState->GetPlayerId())
+		{
+			MyIdx = Idx;
+			break;
+		}
 	}
 
+	if (MyIdx == INDEX_NONE)
+		return;
+
+	int32 NumPlayers = RankedPlayerStates.Num();
+
 	TArray<int32> Indices;
-	int32 NumPlayers = Players.Num();
 	if (MyIdx == 0)
 	{
 		Indices.Append({ 0, 1, 2 });
@@ -99,7 +109,7 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking()
 			auto RankingSlot = CreateWidget<UASDmRankingSlotUserWidget>(this, DmRankingSlotWidgetClass);
 			if (RankingSlot != nullptr)
 			{
-				RankingSlot->SetPlayerInfo(Idx + 1, Players[Idx]);
+				RankingSlot->SetPlayerInfo(RankedPlayerStates[Idx].Ranking, RankedPlayerStates[Idx].PlayerState);
 
 				RankScrollBox->AddChild(RankingSlot);
 			}

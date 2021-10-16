@@ -13,27 +13,42 @@ void UASDmRankingSlotUserWidget::SetPlayerInfo(int32 Rank, AASPlayerState* Playe
 		return;
 	}
 
-	bool bMyPlayerState = (PlayerState != nullptr && GetOwningPlayer()->GetPlayerState<AASPlayerState>() == PlayerState);
+	PlayerStatePtr = MakeWeakObjectPtr(PlayerState);
+	if (!PlayerStatePtr.IsValid())
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	auto OwningPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
+	if (!IsValid(OwningPlayerState))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	PlayerStatePtr->OnChangedPlayerName.AddUObject(this, &UASDmRankingSlotUserWidget::OnChangedPlayerName);
+	PlayerStatePtr->OnChangedKillCount.AddUObject(this, &UASDmRankingSlotUserWidget::OnChangedPlayerKillCount);
+
+	bool bMyPlayerState = OwningPlayerState->GetPlayerId() == PlayerStatePtr->GetPlayerId();
 	FLinearColor TextColor = bMyPlayerState ? MyPlayerStateTextColor : OtherPlayerStateTextColor;
 
 	if (RankTextBlock != nullptr)
 	{
-		RankTextBlock->SetText(FText::FromString(FString::FromInt(Rank)));
 		RankTextBlock->SetColorAndOpacity(TextColor);
+		RankTextBlock->SetText(FText::FromString(FString::FromInt(Rank)));
 	}
 
 	if (NameTextBlock != nullptr)
 	{
-		NameTextBlock->SetText(FText::FromString(PlayerState->GetPlayerName()));
 		NameTextBlock->SetColorAndOpacity(TextColor);
-
-		AS_LOG(Warning, TEXT("PlayerName: %s"), *PlayerState->GetPlayerName());
+		OnChangedPlayerName(PlayerStatePtr->GetPlayerName());
 	}
 
 	if (KillCountTextBlock != nullptr)
 	{
-		KillCountTextBlock->SetText(FText::FromString(FString::FromInt(PlayerState->GetKillCount())));
 		KillCountTextBlock->SetColorAndOpacity(TextColor);
+		OnChangedPlayerKillCount(PlayerStatePtr->GetKillCount());
 	}
 }
 
@@ -44,4 +59,31 @@ void UASDmRankingSlotUserWidget::NativeConstruct()
 	RankTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("RankTextBlock")));
 	NameTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("NameTextBlock")));
 	KillCountTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("KillCountTextBlock")));
+}
+
+void UASDmRankingSlotUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (PlayerStatePtr.IsValid())
+	{
+		PlayerStatePtr->OnChangedPlayerName.RemoveAll(this);
+		PlayerStatePtr->OnChangedKillCount.RemoveAll(this);
+	}
+}
+
+void UASDmRankingSlotUserWidget::OnChangedPlayerName(FString NewName)
+{
+	if (NameTextBlock != nullptr)
+	{
+		NameTextBlock->SetText(FText::FromString(NewName));
+	}
+}
+
+void UASDmRankingSlotUserWidget::OnChangedPlayerKillCount(int32 NewCount)
+{
+	if (KillCountTextBlock != nullptr)
+	{
+		KillCountTextBlock->SetText(FText::FromString(FString::FromInt(NewCount)));
+	}
 }

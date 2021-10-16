@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "Blueprint/UserWidget.h"
+#include "Common/ASStructs.h"
 #include "ASDeathMatchRankingUserWidget.generated.h"
 
 class UASDmRankingSlotUserWidget;
@@ -18,11 +19,9 @@ class ARENASHOOTERS_API UASDeathMatchRankingUserWidget : public UUserWidget
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
-	void OnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState);
-	void OnChangedNumPlayers(int32 PlayerNum);
-
-	void UpdatePlayerRanking();
+	void UpdatePlayerRanking(const TArray<FRankedPlayerState>& RankedPlayerStates);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Slot)

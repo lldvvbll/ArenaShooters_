@@ -4,18 +4,18 @@
 
 #include "ArenaShooters.h"
 #include "Blueprint/UserWidget.h"
-#include "ASDmRankingSlotUserWidget.generated.h"
+#include "ASDmLeaderBoardSlotUserWidget.generated.h"
 
-class AASPlayerState;
 class UTextBlock;
+class AASPlayerState;
 
 UCLASS()
-class ARENASHOOTERS_API UASDmRankingSlotUserWidget : public UUserWidget
+class ARENASHOOTERS_API UASDmLeaderBoardSlotUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	void SetPlayerInfo(int32 Rank, AASPlayerState* PlayerState);
+	void SetInfo(int32 Ranking, AASPlayerState* PlayerState);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -23,16 +23,20 @@ protected:
 
 	void OnChangedPlayerName(FString NewName);
 	void OnChangedPlayerKillCount(int32 NewCount);
+	void OnChangedPlayerDeathCount(int32 NewCount);
 
 protected:
 	UPROPERTY()
-	UTextBlock* RankTextBlock;
+	UTextBlock* RankingTextBlock;
 
 	UPROPERTY()
 	UTextBlock* NameTextBlock;
 
 	UPROPERTY()
 	UTextBlock* KillCountTextBlock;
+
+	UPROPERTY()
+	UTextBlock* DeathCountTextBlock;
 
 	UPROPERTY(EditDefaultsOnly, Category = TextColor)
 	FLinearColor MyPlayerStateTextColor;

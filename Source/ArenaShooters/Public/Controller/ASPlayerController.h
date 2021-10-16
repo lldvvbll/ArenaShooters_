@@ -12,13 +12,7 @@ class UASInventoryUserWidget;
 class UASGameMenuUserWidget;
 class UASPrepareInfoUserWidget;
 class UASHudUserWidget;
-
-enum class EFullScreenWidgetType
-{
-	None,
-	Inventory,
-	GameMenu,
-};
+class AASCharacter;
 
 UCLASS()
 class ARENASHOOTERS_API AASPlayerController : public APlayerController
@@ -43,6 +37,38 @@ protected:
 	void ToggleShowInventoryWidget();
 	void ToggleShowGameMenuWidget();
 
+	template <typename TWidget>
+	void ToggleFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass)
+	{
+		if (CurrentFullScreenWidget == nullptr)
+		{
+			auto FullScreenWidget = CreateWidget<TWidget>(this, WidgetClass);
+			if (FullScreenWidget != nullptr)
+			{
+				FullScreenWidget->OnConstructed.AddUObject(this, &AASPlayerController::OnConstructedFullScreenWidget);
+				FullScreenWidget->OnDestructed.AddUObject(this, &AASPlayerController::OnDestructedFullScreenWidget);
+
+				if (auto ASChar = Cast<AASCharacter>(GetCharacter()))
+				{
+					FullScreenWidget->OnConstructed.AddUObject(ASChar, &AASCharacter::OnConstructedFullScreenWidget);
+					FullScreenWidget->OnDestructed.AddUObject(ASChar, &AASCharacter::OnDestructedFullScreenWidget);
+				}
+
+				FullScreenWidget->AddToViewport(1);
+
+				CurrentFullScreenWidget = FullScreenWidget;
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+
 	void OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget);
 	void OnDestructedFullScreenWidget(UUserWidget* DestructedWidget);
 
@@ -56,14 +82,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASInventoryUserWidget> InventoryWidgetClass;
 
-	UPROPERTY()
-	UASInventoryUserWidget* InventoryWidget;
-
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASGameMenuUserWidget> GameMenuWidgetClass;
-
-	UPROPERTY()
-	UASGameMenuUserWidget* GameMenuWidget;
 
 	UPROPERTY()
 	UUserWidget* CurrentFullScreenWidget;
@@ -82,6 +102,4 @@ protected:
 
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;
-
-	EFullScreenWidgetType CurrentFullScreenWidgetType;
 };

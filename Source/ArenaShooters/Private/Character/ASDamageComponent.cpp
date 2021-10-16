@@ -48,6 +48,13 @@ void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult&
 		return;
 	}
 
+	auto InstigatorChar = InBullet->GetOwner<AASCharacter>();
+	if (!IsValid(InstigatorChar))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
 	float Damage = InBullet->GetDamage();
 	float TakenDamage = Damage;
 
@@ -63,7 +70,7 @@ void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult&
 	}
 
 	FPointDamageEvent DamageEvent(TakenDamage, InHit, InBullet->GetActorForwardVector(), nullptr);
-	ASChar->TakeDamage(TakenDamage, DamageEvent, ASChar->GetController(), InBullet);
+	ASChar->TakeDamage(TakenDamage, DamageEvent, InstigatorChar->GetController(), InBullet);
 }
 
 void UASDamageComponent::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)

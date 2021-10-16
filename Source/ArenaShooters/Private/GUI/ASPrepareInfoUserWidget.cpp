@@ -75,7 +75,8 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 		if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 		{
 			GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
-			GameState->OnChangedNumPlayers.AddUObject(this, &UASPrepareInfoUserWidget::SetNumPlayers);
+			GameState->OnAddedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnAddedPlayerState);
+			GameState->OnRemovedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnRemovedPlayerState);
 
 			SetNumPlayers(GameState->GetNumPlayers());
 			SetMaxNumPlayers(GameState->GetMaxNumPlayer());
@@ -84,6 +85,23 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 		{
 			AS_LOG_S(Error);
 		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASPrepareInfoUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		GameState->OnStartTimeForProcess.RemoveAll(this);
+		GameState->OnAddedPlayerState.RemoveAll(this);
+		GameState->OnRemovedPlayerState.RemoveAll(this);
 	}
 	else
 	{
@@ -108,5 +126,31 @@ void UASPrepareInfoUserWidget::NativeTick(const FGeometry& MyGeometry, float InD
 
 			CountDownTextBlock->SetText(FText::FromString(FString::FromInt(RemainSeconds)));
 		}
+	}
+}
+
+void UASPrepareInfoUserWidget::OnAddedPlayerState(APlayerState* AddedPlayerState)
+{
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		SetNumPlayers(GameState->PlayerArray.Num());
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASPrepareInfoUserWidget::OnRemovedPlayerState(APlayerState* AddedPlayerState)
+{
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		SetNumPlayers(GameState->PlayerArray.Num());
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }

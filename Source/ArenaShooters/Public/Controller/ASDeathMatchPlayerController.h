@@ -7,6 +7,7 @@
 #include "ASDeathMatchPlayerController.generated.h"
 
 class UASDeathMatchRankingUserWidget;
+class UASDmLeaderBoardUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API AASDeathMatchPlayerController : public AASPlayerController
@@ -20,6 +21,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+
+	void ToggleShowLeaderBoardWidget();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
@@ -29,4 +33,7 @@ protected:
 	UASDeathMatchRankingUserWidget* DeathMatchRankingWidget;
 
 	bool bCreateRankingWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UASDmLeaderBoardUserWidget> DmLeaderBoardWidgetClass;
 };

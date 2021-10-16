@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "GameMode/ASMatchGameStateBase.h"
+#include "Common/ASStructs.h"
 #include "ASDeathmatchGameState.generated.h"
 
 class UASItemFactoryComponent;
@@ -19,8 +20,29 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void AddPlayerState(APlayerState* PlayerState) override;
+	virtual void RemovePlayerState(APlayerState* PlayerState) override;
+
 	virtual void OnFinishMatch() override;
 
-	TArray<AASPlayerState*> GetPlayersSortedByKillCount() const;
+	const TArray<FRankedPlayerState>& GetRankedPlayerStates() const;
 
+protected:
+	void UpdateRanking();
+
+	void OnChangedPlayerName(FString Name);
+	void OnChangedPlayerId(int32 Id);
+	void OnChangedPlayerKillCount(int32 Count);
+	void OnChangedPlayerDeathCount(int32 Count);
+
+	UFUNCTION()
+	void OnRep_RankedPlayerStates();
+
+public:
+	DECLARE_EVENT_OneParam(AASDeathmatchGameState, FOnUpdatedRankingEvent, const TArray<FRankedPlayerState>&);
+	FOnUpdatedRankingEvent OnUpdatedRanking;
+
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_RankedPlayerStates)
+	TArray<FRankedPlayerState> RankedPlayerStates;
 };

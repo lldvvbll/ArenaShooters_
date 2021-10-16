@@ -46,14 +46,34 @@ void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
 {
 	Super::AddPlayerState(PlayerState);
 
-	OnChangedNumPlayers.Broadcast(PlayerArray.Num());
+	if (IsValid(PlayerState))
+	{
+		if (!PlayerState->IsInactive())
+		{
+			OnAddedPlayerState.Broadcast(PlayerState);
+		}		
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}	
 }
 
 void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
 
-	OnChangedNumPlayers.Broadcast(PlayerArray.Num());
+	if (IsValid(PlayerState))
+	{
+		if (!PlayerState->IsInactive())
+		{
+			OnRemovedPlayerState.Broadcast(PlayerState);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}	
 }
 
 UASItemFactoryComponent* AASMatchGameStateBase::GetItemFactory()

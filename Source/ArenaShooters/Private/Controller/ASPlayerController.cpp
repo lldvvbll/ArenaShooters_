@@ -16,7 +16,6 @@
 AASPlayerController::AASPlayerController()
 {
 	UIInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
-	CurrentFullScreenWidgetType = EFullScreenWidgetType::None;
 }
 
 void AASPlayerController::SetPawn(APawn* InPawn)
@@ -127,62 +126,12 @@ void AASPlayerController::ShowCrossHair(bool bShow)
 
 void AASPlayerController::ToggleShowInventoryWidget()
 {
-	if (CurrentFullScreenWidget != nullptr)
-		return;
-
-	if (InventoryWidget == nullptr)
-	{
-		InventoryWidget = CreateWidget<UASInventoryUserWidget>(this, InventoryWidgetClass);
-		if (InventoryWidget != nullptr)
-		{
-			InventoryWidget->OnConstructed.AddUObject(this, &AASPlayerController::OnConstructedFullScreenWidget);
-			InventoryWidget->OnDestructed.AddUObject(this, &AASPlayerController::OnDestructedFullScreenWidget);
-			
-			if (auto ASChar = Cast<AASCharacter>(GetCharacter()))
-			{
-				InventoryWidget->OnConstructed.AddUObject(ASChar, &AASCharacter::OnConstructedFullScreenWidget);
-				InventoryWidget->OnDestructed.AddUObject(ASChar, &AASCharacter::OnDestructedFullScreenWidget);
-			}
-
-			InventoryWidget->AddToViewport(1);
-
-			CurrentFullScreenWidget = InventoryWidget;
-		}
-	}
-	else
-	{
-		checkNoEntry();
-	}
+	ToggleFullScreenWidget<UASInventoryUserWidget>(InventoryWidgetClass);
 }
 
 void AASPlayerController::ToggleShowGameMenuWidget()
 {
-	if (CurrentFullScreenWidget != nullptr)
-		return;
-
-	if (GameMenuWidget == nullptr)
-	{
-		GameMenuWidget = CreateWidget<UASGameMenuUserWidget>(this, GameMenuWidgetClass);
-		if (GameMenuWidget != nullptr)
-		{
-			GameMenuWidget->OnConstructed.AddUObject(this, &AASPlayerController::OnConstructedFullScreenWidget);
-			GameMenuWidget->OnDestructed.AddUObject(this, &AASPlayerController::OnDestructedFullScreenWidget);
-			
-			if (auto ASChar = Cast<AASCharacter>(GetCharacter()))
-			{
-				GameMenuWidget->OnConstructed.AddUObject(ASChar, &AASCharacter::OnConstructedFullScreenWidget);
-				GameMenuWidget->OnDestructed.AddUObject(ASChar, &AASCharacter::OnDestructedFullScreenWidget);
-			}
-
-			GameMenuWidget->AddToViewport(1);
-
-			CurrentFullScreenWidget = GameMenuWidget;
-		}
-	}
-	else
-	{
-		checkNoEntry();
-	}
+	ToggleFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass);
 }
 
 void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget)
@@ -205,15 +154,6 @@ void AASPlayerController::OnDestructedFullScreenWidget(UUserWidget* DestructedWi
 	if (CurrentFullScreenWidget == DestructedWidget)
 	{
 		CurrentFullScreenWidget = nullptr;
-
-		if (InventoryWidget == DestructedWidget)
-		{
-			InventoryWidget = nullptr;
-		}
-		else if (GameMenuWidget == DestructedWidget)
-		{
-			GameMenuWidget = nullptr;
-		}
 	}
 	else
 	{

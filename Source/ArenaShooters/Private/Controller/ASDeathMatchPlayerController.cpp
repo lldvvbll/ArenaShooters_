@@ -3,7 +3,9 @@
 
 #include "Controller/ASDeathMatchPlayerController.h"
 #include "GUI/HUD/ASDeathMatchRankingUserWidget.h"
+#include "GUI/ASDmLeaderBoardUserWidget.h"
 #include "GameMode/ASMatchGameStateBase.h"
+#include "Character/ASCharacter.h"
 
 AASDeathMatchPlayerController::AASDeathMatchPlayerController()
 {
@@ -14,8 +16,6 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	AS_LOG_S(Warning);
-
 	if (IsLocalPlayerController())
 	{
 		if (!bCreateRankingWidget)
@@ -23,17 +23,12 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 			auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 			if (IsValid(GameState))
 			{
-				EInnerMatchState InnerMatchState = GameState->GetInnerMatchState();
-				if (InnerMatchState == EInnerMatchState::Process ||
-					InnerMatchState == EInnerMatchState::Finish)
+				DeathMatchRankingWidget = CreateWidget<UASDeathMatchRankingUserWidget>(this, DeathMatchRankingWidgetClass);
+				if (DeathMatchRankingWidget != nullptr)
 				{
-					DeathMatchRankingWidget = CreateWidget<UASDeathMatchRankingUserWidget>(this, DeathMatchRankingWidgetClass);
-					if (DeathMatchRankingWidget != nullptr)
-					{
-						DeathMatchRankingWidget->AddToViewport(1);
+					DeathMatchRankingWidget->AddToViewport(1);
 
-						bCreateRankingWidget = true;
-					}
+					bCreateRankingWidget = true;
 				}
 			}
 		}		
@@ -44,4 +39,25 @@ void AASDeathMatchPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 		
+}
+
+void AASDeathMatchPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	InputComponent->BindAction(TEXT("ShowLeaderBoard"), EInputEvent::IE_Pressed, this, &AASDeathMatchPlayerController::ToggleShowLeaderBoardWidget);
+}
+
+void AASDeathMatchPlayerController::ToggleShowLeaderBoardWidget()
+{
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		EInnerMatchState InnerMatchState = GameState->GetInnerMatchState();
+		if (InnerMatchState == EInnerMatchState::Process ||
+			InnerMatchState == EInnerMatchState::Finish)
+		{
+			ToggleFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
+		}
+	}
 }

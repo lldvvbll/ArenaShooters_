@@ -62,8 +62,11 @@ protected:
 	AASPlayerState* GetPlayerStateOfTopKillCount() const;
 
 public:
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedNumPlayersEvent, int32);
-	FOnChangedNumPlayersEvent OnChangedNumPlayers;
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnAddedPlayerStateEvent, APlayerState*);
+	FOnAddedPlayerStateEvent OnAddedPlayerState;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnRemovedPlayerStateEvent, APlayerState*);
+	FOnRemovedPlayerStateEvent OnRemovedPlayerState;
 
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnStartTimeForProcessEvent, float);
 	FOnStartTimeForProcessEvent OnStartTimeForProcess;

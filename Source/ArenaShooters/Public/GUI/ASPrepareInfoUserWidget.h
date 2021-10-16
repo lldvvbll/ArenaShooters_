@@ -20,7 +20,11 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	void OnAddedPlayerState(APlayerState* AddedPlayerState);
+	void OnRemovedPlayerState(APlayerState* AddedPlayerState);
 
 protected:
 	UPROPERTY()

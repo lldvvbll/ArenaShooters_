@@ -16,6 +16,10 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void SetPlayerName(const FString& S) override;
+	virtual void OnRep_PlayerName() override;
+	virtual void OnRep_PlayerId() override;
+
 	int32 GetKillCount() const;
 	void SetKillCount(int32 Count);
 	void ModifyKillCount(int32 Count);
@@ -35,6 +39,12 @@ protected:
 	void OnRep_DeathCount();
 
 public:
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedPlayerNameEvent, FString);
+	FOnChangedPlayerNameEvent OnChangedPlayerName;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedPlayerIdEvent, int32);
+	FOnChangedPlayerIdEvent OnChangedPlayerId;
+
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedKillCountEvent, int32);
 	FOnChangedKillCountEvent OnChangedKillCount;
 

@@ -16,6 +16,30 @@ void AASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(AASPlayerState, DeathCount);
 }
 
+void AASPlayerState::SetPlayerName(const FString& S)
+{
+	Super::SetPlayerName(S);
+
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		OnChangedPlayerName.Broadcast(GetPlayerName());
+	}
+}
+
+void AASPlayerState::OnRep_PlayerName()
+{
+	Super::OnRep_PlayerName();
+
+	OnChangedPlayerName.Broadcast(GetPlayerName());
+}
+
+void AASPlayerState::OnRep_PlayerId()
+{
+	Super::OnRep_PlayerId();
+
+	OnChangedPlayerId.Broadcast(GetPlayerId());
+}
+
 int32 AASPlayerState::GetKillCount() const
 {
 	return KillCount;
@@ -63,13 +87,9 @@ void AASPlayerState::OnDie()
 void AASPlayerState::OnRep_KillCount()
 {
 	OnChangedKillCount.Broadcast(KillCount);
-
-	AS_LOG(Warning, TEXT("KillCount: %d"), KillCount);
 }
 
 void AASPlayerState::OnRep_DeathCount()
 {
 	OnChangedDeathCount.Broadcast(DeathCount);
-
-	AS_LOG(Warning, TEXT("DeathCount: %d"), DeathCount);
 }
