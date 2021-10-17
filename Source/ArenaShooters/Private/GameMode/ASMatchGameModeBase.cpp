@@ -124,12 +124,14 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 	}
 
 	AASPlayerState* KillerPlayerState = nullptr;
+	int32 KillCount = -1;
 	if (IsValid(KillerController))
 	{
 		KillerPlayerState = KillerController->GetPlayerState<AASPlayerState>();
 		if (IsValid(KillerPlayerState))
 		{
 			KillerPlayerState->OnKill();
+			KillCount = KillerPlayerState->GetKillCount();
 		}
 		else
 		{
@@ -143,7 +145,7 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 
 	if (IsValid(ASMatchGameState))
 	{
-		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState);
+		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState, KillCount);
 	}
 	else
 	{

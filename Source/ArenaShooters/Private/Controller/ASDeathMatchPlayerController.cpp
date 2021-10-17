@@ -53,11 +53,6 @@ void AASDeathMatchPlayerController::ToggleShowLeaderBoardWidget()
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 	if (IsValid(GameState))
 	{
-		EInnerMatchState InnerMatchState = GameState->GetInnerMatchState();
-		if (InnerMatchState == EInnerMatchState::Process ||
-			InnerMatchState == EInnerMatchState::Finish)
-		{
-			ToggleFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
-		}
+		ToggleFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
 	}
 }

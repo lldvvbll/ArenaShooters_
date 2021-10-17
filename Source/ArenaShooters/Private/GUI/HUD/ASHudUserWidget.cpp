@@ -3,6 +3,7 @@
 
 #include "GUI/HUD/ASHudUserWidget.h"
 #include "GUI/HUD/ASInventoryStatusUserWidget.h"
+#include "GUI/HUD/ASKillDeathCaptionUserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/Border.h"
@@ -10,6 +11,7 @@
 #include "Character/ASCharacter.h"
 #include "Character/ASStatusComponent.h"
 #include "GameMode/ASMatchGameStateBase.h"
+#include "Controller/ASPlayerState.h"
 
 void UASHudUserWidget::NativeConstruct()
 {
@@ -17,7 +19,8 @@ void UASHudUserWidget::NativeConstruct()
 
 	InventoryStatusWidget = Cast<UASInventoryStatusUserWidget>(GetWidgetFromName(TEXT("InventoryStatusWidget")));
 	FinishCountDownBorder = Cast<UBorder>(GetWidgetFromName(TEXT("FinishCountDownBorder")));
-	FinishCountDownTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FinishCountDownTextBlock")));	
+	FinishCountDownTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FinishCountDownTextBlock")));
+	KillDeathCaptionWidget = Cast<UASKillDeathCaptionUserWidget>(GetWidgetFromName(TEXT("KillDeathCaptionWidget")));
 	HealthProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HealthProgressBar")));
 
 	bSetMatchFinishTime = false;
@@ -28,21 +31,30 @@ void UASHudUserWidget::NativeConstruct()
 		FinishCountDownBorder->SetVisibility(ESlateVisibility::Hidden);
 	}
 
+	if (KillDeathCaptionWidget != nullptr)
+	{
+		KillDeathCaptionWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 	if (IsValid(GameState))
 	{
 		GameState->OnSetMatchFinishTime.AddUObject(this, &UASHudUserWidget::OnSetMatchFinishTime);
+		GameState->OnKill.AddUObject(this, &UASHudUserWidget::OnKill);
 	}
 	else
 	{
 		AS_LOG_S(Error);
 	}
 
-	if (auto ASPlayerController = GetOwningPlayer<AASPlayerController>())
+	auto ASPlayerController = GetOwningPlayer<AASPlayerController>();
+	if (IsValid(ASPlayerController))
 	{
-		if (auto Char = ASPlayerController->GetPawn<AASCharacter>())
+		auto Char = ASPlayerController->GetPawn<AASCharacter>();
+		if (IsValid(Char))
 		{
-			if (auto StatusComp = Char->GetStatusComponent())
+			auto StatusComp = Char->GetStatusComponent();
+			if (IsValid(StatusComp))
 			{
 				StatusComp->OnChangeCurrentHealth.AddUObject(this, &UASHudUserWidget::OnChangedCharacterHealth);
 
@@ -58,6 +70,22 @@ void UASHudUserWidget::NativeConstruct()
 		{
 			AS_LOG_S(Error);
 		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASHudUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		GameState->OnSetMatchFinishTime.RemoveAll(this);
+		GameState->OnKill.RemoveAll(this);
 	}
 	else
 	{
@@ -111,6 +139,34 @@ void UASHudUserWidget::OnSetMatchFinishTime(float Time)
 	{
 		AS_LOG_S(Error);
 	}
+}
+
+void UASHudUserWidget::OnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount)
+{
+	auto MyPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
+	if (!IsValid(MyPlayerState))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FString KillerName = IsValid(KillerPlayerState) ? *KillerPlayerState->GetPlayerName() : TEXT("Unknown");
+	FString DeadName = IsValid(DeadPlayerState) ? *DeadPlayerState->GetPlayerName() : TEXT("Unknown");
+
+	if (KillDeathCaptionWidget != nullptr)
+	{
+		if (IsValid(KillerPlayerState) && MyPlayerState->GetPlayerId() == KillerPlayerState->GetPlayerId())
+		{
+			KillDeathCaptionWidget->ShowKillCaption(DeadName, KillCount);
+
+		}
+		else if (IsValid(DeadPlayerState) && MyPlayerState->GetPlayerId() == DeadPlayerState->GetPlayerId())
+		{
+			KillDeathCaptionWidget->ShowDeadCaption(KillerName);
+		}
+	}
+
+	// Å³·Î±×
 }
 
 void UASHudUserWidget::OnChangedCharacterHealth(float NewHealth) const

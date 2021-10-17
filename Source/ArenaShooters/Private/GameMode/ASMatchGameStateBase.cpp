@@ -46,34 +46,46 @@ void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
 {
 	Super::AddPlayerState(PlayerState);
 
-	if (IsValid(PlayerState))
+	if (!PlayerState->IsInactive())
 	{
-		if (!PlayerState->IsInactive())
+		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
+		if (IsValid(ASPlayerState))
 		{
-			OnAddedPlayerState.Broadcast(PlayerState);
-		}		
+			OnAddedPlayerState.Broadcast(ASPlayerState);
+
+			ASPlayerState->OnChangedPlayerName.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerName);
+			ASPlayerState->OnChangedPlayerId.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerId);
+			ASPlayerState->OnChangedKillCount.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerKillCount);
+			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerDeathCount);	
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}	
 }
 
 void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
 
-	if (IsValid(PlayerState))
+	if (!PlayerState->IsInactive())
 	{
-		if (!PlayerState->IsInactive())
+		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
+		if (IsValid(ASPlayerState))
 		{
-			OnRemovedPlayerState.Broadcast(PlayerState);
+			OnRemovedPlayerState.Broadcast(ASPlayerState);
+
+			ASPlayerState->OnChangedPlayerName.RemoveAll(this);
+			ASPlayerState->OnChangedPlayerId.RemoveAll(this);
+			ASPlayerState->OnChangedKillCount.RemoveAll(this);
+			ASPlayerState->OnChangedDeathCount.RemoveAll(this);
+		}
+		else
+		{
+			AS_LOG_S(Error);
 		}
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}	
 }
 
 UASItemFactoryComponent* AASMatchGameStateBase::GetItemFactory()
@@ -130,7 +142,7 @@ bool AASMatchGameStateBase::IsMatchProcess() const
 	return InnerMatchState == EInnerMatchState::Process;
 }
 
-void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState)
+void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount)
 {
 	if (GetLocalRole() == ROLE_Authority)
 	{
@@ -144,7 +156,7 @@ void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* Kille
 		// todo: Kill log
 	}
 
-	OnKill.Broadcast(KillerPlayerState, DeadPlayerState);
+	OnKill.Broadcast(KillerPlayerState, DeadPlayerState, KillCount);
 }
 
 void AASMatchGameStateBase::OnFinishMatch()
@@ -172,6 +184,22 @@ void AASMatchGameStateBase::SetMatchFinishTime(float FinishTime)
 	MatchFinishTime = FinishTime;
 
 	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
+}
+
+void AASMatchGameStateBase::OnChangedPlayerName(FString Name)
+{
+}
+
+void AASMatchGameStateBase::OnChangedPlayerId(int32 Id)
+{
+}
+
+void AASMatchGameStateBase::OnChangedPlayerKillCount(int32 Count)
+{
+}
+
+void AASMatchGameStateBase::OnChangedPlayerDeathCount(int32 Count)
+{
 }
 
 void AASMatchGameStateBase::OnRep_StartTimeForProcess()

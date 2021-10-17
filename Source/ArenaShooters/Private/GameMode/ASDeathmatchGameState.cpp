@@ -26,11 +26,6 @@ void AASDeathmatchGameState::AddPlayerState(APlayerState* PlayerState)
 		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
 		if (IsValid(ASPlayerState))
 		{
-			ASPlayerState->OnChangedPlayerName.AddUObject(this, &AASDeathmatchGameState::OnChangedPlayerName);
-			ASPlayerState->OnChangedPlayerId.AddUObject(this, &AASDeathmatchGameState::OnChangedPlayerId);
-			ASPlayerState->OnChangedKillCount.AddUObject(this, &AASDeathmatchGameState::OnChangedPlayerKillCount);
-			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASDeathmatchGameState::OnChangedPlayerDeathCount);
-
 			UpdateRanking();
 		}
 		else
@@ -49,11 +44,6 @@ void AASDeathmatchGameState::RemovePlayerState(APlayerState* PlayerState)
 		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
 		if (IsValid(ASPlayerState))
 		{
-			ASPlayerState->OnChangedPlayerName.RemoveAll(this);
-			ASPlayerState->OnChangedPlayerId.RemoveAll(this);
-			ASPlayerState->OnChangedKillCount.RemoveAll(this);
-			ASPlayerState->OnChangedDeathCount.RemoveAll(this);
-
 			UpdateRanking();
 		}
 		else
@@ -152,21 +142,29 @@ void AASDeathmatchGameState::UpdateRanking()
 
 void AASDeathmatchGameState::OnChangedPlayerName(FString Name)
 {
+	Super::OnChangedPlayerName(Name);
+
 	UpdateRanking();
 }
 
 void AASDeathmatchGameState::OnChangedPlayerId(int32 Id)
 {
+	Super::OnChangedPlayerId(Id);
+
 	UpdateRanking();
 }
 
 void AASDeathmatchGameState::OnChangedPlayerKillCount(int32 Count)
 {
+	Super::OnChangedPlayerKillCount(Count);
+
 	UpdateRanking();
 }
 
 void AASDeathmatchGameState::OnChangedPlayerDeathCount(int32 Count)
 {
+	Super::OnChangedPlayerDeathCount(Count);
+
 }
 
 void AASDeathmatchGameState::OnRep_RankedPlayerStates()

@@ -30,10 +30,10 @@ public:
 protected:
 	void UpdateRanking();
 
-	void OnChangedPlayerName(FString Name);
-	void OnChangedPlayerId(int32 Id);
-	void OnChangedPlayerKillCount(int32 Count);
-	void OnChangedPlayerDeathCount(int32 Count);
+	virtual void OnChangedPlayerName(FString Name) override;
+	virtual void OnChangedPlayerId(int32 Id) override;
+	virtual void OnChangedPlayerKillCount(int32 Count) override;
+	virtual void OnChangedPlayerDeathCount(int32 Count)override;
 
 	UFUNCTION()
 	void OnRep_RankedPlayerStates();

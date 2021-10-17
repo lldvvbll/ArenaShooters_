@@ -10,6 +10,8 @@ class UASInventoryStatusUserWidget;
 class UProgressBar;
 class UTextBlock;
 class UBorder;
+class UASKillDeathCaptionUserWidget;
+class AASPlayerState;
 
 UCLASS()
 class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
@@ -18,9 +20,11 @@ class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void OnSetMatchFinishTime(float Time);
+	void OnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount);
 	void OnChangedCharacterHealth(float NewHealth) const;
 
 protected:
@@ -32,6 +36,9 @@ protected:
 
 	UPROPERTY()
 	UTextBlock* FinishCountDownTextBlock;
+
+	UPROPERTY()
+	UASKillDeathCaptionUserWidget* KillDeathCaptionWidget;
 
 	UPROPERTY()
 	UProgressBar* HealthProgressBar;

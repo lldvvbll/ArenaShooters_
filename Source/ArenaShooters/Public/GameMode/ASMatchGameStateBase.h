@@ -41,8 +41,8 @@ public:
 	bool IsMatchProcess() const;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState);
-	void MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState);
+	void MulticastOnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount);
+	void MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount);
 
 	virtual void OnFinishMatch();
 
@@ -50,6 +50,11 @@ public:
 	void SetMatchFinishTime(float FinishTime);
 
 protected:
+	virtual void OnChangedPlayerName(FString Name);
+	virtual void OnChangedPlayerId(int32 Id);
+	virtual void OnChangedPlayerKillCount(int32 Count);
+	virtual void OnChangedPlayerDeathCount(int32 Count);
+
 	UFUNCTION()
 	void OnRep_StartTimeForProcess();
 
@@ -77,7 +82,7 @@ public:
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetMatchFinishTimeEvent, float)
 	FOnSetMatchFinishTimeEvent OnSetMatchFinishTime;
 
-	DECLARE_EVENT_TwoParams(AASMatchGameStateBase, FOnKillEvent, AASPlayerState*, AASPlayerState*)
+	DECLARE_EVENT_ThreeParams(AASMatchGameStateBase, FOnKillEvent, AASPlayerState*, AASPlayerState*, int32)
 	FOnKillEvent OnKill;
 
 protected:
