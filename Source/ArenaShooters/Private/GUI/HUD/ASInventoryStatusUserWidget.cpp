@@ -18,7 +18,7 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 	JacketProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("JacketProgressBar")));
 	FireModeTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FireModeTextBlock")));
 	CurrentAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentAmmoTextBlock")));
-	InventoryAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TotalAmmoTextBlock")));
+	InventoryAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("InventoryAmmoTextBlock")));
 
 	if (auto Ctrlr = GetOwningPlayer<AASPlayerController>())
 	{
