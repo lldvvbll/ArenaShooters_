@@ -104,3 +104,11 @@ enum class EInnerMatchState : uint8
 	Process,
 	Finish,
 };
+
+UENUM()
+enum class EKillLogType : uint8
+{
+	Other,
+	MyKill,
+	MyDeath,
+};

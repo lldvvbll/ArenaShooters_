@@ -62,18 +62,37 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 	}
 }
 
+void UASInventoryStatusUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (auto Ctrlr = GetOwningPlayer<AASPlayerController>())
+	{
+		if (auto Char = Ctrlr->GetPawn<AASCharacter>())
+		{
+			InventoryComp = Char->GetInventoryComponent();
+			if (InventoryComp != nullptr)
+			{
+				InventoryComp->OnChangedSelectedWeapon.RemoveAll(this);
+				InventoryComp->OnInsertArmor.RemoveAll(this);
+				InventoryComp->OnChangedInventoryAmmoCount.RemoveAll(this);
+			}
+		}
+	}
+}
+
 void UASInventoryStatusUserWidget::OnChangedSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon)
 {
 	if (OldWeapon.IsValid())
 	{
-		OldWeapon->OnFireModeChanged.Remove(OnChangedFireModeDelegateHandle);
-		OldWeapon->OnCurrentAmmoCountChanged.Remove(OnChangedCurrentAmmoCountDelegateHandle);
+		OldWeapon->OnFireModeChanged.RemoveAll(this);
+		OldWeapon->OnCurrentAmmoCountChanged.RemoveAll(this);
 	}
 
 	if (NewWeapon.IsValid())
 	{
-		OnChangedFireModeDelegateHandle = NewWeapon->OnFireModeChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedFireMode);
-		OnChangedCurrentAmmoCountDelegateHandle = NewWeapon->OnCurrentAmmoCountChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedCurrentAmmoCount);
+		NewWeapon->OnFireModeChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedFireMode);
+		NewWeapon->OnCurrentAmmoCountChanged.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedCurrentAmmoCount);
 		
 		if (FireModeTextBlock != nullptr)
 		{
@@ -102,20 +121,20 @@ void UASInventoryStatusUserWidget::OnInsertArmor(EArmorSlotType SlotType, UASArm
 		{
 			if (Armor != nullptr)
 			{
-				Armor->OnChangedDurability.Remove(OnChangedHelmetDurabilityDelegateHandle);
+				Armor->OnChangedDurability.RemoveAll(this);
 			}
 
-			BindProgressBarToArmor(HelmetProgressBar, SlotType, OnChangedHelmetDurabilityDelegateHandle);
+			BindProgressBarToArmor(HelmetProgressBar, SlotType);
 		}		
 		break;
 	case EArmorSlotType::Jacket:
 		{
 			if (Armor != nullptr)
 			{
-				Armor->OnChangedDurability.Remove(OnChangedJacketDurabilityDelegateHandle);
+				Armor->OnChangedDurability.RemoveAll(this);
 			}
 
-			BindProgressBarToArmor(JacketProgressBar, SlotType, OnChangedJacketDurabilityDelegateHandle);
+			BindProgressBarToArmor(JacketProgressBar, SlotType);
 		}
 		break;
 	default:
@@ -124,8 +143,7 @@ void UASInventoryStatusUserWidget::OnInsertArmor(EArmorSlotType SlotType, UASArm
 	}
 }
 
-void UASInventoryStatusUserWidget::BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType,
-	FDelegateHandle& InOnChangedArmorDurabilityDelegateHandle)
+void UASInventoryStatusUserWidget::BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType)
 {
 	if (InventoryComp == nullptr)
 	{
@@ -151,8 +169,7 @@ void UASInventoryStatusUserWidget::BindProgressBarToArmor(UProgressBar* Progress
 		ProgressBar->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 		int32 SlotTypeInt = static_cast<int32>(SlotType);
-		InOnChangedArmorDurabilityDelegateHandle = 
-			Armor->OnChangedDurability.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedArmorDurability, SlotTypeInt);
+		Armor->OnChangedDurability.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedArmorDurability, SlotTypeInt);
 
 		OnChangedArmorDurability(Armor->GetCurrentDurability(), Armor->GetMaxDurability(), SlotTypeInt);
 	}

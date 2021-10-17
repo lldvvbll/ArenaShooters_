@@ -32,4 +32,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Timer)
 	float DurationSec;
+
+	FTimerHandle HideCaptionTimerHandle;
 };

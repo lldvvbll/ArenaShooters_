@@ -4,6 +4,7 @@
 #include "GUI/HUD/ASHudUserWidget.h"
 #include "GUI/HUD/ASInventoryStatusUserWidget.h"
 #include "GUI/HUD/ASKillDeathCaptionUserWidget.h"
+#include "GUI/HUD/ASKillLogUserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/Border.h"
@@ -12,6 +13,7 @@
 #include "Character/ASStatusComponent.h"
 #include "GameMode/ASMatchGameStateBase.h"
 #include "Controller/ASPlayerState.h"
+#include "Common/ASEnums.h"
 
 void UASHudUserWidget::NativeConstruct()
 {
@@ -20,6 +22,7 @@ void UASHudUserWidget::NativeConstruct()
 	InventoryStatusWidget = Cast<UASInventoryStatusUserWidget>(GetWidgetFromName(TEXT("InventoryStatusWidget")));
 	FinishCountDownBorder = Cast<UBorder>(GetWidgetFromName(TEXT("FinishCountDownBorder")));
 	FinishCountDownTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("FinishCountDownTextBlock")));
+	KillLogWidget = Cast<UASKillLogUserWidget>(GetWidgetFromName(TEXT("KillLogWidget")));
 	KillDeathCaptionWidget = Cast<UASKillDeathCaptionUserWidget>(GetWidgetFromName(TEXT("KillDeathCaptionWidget")));
 	HealthProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HealthProgressBar")));
 
@@ -153,20 +156,26 @@ void UASHudUserWidget::OnKill(AASPlayerState* KillerPlayerState, AASPlayerState*
 	FString KillerName = IsValid(KillerPlayerState) ? *KillerPlayerState->GetPlayerName() : TEXT("Unknown");
 	FString DeadName = IsValid(DeadPlayerState) ? *DeadPlayerState->GetPlayerName() : TEXT("Unknown");
 
+	EKillLogType KillLogType = EKillLogType::Other;
 	if (KillDeathCaptionWidget != nullptr)
 	{
 		if (IsValid(KillerPlayerState) && MyPlayerState->GetPlayerId() == KillerPlayerState->GetPlayerId())
 		{
+			KillLogType = EKillLogType::MyKill;
 			KillDeathCaptionWidget->ShowKillCaption(DeadName, KillCount);
 
 		}
 		else if (IsValid(DeadPlayerState) && MyPlayerState->GetPlayerId() == DeadPlayerState->GetPlayerId())
 		{
+			KillLogType = EKillLogType::MyDeath;
 			KillDeathCaptionWidget->ShowDeadCaption(KillerName);
 		}
 	}
 
-	// Å³·Î±×
+	if (KillLogWidget != nullptr)
+	{
+		KillLogWidget->AddLog(KillerName, DeadName, KillLogType);
+	}
 }
 
 void UASHudUserWidget::OnChangedCharacterHealth(float NewHealth) const

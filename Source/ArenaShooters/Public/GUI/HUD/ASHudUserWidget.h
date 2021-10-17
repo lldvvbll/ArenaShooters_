@@ -12,6 +12,7 @@ class UTextBlock;
 class UBorder;
 class UASKillDeathCaptionUserWidget;
 class AASPlayerState;
+class UASKillLogUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
@@ -36,6 +37,9 @@ protected:
 
 	UPROPERTY()
 	UTextBlock* FinishCountDownTextBlock;
+
+	UPROPERTY()
+	UASKillLogUserWidget* KillLogWidget;
 
 	UPROPERTY()
 	UASKillDeathCaptionUserWidget* KillDeathCaptionWidget;

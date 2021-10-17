@@ -20,11 +20,12 @@ class ARENASHOOTERS_API UASInventoryStatusUserWidget : public UUserWidget
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	void OnChangedSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon);
 	void OnInsertArmor(EArmorSlotType SlotType, UASArmor* Armor);
 
-	void BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType, FDelegateHandle& InOnChangedArmorDurabilityDelegateHandle);
+	void BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType);
 
 	void OnChangedArmorDurability(float Durability, float MaxDurability, int32 SlotTypeInt);
 	void OnChangedFireMode(EFireMode NewFireMode);
@@ -49,9 +50,4 @@ protected:
 
 	UPROPERTY()
 	UASInventoryComponent* InventoryComp;
-
-	FDelegateHandle OnChangedHelmetDurabilityDelegateHandle;
-	FDelegateHandle OnChangedJacketDurabilityDelegateHandle;
-	FDelegateHandle OnChangedFireModeDelegateHandle;
-	FDelegateHandle OnChangedCurrentAmmoCountDelegateHandle;
 };

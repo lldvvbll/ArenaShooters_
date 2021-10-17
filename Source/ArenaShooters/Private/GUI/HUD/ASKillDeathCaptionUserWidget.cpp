@@ -49,8 +49,14 @@ void UASKillDeathCaptionUserWidget::NativeConstruct()
 
 void UASKillDeathCaptionUserWidget::SetTimer()
 {
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UASKillDeathCaptionUserWidget::Hide, DurationSec);
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	if (TimerManager.IsTimerActive(HideCaptionTimerHandle))
+	{
+		TimerManager.ClearTimer(HideCaptionTimerHandle);
+	}
+
+	TimerManager.SetTimer(HideCaptionTimerHandle, this, &UASKillDeathCaptionUserWidget::Hide, DurationSec);
 }
 
 void UASKillDeathCaptionUserWidget::Hide()

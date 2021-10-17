@@ -21,16 +21,19 @@ void AASDeathmatchGameState::AddPlayerState(APlayerState* PlayerState)
 {
 	Super::AddPlayerState(PlayerState);
 
-	if (!PlayerState->IsInactive())
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-		if (IsValid(ASPlayerState))
+		if (!PlayerState->IsInactive())
 		{
-			UpdateRanking();
-		}
-		else
-		{
-			AS_LOG_S(Error);
+			auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
+			if (IsValid(ASPlayerState))
+			{
+				UpdateRanking();
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
 		}
 	}
 }
@@ -39,16 +42,19 @@ void AASDeathmatchGameState::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
 
-	if (!PlayerState->IsInactive())
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-		if (IsValid(ASPlayerState))
+		if (!PlayerState->IsInactive())
 		{
-			UpdateRanking();
-		}
-		else
-		{
-			AS_LOG_S(Error);
+			auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
+			if (IsValid(ASPlayerState))
+			{
+				UpdateRanking();
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
 		}
 	}
 }
@@ -69,8 +75,7 @@ void AASDeathmatchGameState::UpdateRanking()
 	if (GetLocalRole() != ROLE_Authority)
 		return;
 
-	RankedPlayerStates.Empty();
-	RankedPlayerStates.Reserve(PlayerArray.Num());
+	RankedPlayerStates.Empty(PlayerArray.Num());
 
 	for (auto& Player : PlayerArray)
 	{
@@ -144,7 +149,7 @@ void AASDeathmatchGameState::OnChangedPlayerName(FString Name)
 {
 	Super::OnChangedPlayerName(Name);
 
-	UpdateRanking();
+	//UpdateRanking();
 }
 
 void AASDeathmatchGameState::OnChangedPlayerId(int32 Id)

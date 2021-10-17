@@ -144,18 +144,6 @@ bool AASMatchGameStateBase::IsMatchProcess() const
 
 void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount)
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		// server
-
-	}
-	else
-	{
-		// client
-
-		// todo: Kill log
-	}
-
 	OnKill.Broadcast(KillerPlayerState, DeadPlayerState, KillCount);
 }
 
