@@ -70,6 +70,14 @@ const TArray<FRankedPlayerState>& AASDeathmatchGameState::GetRankedPlayerStates(
 	return RankedPlayerStates;
 }
 
+AASPlayerState* AASDeathmatchGameState::GetTopRankPlayerState() const
+{
+	if (RankedPlayerStates.Num() <= 0)
+		return nullptr;
+
+	return RankedPlayerStates[0].PlayerState;
+}
+
 void AASDeathmatchGameState::UpdateRanking()
 {
 	if (GetLocalRole() != ROLE_Authority)

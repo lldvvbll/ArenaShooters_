@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "GameFramework/PlayerController.h"
+#include "Common/ASEnums.h"
 #include "ASPlayerController.generated.h"
 
 class UASCrossHairUserWidget;
@@ -26,6 +27,8 @@ public:
 
 	void ChangeInputMode(bool bGameMode);
 
+	virtual void OnChangedInnerMatchState(EInnerMatchState State);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -34,11 +37,11 @@ protected:
 	void OnUnscope();
 
 	void ShowCrossHair(bool bShow);
-	void ToggleShowInventoryWidget();
-	void ToggleShowGameMenuWidget();
+	void ShowInventoryWidget();
+	void ShowGameMenuWidget();
 
 	template <typename TWidget>
-	void ToggleFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass)
+	TWidget* ShowFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass)
 	{
 		if (CurrentFullScreenWidget == nullptr)
 		{
@@ -57,6 +60,8 @@ protected:
 				FullScreenWidget->AddToViewport(1);
 
 				CurrentFullScreenWidget = FullScreenWidget;
+
+				return FullScreenWidget;
 			}
 			else
 			{
@@ -67,6 +72,8 @@ protected:
 		{
 			AS_LOG_S(Error);
 		}
+
+		return nullptr;
 	}
 
 	void OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget);

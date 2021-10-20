@@ -2,6 +2,7 @@
 
 
 #include "GameMode/ASDeathmatchGameMode.h"
+#include "GameMode/ASDeathmatchGameState.h"
 #include "Controller/ASPlayerController.h"
 #include "Controller/ASPlayerState.h"
 
@@ -9,12 +10,13 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 {
 	Super::OnKillCharacter(KillerController, DeadController);
 
-	if (IsValid(KillerController))
+	auto DmGameState = GetGameState<AASDeathmatchGameState>();
+	if (IsValid(DmGameState))
 	{
-		auto KillerPlayerState = KillerController->GetPlayerState<AASPlayerState>();
-		if (IsValid(KillerPlayerState))
+		AASPlayerState* TopRankPlayerState = DmGameState->GetTopRankPlayerState();
+		if (IsValid(TopRankPlayerState))
 		{
-			if (KillerPlayerState->GetKillCount() >= GoalNumOfKills)
+			if (TopRankPlayerState->GetKillCount() >= GoalNumOfKills)
 			{
 				FinishMatch();
 			}

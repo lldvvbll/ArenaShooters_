@@ -45,14 +45,53 @@ void AASDeathMatchPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction(TEXT("ShowLeaderBoard"), EInputEvent::IE_Pressed, this, &AASDeathMatchPlayerController::ToggleShowLeaderBoardWidget);
+	InputComponent->BindAction(TEXT("ShowLeaderBoard"), EInputEvent::IE_Pressed, this, &AASDeathMatchPlayerController::ShowLeaderBoardWidget);
 }
 
-void AASDeathMatchPlayerController::ToggleShowLeaderBoardWidget()
+void AASDeathMatchPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
 {
-	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	Super::OnChangedInnerMatchState(State);
+
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_Client)
 	{
-		ToggleFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
+		if (State == EInnerMatchState::Finish)
+		{
+			ShowMatchResultWidget();
+		}
+	}
+}
+
+void AASDeathMatchPlayerController::ShowLeaderBoardWidget()
+{
+	ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
+}
+
+void AASDeathMatchPlayerController::ShowMatchResultWidget()
+{
+	UASDmLeaderBoardUserWidget* LeaderBoardWidget = nullptr;
+
+	if (CurrentFullScreenWidget != nullptr)
+	{
+		LeaderBoardWidget = Cast<UASDmLeaderBoardUserWidget>(CurrentFullScreenWidget);
+		if (LeaderBoardWidget == nullptr)
+		{
+			CurrentFullScreenWidget->RemoveFromParent();
+			OnDestructedFullScreenWidget(CurrentFullScreenWidget);
+		}
+	}
+	
+	if (LeaderBoardWidget == nullptr)
+	{
+		LeaderBoardWidget = ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
+	}
+
+	if (LeaderBoardWidget != nullptr)
+	{
+		LeaderBoardWidget->ChangeToMatchResultWidget();
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }

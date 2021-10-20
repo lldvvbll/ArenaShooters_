@@ -8,10 +8,22 @@
 #include "GameMode/ASDeathmatchGameState.h"
 #include "Controller/ASPlayerState.h"
 
+void UASDmLeaderBoardUserWidget::ChangeToMatchResultWidget()
+{
+	if (TitleTextBlock != nullptr)
+	{
+		TitleTextBlock->SetColorAndOpacity(MatchResultTitleColor);
+		TitleTextBlock->SetText(FText::FromString(TEXT("MATCH RESULT")));
+	}
+
+	// todo: 무기 선택 버튼 비활성화
+}
+
 void UASDmLeaderBoardUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
+	TitleTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TitleTextBlock")));
 	GoalNumOfKillsTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("GoalNumOfKillsTextBlock")));
 	RankingScrollBox = Cast<UScrollBox>(GetWidgetFromName(TEXT("RankingScrollBox")));
 

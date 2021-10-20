@@ -43,6 +43,42 @@ void AASPlayerController::ChangeInputMode(bool bGameMode)
 	}
 }
 
+void AASPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
+{
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_Client)
+	{
+		if (State == EInnerMatchState::Finish)
+		{
+			auto Char = GetPawn<AASCharacter>();
+			if (IsValid(Char))
+			{
+				Char->DisableInput(this);
+			}
+
+			if (HudWidget != nullptr)
+			{
+				HudWidget->StopFinishTimer();
+			}
+		}
+	}
+	else if (NetMode == NM_DedicatedServer)
+	{
+		if (State == EInnerMatchState::Finish)
+		{
+			auto Char = GetPawn<AASCharacter>();
+			if (IsValid(Char))
+			{
+				Char->SetCanBeDamaged(false);
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+	}
+}
+
 void AASPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -80,8 +116,8 @@ void AASPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction(TEXT("ShowInventory"), EInputEvent::IE_Pressed, this, &AASPlayerController::ToggleShowInventoryWidget);
-	InputComponent->BindAction(TEXT("ShowGameMenu"), EInputEvent::IE_Pressed, this, &AASPlayerController::ToggleShowGameMenuWidget);
+	InputComponent->BindAction(TEXT("ShowInventory"), EInputEvent::IE_Pressed, this, &AASPlayerController::ShowInventoryWidget);
+	InputComponent->BindAction(TEXT("ShowGameMenu"), EInputEvent::IE_Pressed, this, &AASPlayerController::ShowGameMenuWidget);
 }
 
 void AASPlayerController::OnScope(const TWeakObjectPtr<UASWeapon>& UsingWeapon)
@@ -124,14 +160,14 @@ void AASPlayerController::ShowCrossHair(bool bShow)
 	}
 }
 
-void AASPlayerController::ToggleShowInventoryWidget()
+void AASPlayerController::ShowInventoryWidget()
 {
-	ToggleFullScreenWidget<UASInventoryUserWidget>(InventoryWidgetClass);
+	ShowFullScreenWidget<UASInventoryUserWidget>(InventoryWidgetClass);
 }
 
-void AASPlayerController::ToggleShowGameMenuWidget()
+void AASPlayerController::ShowGameMenuWidget()
 {
-	ToggleFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass);
+	ShowFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass);
 }
 
 void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget)

@@ -19,6 +19,9 @@ class ARENASHOOTERS_API UASHudUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void StopFinishTimer();
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

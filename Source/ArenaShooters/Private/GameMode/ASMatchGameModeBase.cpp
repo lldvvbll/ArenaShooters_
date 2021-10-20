@@ -84,6 +84,13 @@ int32 AASMatchGameModeBase::GetGoalNumOfKills() const
 
 void AASMatchGameModeBase::FinishMatch()
 {
+	if (GetWorldTimerManager().IsTimerActive(MatchFinishTimeHandle))
+	{
+		GetWorldTimerManager().ClearTimer(MatchFinishTimeHandle);
+
+		// todo: 클라의 UI 타이머도 멈추기
+	}
+
 	if (IsValid(ASGameInstance))
 	{
 		ASGameInstance->SetInnerMatchState(EInnerMatchState::Finish);

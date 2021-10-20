@@ -17,6 +17,9 @@ class ARENASHOOTERS_API UASDmLeaderBoardUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void ChangeToMatchResultWidget();
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -24,7 +27,7 @@ protected:
 	UFUNCTION()
 	void BackToGame();
 
-	void UpdateRanking(const TArray<FRankedPlayerState>& RankedPlayerStates);	
+	void UpdateRanking(const TArray<FRankedPlayerState>& RankedPlayerStates);
 
 public:
 	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnConstructedEvent, UUserWidget*);
@@ -35,6 +38,9 @@ public:
 
 protected:
 	UPROPERTY()
+	UTextBlock* TitleTextBlock;
+
+	UPROPERTY()
 	UTextBlock* GoalNumOfKillsTextBlock;
 
 	UPROPERTY()
@@ -42,4 +48,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Slot)
 	TSubclassOf<UASDmLeaderBoardSlotUserWidget> DmLeaderBoardSlotWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Match Result")
+	FLinearColor MatchResultTitleColor;
 };

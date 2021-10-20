@@ -23,7 +23,10 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
-	void ToggleShowLeaderBoardWidget();
+	virtual void OnChangedInnerMatchState(EInnerMatchState State) override;
+	
+	void ShowLeaderBoardWidget();
+	void ShowMatchResultWidget();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)

@@ -27,6 +27,8 @@ public:
 
 	const TArray<FRankedPlayerState>& GetRankedPlayerStates() const;
 
+	AASPlayerState* GetTopRankPlayerState() const;
+
 protected:
 	void UpdateRanking();
 

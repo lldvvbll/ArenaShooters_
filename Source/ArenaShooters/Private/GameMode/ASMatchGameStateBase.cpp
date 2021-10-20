@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ASGameInstance.h"
 #include "Controller/ASPlayerState.h"
+#include "Controller/ASPlayerController.h"
 
 AASMatchGameStateBase::AASMatchGameStateBase()
 {
@@ -134,6 +135,19 @@ void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
 {
 	InnerMatchState = State;
 
+	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
+		if (IsValid(PlayerController))
+		{
+			PlayerController->OnChangedInnerMatchState(InnerMatchState);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+
 	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 }
 
@@ -149,16 +163,6 @@ void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* Kille
 
 void AASMatchGameStateBase::OnFinishMatch()
 {
-	auto GameInst = GetGameInstance<UASGameInstance>();
-	if (IsValid(GameInst))
-	{
-		GameInst->SetInnerMatchState(EInnerMatchState::Finish);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-
 	SetInnerMatchState(EInnerMatchState::Finish);
 }
 
@@ -197,6 +201,19 @@ void AASMatchGameStateBase::OnRep_StartTimeForProcess()
 
 void AASMatchGameStateBase::OnRep_InnerMatchState()
 {
+	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
+		if (IsValid(PlayerController))
+		{
+			PlayerController->OnChangedInnerMatchState(InnerMatchState);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+
 	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 }
 

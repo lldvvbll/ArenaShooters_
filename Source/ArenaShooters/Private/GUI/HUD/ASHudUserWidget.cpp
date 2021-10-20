@@ -15,6 +15,11 @@
 #include "Controller/ASPlayerState.h"
 #include "Common/ASEnums.h"
 
+void UASHudUserWidget::StopFinishTimer()
+{
+	bSetMatchFinishTime = false;
+}
+
 void UASHudUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
