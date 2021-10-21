@@ -63,4 +63,7 @@ protected:
 	int32 GoalNumOfKills;
 
 	FTimerHandle MatchFinishTimeHandle;
+
+	UPROPERTY(EditDefaultsOnly, Category = Setting)
+	FTimespan PostFinishTime;
 };

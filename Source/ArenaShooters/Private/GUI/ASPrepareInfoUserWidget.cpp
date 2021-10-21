@@ -72,19 +72,12 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 	if (IsValid(GameState))
 	{
-		if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
-		{
-			GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
-			GameState->OnAddedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnAddedPlayerState);
-			GameState->OnRemovedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnRemovedPlayerState);
+		GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
+		GameState->OnAddedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnAddedPlayerState);
+		GameState->OnRemovedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnRemovedPlayerState);
 
-			SetNumPlayers(GameState->GetNumPlayers());
-			SetMaxNumPlayers(GameState->GetMaxNumPlayer());
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
+		SetNumPlayers(GameState->GetNumPlayers());
+		SetMaxNumPlayers(GameState->GetMaxNumPlayer());
 	}
 	else
 	{

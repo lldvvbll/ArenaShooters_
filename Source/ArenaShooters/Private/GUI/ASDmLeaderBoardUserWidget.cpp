@@ -15,8 +15,6 @@ void UASDmLeaderBoardUserWidget::ChangeToMatchResultWidget()
 		TitleTextBlock->SetColorAndOpacity(MatchResultTitleColor);
 		TitleTextBlock->SetText(FText::FromString(TEXT("MATCH RESULT")));
 	}
-
-	// todo: 무기 선택 버튼 비활성화
 }
 
 void UASDmLeaderBoardUserWidget::NativeConstruct()

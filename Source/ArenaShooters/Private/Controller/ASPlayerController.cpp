@@ -48,33 +48,27 @@ void AASPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
 	ENetMode NetMode = GetNetMode();
 	if (NetMode == NM_Client)
 	{
-		if (State == EInnerMatchState::Finish)
+		switch (State)
 		{
-			auto Char = GetPawn<AASCharacter>();
-			if (IsValid(Char))
+		case EInnerMatchState::Prepare:
+			// nothing
+			break;
+		case EInnerMatchState::Process:
+			// nothing
+			break;
+		case EInnerMatchState::Finish:
 			{
-				Char->DisableInput(this);
-			}
+				if (HudWidget != nullptr)
+				{
+					HudWidget->StopFinishTimer();
+				}
 
-			if (HudWidget != nullptr)
-			{
-				HudWidget->StopFinishTimer();
+				ShowPrepareInfoWidget();
 			}
-		}
-	}
-	else if (NetMode == NM_DedicatedServer)
-	{
-		if (State == EInnerMatchState::Finish)
-		{
-			auto Char = GetPawn<AASCharacter>();
-			if (IsValid(Char))
-			{
-				Char->SetCanBeDamaged(false);
-			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
+			break;
+		default:
+			checkNoEntry();
+			break;
 		}
 	}
 }
@@ -102,11 +96,7 @@ void AASPlayerController::BeginPlay()
 		{
 			if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 			{
-				PrepareInfoWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoWidgetClass);
-				if (PrepareInfoWidget != nullptr)
-				{
-					PrepareInfoWidget->AddToViewport(1);
-				}
+				ShowPrepareInfoWidget();
 			}
 		}
 	}
@@ -168,6 +158,15 @@ void AASPlayerController::ShowInventoryWidget()
 void AASPlayerController::ShowGameMenuWidget()
 {
 	ShowFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass);
+}
+
+void AASPlayerController::ShowPrepareInfoWidget()
+{
+	PrepareInfoWidget = CreateWidget<UASPrepareInfoUserWidget>(this, PrepareInfoWidgetClass);
+	if (PrepareInfoWidget != nullptr)
+	{
+		PrepareInfoWidget->AddToViewport(2);
+	}
 }
 
 void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget)

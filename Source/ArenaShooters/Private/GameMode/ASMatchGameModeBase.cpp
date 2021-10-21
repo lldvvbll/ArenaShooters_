@@ -87,8 +87,6 @@ void AASMatchGameModeBase::FinishMatch()
 	if (GetWorldTimerManager().IsTimerActive(MatchFinishTimeHandle))
 	{
 		GetWorldTimerManager().ClearTimer(MatchFinishTimeHandle);
-
-		// todo: 클라의 UI 타이머도 멈추기
 	}
 
 	if (IsValid(ASGameInstance))
@@ -108,6 +106,12 @@ void AASMatchGameModeBase::FinishMatch()
 	{
 		AS_LOG_S(Error);
 	}
+
+	if (NumPlayers >= MinPlayerCount)
+	{
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, PostFinishTime.GetTotalSeconds());
+	}	
 }
 
 void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)

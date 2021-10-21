@@ -120,19 +120,16 @@ void AASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GetLocalRole() == ROLE_Authority)
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
 	{
-		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (IsValid(GameState))
-		{
-			GameState->OnChangedInnerMatchState.AddUObject(this, &AASCharacter::OnChangedInnerMatchState);
+		GameState->OnChangedInnerMatchState.AddUObject(this, &AASCharacter::OnChangedInnerMatchState);
 
-			OnChangedInnerMatchState(GameState->GetInnerMatchState());
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
+		OnChangedInnerMatchState(GameState->GetInnerMatchState());
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }
 
@@ -1827,25 +1824,53 @@ void AASCharacter::OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& InOld
 
 void AASCharacter::OnChangedInnerMatchState(EInnerMatchState State)
 {
-	switch (State)
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_DedicatedServer)
 	{
-	case EInnerMatchState::Prepare:
+		switch (State)
 		{
-			SetCanBeDamaged(false);
-		}		
-		break;
-	case EInnerMatchState::Process:
+		case EInnerMatchState::Prepare:
+			{
+				SetCanBeDamaged(false);
+			}
+			break;
+		case EInnerMatchState::Process:
+			{
+				SetCanBeDamaged(true);
+			}
+			break;
+		case EInnerMatchState::Finish:
+			{
+				SetCanBeDamaged(false);
+			}
+			break;
+		default:
+			checkNoEntry();
+			break;
+		}
+	}
+	else if (NetMode == NM_Client)
+	{
+		switch (State)
 		{
-			SetCanBeDamaged(true);
-		}		
-		break;
-	case EInnerMatchState::Finish:
-		{
-			SetCanBeDamaged(false);
-		}		
-		break;
-	default:
-		checkNoEntry();
-		break;
+		case EInnerMatchState::Prepare:
+			{
+				EnableInput(nullptr);
+			}
+			break;
+		case EInnerMatchState::Process:
+			{
+				EnableInput(nullptr);
+			}
+			break;
+		case EInnerMatchState::Finish:
+			{
+				DisableInput(nullptr);
+			}
+			break;
+		default:
+			checkNoEntry();
+			break;
+		}
 	}
 }

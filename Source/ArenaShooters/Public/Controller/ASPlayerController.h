@@ -39,6 +39,7 @@ protected:
 	void ShowCrossHair(bool bShow);
 	void ShowInventoryWidget();
 	void ShowGameMenuWidget();
+	void ShowPrepareInfoWidget();
 
 	template <typename TWidget>
 	TWidget* ShowFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass)
