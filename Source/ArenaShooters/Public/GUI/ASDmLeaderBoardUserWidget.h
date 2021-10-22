@@ -30,10 +30,10 @@ protected:
 	void UpdateRanking(const TArray<FRankedPlayerState>& RankedPlayerStates);
 
 public:
-	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnConstructedEvent, UUserWidget*);
+	DECLARE_EVENT_OneParam(UASDmLeaderBoardUserWidget, FOnConstructedEvent, UUserWidget*);
 	FOnConstructedEvent OnConstructed;
 
-	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnDestructedEvent, UUserWidget*);
+	DECLARE_EVENT_OneParam(UASDmLeaderBoardUserWidget, FOnDestructedEvent, UUserWidget*);
 	FOnDestructedEvent OnDestructed;
 
 protected:

@@ -43,10 +43,10 @@ protected:
 	void BackToGame();
 
 public:
-	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnConstructedEvent, UUserWidget*);
+	DECLARE_EVENT_OneParam(UASInventoryUserWidget, FOnConstructedEvent, UUserWidget*);
 	FOnConstructedEvent OnConstructed;
 
-	DECLARE_EVENT_OneParam(UASGameMenuUserWidget, FOnDestructedEvent, UUserWidget*);
+	DECLARE_EVENT_OneParam(UASInventoryUserWidget, FOnDestructedEvent, UUserWidget*);
 	FOnDestructedEvent OnDestructed;
 
 private:

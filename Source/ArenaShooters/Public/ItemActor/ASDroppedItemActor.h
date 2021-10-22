@@ -34,7 +34,7 @@ protected:
 	void OnRep_ASItems(TArray<UASItem*>& OldItems);
 
 public:
-	DECLARE_EVENT_OneParam(AASCharacter, FOnRemoveItemEvent, const TWeakObjectPtr<UASItem>&)
+	DECLARE_EVENT_OneParam(AASDroppedItemActor, FOnRemoveItemEvent, const TWeakObjectPtr<UASItem>&)
 	FOnRemoveItemEvent OnRemoveItemEvent;
 
 protected:

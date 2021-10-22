@@ -39,16 +39,16 @@ protected:
 	void OnRep_DeathCount();
 
 public:
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedPlayerNameEvent, FString);
+	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedPlayerNameEvent, FString);
 	FOnChangedPlayerNameEvent OnChangedPlayerName;
 
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedPlayerIdEvent, int32);
+	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedPlayerIdEvent, int32);
 	FOnChangedPlayerIdEvent OnChangedPlayerId;
 
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedKillCountEvent, int32);
+	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedKillCountEvent, int32);
 	FOnChangedKillCountEvent OnChangedKillCount;
 
-	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnChangedDeathCountEvent, int32);
+	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedDeathCountEvent, int32);
 	FOnChangedDeathCountEvent OnChangedDeathCount;
 
 protected:

@@ -44,19 +44,19 @@ protected:
 	void AnimNotify_HitReact();
 
 public:
-	DECLARE_EVENT(UASInventoryComponent, FOnReloadCompleteEvent);
+	DECLARE_EVENT(UASAnimInstance, FOnReloadCompleteEvent);
 	FOnReloadCompleteEvent OnReloadComplete;
 
-	DECLARE_EVENT(UASInventoryComponent, FOnReloadEndEvent);
+	DECLARE_EVENT(UASAnimInstance, FOnReloadEndEvent);
 	FOnReloadEndEvent OnReloadEnd;
 
-	DECLARE_EVENT(UASInventoryComponent, FOnChangeWeaponEndEvent);
+	DECLARE_EVENT(UASAnimInstance, FOnChangeWeaponEndEvent);
 	FOnChangeWeaponEndEvent OnChangeWeaponEnd;
 
-	DECLARE_EVENT(UASInventoryComponent, FOnUseHealingKitCompleteEvent);
+	DECLARE_EVENT(UASAnimInstance, FOnUseHealingKitCompleteEvent);
 	FOnUseHealingKitCompleteEvent OnUseHealingKitComplete;
 
-	DECLARE_EVENT(UASInventoryComponent, FOnUseHealingKitEndEvent);
+	DECLARE_EVENT(UASAnimInstance, FOnUseHealingKitEndEvent);
 	FOnUseHealingKitEndEvent OnUseHealingKitEnd;
 
 private:
