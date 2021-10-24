@@ -181,6 +181,16 @@ void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AASCharacter, bUseHealingKit);
 }
 
+void AASCharacter::Restart()
+{
+	Super::Restart();
+
+	bDead = false;
+	SetCanBeDamaged(true);
+
+	EndRagdoll();
+}
+
 void AASCharacter::Jump()
 {
 	if (IsLocallyControlled())
@@ -698,6 +708,62 @@ UASStatusComponent* AASCharacter::GetStatusComponent()
 bool AASCharacter::IsDead() const
 {
 	return bDead;
+}
+
+void AASCharacter::StartRagdoll()
+{
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_DedicatedServer)
+	{
+		if (UCharacterMovementComponent* CharMoveComp = GetCharacterMovement())
+		{
+			CharMoveComp->SetMovementMode(EMovementMode::MOVE_None);
+		}
+	}
+	else if (NetMode == NM_Client)
+	{
+		if (USkeletalMeshComponent* SkeletalMeshComp = GetMesh())
+		{
+			SkeletalMeshComp->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			SkeletalMeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
+			SkeletalMeshComp->SetAllBodiesBelowSimulatePhysics(FName(TEXT("pelvis")), true, true);
+
+			if (auto AnimInstance = Cast<UASAnimInstance>(SkeletalMeshComp->GetAnimInstance()))
+			{
+				AnimInstance->StopAllMontages(0.2f);
+			}
+		}
+	}
+
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	{
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AASCharacter::EndRagdoll()
+{
+	ENetMode NetMode = GetNetMode();
+	if (NetMode == NM_DedicatedServer)
+	{
+
+	}
+	else if (NetMode == NM_Client)
+	{
+		if (USkeletalMeshComponent* SkeletalMeshComp = GetMesh())
+		{
+			SkeletalMeshComp->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+			SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			SkeletalMeshComp->SetCollisionProfileName(TEXT("CharacterMesh"));
+			SkeletalMeshComp->ResetAllBodiesSimulatePhysics();
+		}
+	}
+
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	{
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
 }
 
 void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -1584,40 +1650,20 @@ void AASCharacter::Die()
 		bDead = true;
 		SetCanBeDamaged(false);
 
-		if (UCharacterMovementComponent* CharMoveComp = GetCharacterMovement())
-		{
-			CharMoveComp->SetMovementMode(EMovementMode::MOVE_None);
-		}
-
-		if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
-		{
-			CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
+		StartRagdoll();
 	}
 }
 
 void AASCharacter::OnRep_bDead()
 {
-	if (!bDead)
-		return;
-
-	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	if (bDead)
 	{
-		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StartRagdoll();
 	}
-
-	if (USkeletalMeshComponent* SkeletalMeshComp = GetMesh())
+	else
 	{
-		SkeletalMeshComp->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-		SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		SkeletalMeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
-		SkeletalMeshComp->SetAllBodiesBelowSimulatePhysics(FName(TEXT("pelvis")), true, true);
-
-		if (auto AnimInstance = Cast<UASAnimInstance>(SkeletalMeshComp->GetAnimInstance()))
-		{
-			AnimInstance->StopAllMontages(0.2f);
-		}
-	}
+		EndRagdoll();
+	}	
 }
 
 void AASCharacter::ServerBeginHealingKit_Implementation(UASHealingKit* InHealingKit)

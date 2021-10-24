@@ -3,9 +3,12 @@
 
 #include "GUI/HUD/ASKillLogSlotUserWidget.h"
 #include "Components/TextBlock.h"
+#include "GUI/HUD/ASKillLogUserWidget.h"
 
-void UASKillLogSlotUserWidget::SetInfo(const FString& KillerName, const FString& DeadName, int32 MaxNameLen, float LifeTimeSec, FLinearColor LogColor)
+void UASKillLogSlotUserWidget::SetInfo(UASKillLogUserWidget* LogWidget, const FString& KillerName, const FString& DeadName, int32 MaxNameLen, float LifeTimeSec, FLinearColor LogColor)
 {
+	LogWidgetPtr = MakeWeakObjectPtr(LogWidget);
+
 	if (KillerNameTextBlock != nullptr)
 	{
 		KillerNameTextBlock->SetColorAndOpacity(LogColor);
@@ -39,8 +42,7 @@ void UASKillLogSlotUserWidget::SetInfo(const FString& KillerName, const FString&
 		ArrowTextBlock->SetColorAndOpacity(LogColor);
 	}
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UASKillLogSlotUserWidget::RemoveLog, LifeTimeSec);
+	GetWorld()->GetTimerManager().SetTimer(LifeEndTimerHandle, this, &UASKillLogSlotUserWidget::RemoveLog, LifeTimeSec);
 }
 
 void UASKillLogSlotUserWidget::NativeConstruct()
@@ -52,7 +54,24 @@ void UASKillLogSlotUserWidget::NativeConstruct()
 	ArrowTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("ArrowTextBlock")));
 }
 
+void UASKillLogSlotUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(LifeEndTimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LifeEndTimerHandle);
+	}
+}
+
 void UASKillLogSlotUserWidget::RemoveLog()
 {
-	RemoveFromParent();
+	if (LogWidgetPtr.IsValid())
+	{
+		LogWidgetPtr->RemoveLog(this);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }

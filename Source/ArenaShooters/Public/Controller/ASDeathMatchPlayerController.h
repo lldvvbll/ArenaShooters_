@@ -26,7 +26,7 @@ protected:
 	virtual void OnChangedInnerMatchState(EInnerMatchState State) override;
 	
 	void ShowLeaderBoardWidget();
-	void ShowMatchResultWidget();
+	void ShowDeathmatchResultWidget();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)

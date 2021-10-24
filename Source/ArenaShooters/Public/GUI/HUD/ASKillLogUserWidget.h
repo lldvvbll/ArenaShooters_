@@ -17,6 +17,7 @@ class ARENASHOOTERS_API UASKillLogUserWidget : public UUserWidget
 	
 public:
 	void AddLog(const FString& KillerName, const FString& DeadName, EKillLogType KillLogType);
+	void RemoveLog(UASKillLogSlotUserWidget* LogWidget);
 
 protected:
 	virtual void NativeConstruct() override;

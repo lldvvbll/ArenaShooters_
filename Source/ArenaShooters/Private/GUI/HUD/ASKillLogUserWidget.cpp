@@ -32,7 +32,7 @@ void UASKillLogUserWidget::AddLog(const FString& KillerName, const FString& Dead
 			break;
 		}
 
-		KillLogSlotUserWidget->SetInfo(KillerName, DeadName, MaxNameLen, LogLifeTimeSec, LogColor);
+		KillLogSlotUserWidget->SetInfo(this, KillerName, DeadName, MaxNameLen, LogLifeTimeSec, LogColor);
 
 		CachedLogWidgets.EmplaceAt(0, KillLogSlotUserWidget);
 
@@ -50,6 +50,13 @@ void UASKillLogUserWidget::AddLog(const FString& KillerName, const FString& Dead
 	{
 		AS_LOG_S(Error);
 	}
+}
+
+void UASKillLogUserWidget::RemoveLog(UASKillLogSlotUserWidget* LogWidget)
+{
+	CachedLogWidgets.Remove(LogWidget);
+
+	KillLogScrollBox->RemoveChild(LogWidget);
 }
 
 void UASKillLogUserWidget::NativeConstruct()

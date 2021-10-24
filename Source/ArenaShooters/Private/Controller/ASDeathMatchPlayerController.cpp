@@ -57,7 +57,7 @@ void AASDeathMatchPlayerController::OnChangedInnerMatchState(EInnerMatchState St
 	{
 		if (State == EInnerMatchState::Finish)
 		{
-			ShowMatchResultWidget();
+			ShowDeathmatchResultWidget();
 		}
 	}
 }
@@ -67,7 +67,7 @@ void AASDeathMatchPlayerController::ShowLeaderBoardWidget()
 	ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
 }
 
-void AASDeathMatchPlayerController::ShowMatchResultWidget()
+void AASDeathMatchPlayerController::ShowDeathmatchResultWidget()
 {
 	UASDmLeaderBoardUserWidget* LeaderBoardWidget = nullptr;
 

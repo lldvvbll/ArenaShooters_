@@ -7,6 +7,7 @@
 #include "ASKillLogSlotUserWidget.generated.h"
 
 class UTextBlock;
+class UASKillLogUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API UASKillLogSlotUserWidget : public UUserWidget
@@ -14,10 +15,11 @@ class ARENASHOOTERS_API UASKillLogSlotUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void SetInfo(const FString& KillerName, const FString& DeadName, int32 MaxNameLen, float LifeTimeSec, FLinearColor LogColor);
+	void SetInfo(UASKillLogUserWidget* LogWidget, const FString& KillerName, const FString& DeadName, int32 MaxNameLen, float LifeTimeSec, FLinearColor LogColor);
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	void RemoveLog();
 
@@ -30,4 +32,9 @@ protected:
 
 	UPROPERTY()
 	UTextBlock* ArrowTextBlock;
+
+	FTimerHandle LifeEndTimerHandle;
+
+	UPROPERTY()
+	TWeakObjectPtr<UASKillLogUserWidget> LogWidgetPtr;
 };

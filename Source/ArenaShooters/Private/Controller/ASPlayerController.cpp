@@ -12,10 +12,19 @@
 #include "GameMode/ASMatchGameStateBase.h"
 #include "GUI/ASPrepareInfoUserWidget.h"
 #include "GUI/HUD/ASHudUserWidget.h"
+#include "Net/UnrealNetwork.h"
+#include "GUI/ASRespawnTimerUserWidget.h"
 
 AASPlayerController::AASPlayerController()
 {
 	UIInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+}
+
+void AASPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(AASPlayerController, RespawnTime, COND_AutonomousOnly);
 }
 
 void AASPlayerController::SetPawn(APawn* InPawn)
@@ -63,6 +72,7 @@ void AASPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
 					HudWidget->StopFinishTimer();
 				}
 
+				RemoveRespawnTimerWidget();
 				ShowPrepareInfoWidget();
 			}
 			break;
@@ -70,6 +80,46 @@ void AASPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
 			checkNoEntry();
 			break;
 		}
+	}
+	else if (NetMode == NM_DedicatedServer)
+	{
+		switch (State)
+		{
+		case EInnerMatchState::Prepare:
+			// nothing
+			break;
+		case EInnerMatchState::Process:
+			// nothing
+			break;
+		case EInnerMatchState::Finish:
+			{
+				ClearRespawnTimer();
+			}
+			break;
+		default:
+			checkNoEntry();
+			break;
+		}
+	}
+}
+
+void AASPlayerController::SetRespawnTimer(FTimespan Delay)
+{
+	float RespawnDelaySec = Delay.GetTotalSeconds();
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &AASPlayerController::OnCalledRespawnTimer, RespawnDelaySec);
+	
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
+	{
+		RespawnTime = GameState->GetServerWorldTimeSeconds() + RespawnDelaySec;
+	}
+}
+
+void AASPlayerController::ClearRespawnTimer()
+{
+	if (GetWorldTimerManager().IsTimerActive(RespawnTimerHandle))
+	{
+		GetWorldTimerManager().ClearTimer(RespawnTimerHandle);
 	}
 }
 
@@ -157,7 +207,7 @@ void AASPlayerController::ShowInventoryWidget()
 
 void AASPlayerController::ShowGameMenuWidget()
 {
-	ShowFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass);
+	ShowFullScreenWidget<UASGameMenuUserWidget>(GameMenuWidgetClass, 5);
 }
 
 void AASPlayerController::ShowPrepareInfoWidget()
@@ -166,6 +216,30 @@ void AASPlayerController::ShowPrepareInfoWidget()
 	if (PrepareInfoWidget != nullptr)
 	{
 		PrepareInfoWidget->AddToViewport(2);
+	}
+}
+
+void AASPlayerController::ShowRespawnTimerWidget(float EndTimeSec)
+{
+	RespawnTimerWidget = CreateWidget<UASRespawnTimerUserWidget>(this, RespawnTimerWidgetClass);
+	if (RespawnTimerWidget != nullptr)
+	{
+		RespawnTimerWidget->SetEndTimeByServerWorldTime(EndTimeSec);
+		RespawnTimerWidget->AddToViewport(2);
+
+		if (CurrentFullScreenWidget != nullptr)
+		{
+			RespawnTimerWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void AASPlayerController::RemoveRespawnTimerWidget()
+{
+	if (RespawnTimerWidget != nullptr)
+	{
+		RespawnTimerWidget->RemoveFromParent();
+		RespawnTimerWidget = nullptr;
 	}
 }
 
@@ -178,6 +252,11 @@ void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* Constructed
 	else
 	{
 		AS_LOG_S(Error);
+	}
+
+	if (RespawnTimerWidget != nullptr)
+	{
+		RespawnTimerWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	ChangeInputMode(false);
@@ -195,6 +274,25 @@ void AASPlayerController::OnDestructedFullScreenWidget(UUserWidget* DestructedWi
 		AS_LOG_S(Error);
 	}
 
+	if (RespawnTimerWidget != nullptr)
+	{
+		RespawnTimerWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
 	ChangeInputMode(true);
 	ShowCrossHair(true);
+}
+
+void AASPlayerController::OnCalledRespawnTimer()
+{
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (IsValid(GameMode))
+	{
+		GameMode->RestartPlayer(this);
+	}
+}
+
+void AASPlayerController::OnRep_RespawnTime()
+{
+	ShowRespawnTimerWidget(RespawnTime);
 }

@@ -14,6 +14,7 @@ class UASGameMenuUserWidget;
 class UASPrepareInfoUserWidget;
 class UASHudUserWidget;
 class AASCharacter;
+class UASRespawnTimerUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API AASPlayerController : public APlayerController
@@ -23,11 +24,15 @@ class ARENASHOOTERS_API AASPlayerController : public APlayerController
 public:
 	AASPlayerController();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void SetPawn(APawn* InPawn) override;
 
 	void ChangeInputMode(bool bGameMode);
 
 	virtual void OnChangedInnerMatchState(EInnerMatchState State);
+
+	void SetRespawnTimer(FTimespan Delay);
+	void ClearRespawnTimer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,9 +45,11 @@ protected:
 	void ShowInventoryWidget();
 	void ShowGameMenuWidget();
 	void ShowPrepareInfoWidget();
+	void ShowRespawnTimerWidget(float EndTimeSec);
+	void RemoveRespawnTimerWidget();
 
 	template <typename TWidget>
-	TWidget* ShowFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass)
+	TWidget* ShowFullScreenWidget(const TSubclassOf<TWidget>& WidgetClass, int32 ZOrder = 1)
 	{
 		if (CurrentFullScreenWidget == nullptr)
 		{
@@ -58,7 +65,7 @@ protected:
 					FullScreenWidget->OnDestructed.AddUObject(ASChar, &AASCharacter::OnDestructedFullScreenWidget);
 				}
 
-				FullScreenWidget->AddToViewport(1);
+				FullScreenWidget->AddToViewport(ZOrder);
 
 				CurrentFullScreenWidget = FullScreenWidget;
 
@@ -79,6 +86,11 @@ protected:
 
 	void OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget);
 	void OnDestructedFullScreenWidget(UUserWidget* DestructedWidget);
+
+	void OnCalledRespawnTimer();
+
+	UFUNCTION()
+	void OnRep_RespawnTime();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
@@ -108,6 +120,17 @@ protected:
 	UPROPERTY()
 	UASHudUserWidget* HudWidget;
 
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UASRespawnTimerUserWidget> RespawnTimerWidgetClass;
+
+	UPROPERTY()
+	UASRespawnTimerUserWidget* RespawnTimerWidget;
+
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;
+
+	UPROPERTY(ReplicatedUsing = OnRep_RespawnTime)
+	float RespawnTime;
+
+	FTimerHandle RespawnTimerHandle;
 };

@@ -36,6 +36,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void Restart() override;
+
 	virtual void Jump() override;
 	virtual void Falling() override;
 	virtual bool CanCrouch() const override;
@@ -91,6 +93,9 @@ public:
 
 	UASStatusComponent* GetStatusComponent();
 	bool IsDead() const;
+
+	void StartRagdoll();
+	void EndRagdoll();
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

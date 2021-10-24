@@ -197,7 +197,7 @@ void AASMatchGameModeBase::SetPrepareTimer()
 	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
 	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::OnCalledPrepareTimer, PrepareTimeSec);
 
-	if (ASMatchGameState != nullptr)
+	if (IsValid(ASMatchGameState))
 	{
 		float StartTime = ASMatchGameState->GetServerWorldTimeSeconds() + PrepareTimeSec;
 		ASMatchGameState->SetStartTimeForProcess(StartTime);

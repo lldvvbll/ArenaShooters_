@@ -17,4 +17,7 @@ class ARENASHOOTERS_API AASDeathmatchGameMode : public AASMatchGameModeBase
 public:
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController) override;
 
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	FTimespan RespawnDelay;
 };
