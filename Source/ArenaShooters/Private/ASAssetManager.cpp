@@ -10,6 +10,7 @@ const FPrimaryAssetType UASAssetManager::AmmoAssetType = TEXT("Ammo");
 const FPrimaryAssetType UASAssetManager::HealingKitAssetType = TEXT("HealingKit");
 const FPrimaryAssetType UASAssetManager::DamageAssetType = TEXT("Damage");
 const FPrimaryAssetType UASAssetManager::InventoryAssetType = TEXT("Inventory");
+const FPrimaryAssetType UASAssetManager::MatchItemSetAssetType = TEXT("MatchItemSet");
 
 UASAssetManager& UASAssetManager::Get()
 {
@@ -21,15 +22,4 @@ UASAssetManager& UASAssetManager::Get()
 	}
 
 	return *This;
-}
-
-UASItemDataAsset* UASAssetManager::GetDataAsset(const FPrimaryAssetId& PrimaryAssetId, bool bLogWarning/* = true*/)
-{
-	auto DataAsset = GetPrimaryAssetObject<UASItemDataAsset>(PrimaryAssetId);
-	if (DataAsset == nullptr)
-	{
-		DataAsset = ForceLoadDataAsset<UASItemDataAsset>(PrimaryAssetId, bLogWarning);
-	}
-
-	return DataAsset;
 }

@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UASItem> ItemClass;
 
-	UPROPERTY(EditDefaultSOnly)
+	UPROPERTY(EditDefaultsOnly)
 	FText ItemName;
 
 	UPROPERTY(EditDefaultsOnly)

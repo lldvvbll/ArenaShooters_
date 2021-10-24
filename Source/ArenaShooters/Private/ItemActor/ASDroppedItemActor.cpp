@@ -139,7 +139,7 @@ void AASDroppedItemActor::BeginPlay()
 			if (!ItemDataAssetId.IsValid())
 				continue;
 
-			UASItemDataAsset* ItemDataAsset = UASAssetManager::Get().GetDataAsset(ItemDataAssetId);
+			UASItemDataAsset* ItemDataAsset = UASAssetManager::Get().GetDataAsset<UASItemDataAsset>(ItemDataAssetId);
 			if (ItemDataAsset == nullptr)
 				continue;
 

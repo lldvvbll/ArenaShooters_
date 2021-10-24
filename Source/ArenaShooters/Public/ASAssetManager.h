@@ -20,11 +20,10 @@ public:
 	static const FPrimaryAssetType HealingKitAssetType;
 	static const FPrimaryAssetType DamageAssetType;
 	static const FPrimaryAssetType InventoryAssetType;
+	static const FPrimaryAssetType MatchItemSetAssetType;
 
 public:
 	static UASAssetManager& Get();
-
-	UASItemDataAsset* GetDataAsset(const FPrimaryAssetId& PrimaryAssetId, bool bLogWarning = true);
 
 	template <typename T>
 	T* GetDataAsset(const FPrimaryAssetId& PrimaryAssetId, bool bLogWarning = true)

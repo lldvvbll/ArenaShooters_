@@ -7,6 +7,8 @@
 #include "ASGameInstance.h"
 #include "Controller/ASPlayerState.h"
 #include "Controller/ASPlayerController.h"
+#include "ASAssetManager.h"
+#include "DataAssets/MatchGameDataAssets/ASMatchItemSetDataAsset.h"
 
 AASMatchGameStateBase::AASMatchGameStateBase()
 {
@@ -40,7 +42,9 @@ void AASMatchGameStateBase::PostInitializeComponents()
 		{
 			AS_LOG_S(Error);
 		}
-	}	
+	}
+
+	TArray<UASMatchItemSetDataAsset*> DummyArrayForAssetLoading = GetMatchItemSetDataAssets();
 }
 
 void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
@@ -176,6 +180,27 @@ void AASMatchGameStateBase::SetMatchFinishTime(float FinishTime)
 	MatchFinishTime = FinishTime;
 
 	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
+}
+
+TArray<UASMatchItemSetDataAsset*> AASMatchGameStateBase::GetMatchItemSetDataAssets() const
+{
+	TArray<UASMatchItemSetDataAsset*> DataAssets;
+
+	UASAssetManager& AssetManager = UASAssetManager::Get();
+	for (auto& AssetId : MatchItemSetAssetIds)
+	{
+		auto MatchItemSetAsset = AssetManager.GetDataAsset<UASMatchItemSetDataAsset>(AssetId);
+		if (IsValid(MatchItemSetAsset))
+		{
+			DataAssets.Emplace(MatchItemSetAsset);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+
+	return DataAssets;
 }
 
 void AASMatchGameStateBase::OnChangedPlayerName(FString Name)
