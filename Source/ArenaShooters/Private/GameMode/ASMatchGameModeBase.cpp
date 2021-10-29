@@ -7,6 +7,7 @@
 #include "Controller/ASPlayerController.h"
 #include "Controller/ASPlayerState.h"
 #include "Common/ASEnums.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
 
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
@@ -16,6 +17,16 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	MaxPlayerCount = 16;
 	MinPlayerCount = 1;
 	GoalNumOfKills = 1;
+}
+
+void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+
+	if (ErrorMessage.Len() > 0)
+		return;
+
+
 }
 
 void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -157,6 +168,43 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 	if (IsValid(ASMatchGameState))
 	{
 		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState, KillCount);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASMatchGameModeBase::GenericPlayerInitialization(AController* C)
+{
+	Super::GenericPlayerInitialization(C);
+
+	if (IsValid(C))
+	{
+		if (IsValid(ASMatchGameState))
+		{
+			auto PlayerState = C->GetPlayerState<AASPlayerState>();
+			if (IsValid(PlayerState))
+			{
+				TArray<UASItemSetDataAsset*> DataAssets = ASMatchGameState->GetItemSetDataAssets();
+				if (DataAssets.Num() > 0)
+				{
+					PlayerState->ServerSetItemSetDataAsset(DataAssets[0]);
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
 	}
 	else
 	{

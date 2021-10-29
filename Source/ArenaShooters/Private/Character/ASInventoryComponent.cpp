@@ -16,6 +16,8 @@
 #include "ItemActor/ASArmorActor.h"
 #include "ASAssetManager.h"
 #include "DataAssets/CharacterDataAssets/ASInventoryDataAsset.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
+#include "GameMode/ASItemFactoryComponent.h"
 
 UASInventoryComponent::UASInventoryComponent()
 {
@@ -345,15 +347,17 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 
 	if (SlotType != EWeaponSlotType::SlotNum)
 	{
-		if (NewItem != nullptr && NewItem->GetItemType() == EItemType::Weapon)
+		if (IsValid(NewItem) && NewItem->GetItemType() == EItemType::Weapon)
 		{
 			int32 Idx = static_cast<int32>(SlotType);
 			if (WeaponSlots[Idx] == nullptr)
 			{
-				if (NewItem != nullptr)
+				AActor* CurOwner = GetOwner();
+				if (NewItem->GetOwner() != CurOwner)
 				{
-					NewItem->SetOwner(GetOwner());
+					NewItem->SetOwner(CurOwner);
 				}
+
 				WeaponSlots[Idx] = NewItem;
 
 				ResultPair.Key = WeaponSlots[Idx];
@@ -682,6 +686,117 @@ TArray<TWeakObjectPtr<UASArmor>> UASInventoryComponent::GetCoveringArmors(const 
 	}
 
 	return Armors;
+}
+
+void UASInventoryComponent::ClearAllItems()
+{
+	for (auto& Weapon : WeaponSlots)
+	{
+		if (Weapon == nullptr)
+			continue;
+
+		UASItemFactoryComponent::DeleteItem(GetWorld(), Weapon);
+	}
+
+	for (auto& Armor : ArmorSlots)
+	{
+		if (Armor == nullptr)
+			continue;
+
+		UASItemFactoryComponent::DeleteItem(GetWorld(), Armor);
+	}
+
+	for (auto& InventoryItem : InventoryItems)
+	{
+		UASItemFactoryComponent::DeleteItem(GetWorld(), InventoryItem);
+	}
+}
+
+void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* ItemSetDataAsset)
+{
+	if (!IsValid(ItemSetDataAsset))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	TArray<UASItem*> RemovedItems;
+
+	UWorld* World = GetWorld();
+	for (auto& ItemPair : ItemSetDataAsset->ItemMap)
+	{
+		FPrimaryAssetId& AssetId = ItemPair.Key;
+		if (!AssetId.IsValid())
+		{
+			AS_LOG_S(Error);
+			continue;
+		}
+
+		EItemType ItemType = UASAssetManager::ConvertAssetIdToItemType(AssetId);
+		switch (ItemType)
+		{
+		case EItemType::Weapon:
+			{
+				auto Weapon = Cast<UASWeapon>(UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId));
+				if (IsValid(Weapon))
+				{
+					UASItem* RemovedItem = nullptr;
+					InsertWeapon(GetSuitableWeaponSlotType(Weapon->GetWeaponType()), Weapon, RemovedItem);
+
+					if (RemovedItem != nullptr)
+					{
+						RemovedItems.Emplace(RemovedItem);
+					}
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+			break;
+		case EItemType::Armor:
+			{
+				auto Armor = Cast<UASArmor>(UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId));
+				if (IsValid(Armor))
+				{
+					UASItem* RemovedItem = nullptr;
+					InsertArmor(GetSuitableArmorSlotType(Armor->GetArmorType()), Armor, RemovedItem);
+
+					if (RemovedItem != nullptr)
+					{
+						RemovedItems.Emplace(RemovedItem);
+					}
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+			break;
+		case EItemType::Ammo:		// fallthrough
+		case EItemType::HealingKit:
+			{
+				auto Item = UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId, ItemPair.Value);
+				if (IsValid(Item))
+				{
+					AddItemToInventory(Item);
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+			break;
+		default:
+			checkNoEntry();
+			break;
+		}
+	}
+
+	for (auto& Item : RemovedItems)
+	{
+		UASItemFactoryComponent::DeleteItem(GetWorld(), Item);
+	}
 }
 
 ItemBoolPair UASInventoryComponent::GetItemFromWeaponSlot(EWeaponSlotType SlotType)

@@ -28,6 +28,8 @@ public:
 	void SetCurrentStemina(float NewStemina);
 	void ModifyCurrentStemina(float Value);
 
+	void SetStatusDefaults();
+
 	UFUNCTION()
 	void OnRep_CurrentHealth();
 	

@@ -5,6 +5,8 @@
 #include "GUI/ASMatchItemSetSlotUserWidget.h"
 #include "GameMode/ASMatchGameStateBase.h"
 #include "Components/ScrollBox.h"
+#include "Controller/ASPlayerState.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
 
 void UASMatchItemSetSelectUserWidget::NativeConstruct()
 {
@@ -16,44 +18,68 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 	{
 		SlotsScrollBox->ClearChildren();
 
+		UASItemSetDataAsset* CurItemSetDataAsset = nullptr;
+		auto PlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
+		if (IsValid(PlayerState))
+		{
+			CurItemSetDataAsset = PlayerState->GetItemSetDataAsset();
+		}
+
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 		if (IsValid(GameState))
 		{
-			TArray<UASMatchItemSetDataAsset*> DataAssets = GameState->GetMatchItemSetDataAssets();
+			TArray<UASItemSetDataAsset*> DataAssets = GameState->GetItemSetDataAssets();
 			for (auto& DataAsset : DataAssets)
 			{
 				auto MatchItemSetSlotWidget = CreateWidget<UASMatchItemSetSlotUserWidget>(this, MatchItemSetSlotWidgetClass);
 				if (MatchItemSetSlotWidget != nullptr)
 				{
-					MatchItemSetSlotWidget->OnSelected.AddUObject(this, &UASMatchItemSetSelectUserWidget::OnSelectedSlot);
-
 					SlotsScrollBox->AddChild(MatchItemSetSlotWidget);
+
 					MatchItemSetSlotWidget->SetDataAsset(DataAsset);
+
+					if (CurItemSetDataAsset != nullptr && DataAsset != nullptr)
+					{
+						MatchItemSetSlotWidget->ChangeButtonState(DataAsset == CurItemSetDataAsset);
+					}
+					else
+					{
+						AS_LOG_S(Error);
+					}
+
+					MatchItemSetSlotWidget->OnClickedSlot.AddUObject(this, &UASMatchItemSetSelectUserWidget::OnClickedSlot);
 				}
 				else
 				{
 					AS_LOG_S(Error);
 				}
-			}
+			}			
 		}
 		else
 		{
 			AS_LOG_S(Error);
 		}
-
-		if (SlotsScrollBox->GetChildrenCount() > 0)
-		{
-			if (auto SlotWidget = Cast<UASMatchItemSetSlotUserWidget>(SlotsScrollBox->GetChildAt(0)))
-			{
-				SlotWidget->ChangeButtonState(true);
-			}
-		}
 	}
 }
 
-void UASMatchItemSetSelectUserWidget::OnSelectedSlot(UASMatchItemSetSlotUserWidget* SelectedSlot)
+void UASMatchItemSetSelectUserWidget::NativeDestruct()
 {
-	if (SelectedSlot == nullptr)
+	Super::NativeDestruct();
+
+	auto PlayerState = GetOwningPlayerState<AASPlayerState>();
+	if (IsValid(PlayerState))
+	{
+		PlayerState->OnSetItemSetDataAsset.RemoveAll(this);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void UASMatchItemSetSelectUserWidget::OnClickedSlot(UASMatchItemSetSlotUserWidget* ClickedSlot)
+{
+	if (ClickedSlot == nullptr)
 	{
 		AS_LOG_S(Error);
 		return;
@@ -61,24 +87,16 @@ void UASMatchItemSetSelectUserWidget::OnSelectedSlot(UASMatchItemSetSlotUserWidg
 
 	if (SlotsScrollBox != nullptr)
 	{
-		FPrimaryAssetId AssetId = SelectedSlot->GetDataAssetId();
-		for (auto& ItemSetSlot : SlotsScrollBox->GetAllChildren())
+		for (auto& SlotWidget : SlotsScrollBox->GetAllChildren())
 		{
-			if (auto SlotWidget = Cast<UASMatchItemSetSlotUserWidget>(ItemSetSlot))
-			{
-				if (SlotWidget->GetDataAssetId() == AssetId)
-				{
-					AS_LOG(Warning, TEXT("UASMatchItemSetSlotUserWidget: %s"), *AssetId.ToString());
-				}
-				else
-				{
-					SlotWidget->ChangeButtonState(false);
-				}
-			}
-			else
+			auto ItemSetSlotWidget = Cast<UASMatchItemSetSlotUserWidget>(SlotWidget);
+			if (ItemSetSlotWidget == nullptr)
 			{
 				AS_LOG_S(Error);
+				continue;
 			}
+
+			ItemSetSlotWidget->ChangeButtonState(ItemSetSlotWidget == ClickedSlot);
 		}
 	}
 }

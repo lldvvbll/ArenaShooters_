@@ -10,7 +10,7 @@ class UASMatchItemSetSelectUserWidget;
 class UButton;
 class UImage;
 class UTextBlock;
-class UASMatchItemSetDataAsset;
+class UASItemSetDataAsset;
 
 UCLASS()
 class ARENASHOOTERS_API UASMatchItemSetSlotUserWidget : public UUserWidget
@@ -18,8 +18,8 @@ class ARENASHOOTERS_API UASMatchItemSetSlotUserWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetDataAsset(UASMatchItemSetDataAsset* DataAsset);
-	FPrimaryAssetId GetDataAssetId() const;
+	void SetDataAsset(UASItemSetDataAsset* DataAsset);
+	FPrimaryAssetId GetItemSetDataAssetId() const;
 
 	void ChangeButtonState(bool bIsSelected);
 
@@ -30,8 +30,8 @@ protected:
 	void OnClickedButton();
 
 public:
-	DECLARE_EVENT_OneParam(UASMatchItemSetSlotUserWidget, FOnSelectedEvent, UASMatchItemSetSlotUserWidget*);
-	FOnSelectedEvent OnSelected;
+	DECLARE_EVENT_OneParam(UASMatchItemSetSlotUserWidget, FOnClickedSlotEvent, UASMatchItemSetSlotUserWidget*);
+	FOnClickedSlotEvent OnClickedSlot;
 
 protected:
 	UPROPERTY()
@@ -43,7 +43,8 @@ protected:
 	UPROPERTY()
 	UTextBlock* NameTextBlock;
 
-	FPrimaryAssetId DataAssetId;
+	UPROPERTY()
+	UASItemSetDataAsset* ItemSetDataAsset;
 
 	bool bSelected = false;
 

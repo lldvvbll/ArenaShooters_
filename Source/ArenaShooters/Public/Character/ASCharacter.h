@@ -36,7 +36,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void Restart() override;
+	virtual void SetPlayerDefaults() override;
 
 	virtual void Jump() override;
 	virtual void Falling() override;

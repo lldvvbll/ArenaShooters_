@@ -17,6 +17,7 @@ class UASArmorDataAsset;
 class AASWeaponActor;
 class AASArmorActor;
 class UASInventoryDataAsset;
+class UASItemSetDataAsset;
 
 using ItemBoolPair = TPair<UASItem*, bool>;
 using ItemPtrBoolPair = TPair<TWeakObjectPtr<UASItem>, bool>;
@@ -72,6 +73,9 @@ public:
 	void ReattachWeaponActor(UASWeapon* InWeapon, const FName& SocketName) const;
 
 	TArray<TWeakObjectPtr<UASArmor>> GetCoveringArmors(const FName& BoneName);
+
+	void ClearAllItems();
+	void EquipItemsByItemSetDataAsset(UASItemSetDataAsset* ItemSetDataAsset);
 
 private:
 	ItemBoolPair GetItemFromWeaponSlot(EWeaponSlotType SlotType);

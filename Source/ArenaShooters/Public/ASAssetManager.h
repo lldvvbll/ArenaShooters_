@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "Engine/AssetManager.h"
+#include "Common/ASEnums.h"
 #include "ASAssetManager.generated.h"
 
 class UASItemDataAsset;
@@ -20,7 +21,7 @@ public:
 	static const FPrimaryAssetType HealingKitAssetType;
 	static const FPrimaryAssetType DamageAssetType;
 	static const FPrimaryAssetType InventoryAssetType;
-	static const FPrimaryAssetType MatchItemSetAssetType;
+	static const FPrimaryAssetType ItemSetAssetType;
 
 public:
 	static UASAssetManager& Get();
@@ -49,4 +50,6 @@ public:
 
 		return LoadedDataAsset;
 	}
+
+	static EItemType ConvertAssetIdToItemType(const FPrimaryAssetId& PrimaryAssetId);
 };

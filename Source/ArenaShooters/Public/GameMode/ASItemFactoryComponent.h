@@ -16,6 +16,7 @@ class ARENASHOOTERS_API UASItemFactoryComponent : public UActorComponent
 
 public:
 	static UASItem* NewASItem(UWorld* World, AActor* NewOwner, UASItemDataAsset* DataAsset, int32 Count = 0);
+	static UASItem* NewASItem(UWorld* World, AActor* NewOwner, const FPrimaryAssetId& AssetId, int32 Count = 0);
 
 	template <typename ItemT, typename ItemDataAssetT>
 	static ItemT* NewASItem(UWorld* World, AActor* NewOwner, ItemDataAssetT* DataAsset, int32 Count = 0)

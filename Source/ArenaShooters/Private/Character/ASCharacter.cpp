@@ -15,6 +15,7 @@
 #include "ASAssetManager.h"
 #include "DataAssets/ItemDataAssets/ASWeaponDataAsset.h"
 #include "DataAssets/ItemDataAssets/ASArmorDataAsset.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
 #include "Item/ASItem.h"
 #include "Item/ASWeapon.h"
 #include "Item/ASArmor.h"
@@ -28,6 +29,7 @@
 #include "Character/ASAnimInstance.h"
 #include "GameMode/ASItemFactoryComponent.h"
 #include "GameMode/ASMatchGameStateBase.h"
+#include "Controller/ASPlayerState.h"
 
 AASCharacter::AASCharacter()
 {
@@ -181,12 +183,37 @@ void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AASCharacter, bUseHealingKit);
 }
 
-void AASCharacter::Restart()
+void AASCharacter::SetPlayerDefaults()
 {
-	Super::Restart();
+	Super::SetPlayerDefaults();
 
 	bDead = false;
 	SetCanBeDamaged(true);
+
+	if (IsValid(ASStatus))
+	{
+		ASStatus->SetStatusDefaults();
+	}
+
+	auto ASPlayerState = GetPlayerState<AASPlayerState>();
+	if (IsValid(ASPlayerState))
+	{
+		if (IsValid(ASInventory))
+		{
+			ASInventory->ClearAllItems();
+
+			UASItemSetDataAsset* DataAsset = ASPlayerState->GetItemSetDataAsset();
+			ASInventory->EquipItemsByItemSetDataAsset(DataAsset);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 
 	EndRagdoll();
 }
@@ -568,9 +595,9 @@ void AASCharacter::ServerPickUpInventoryItem_Implementation(UASItem* NewItem)
 
 bool AASCharacter::RemoveItem(UASItem* InItem)
 {
-	if (ASInventory == nullptr)
+	if (!IsValid(ASInventory))
 	{
-		AS_LOG_A_S(Error, 5.0f);
+		AS_LOG_S(Error);
 		return false;
 	}
 

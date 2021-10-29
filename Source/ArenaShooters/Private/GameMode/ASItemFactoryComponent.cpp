@@ -8,6 +8,7 @@
 #include "DataAssets/ItemDataAssets/ASItemDataAsset.h"
 #include "Character/ASCharacter.h"
 #include "GameFramework/GameStateBase.h"
+#include "ASAssetManager.h"
 
 UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, UASItemDataAsset* DataAsset, int32 Count/* = 0*/)
 {
@@ -51,6 +52,11 @@ UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, UAS
 	ItemFactoryComp->ASItems.Emplace(NewItem);
 
 	return NewItem;
+}
+
+UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, const FPrimaryAssetId& AssetId, int32 Count/* = 0*/)
+{
+	 return NewASItem(World, NewOwner, UASAssetManager::Get().GetDataAsset<UASItemDataAsset>(AssetId), Count);
 }
 
 bool UASItemFactoryComponent::DeleteItem(UWorld* World, UASItem* InItem)

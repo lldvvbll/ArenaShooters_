@@ -6,9 +6,10 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "DataAssets/MatchGameDataAssets/ASMatchItemSetDataAsset.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
+#include "Controller/ASPlayerState.h"
 
-void UASMatchItemSetSlotUserWidget::SetDataAsset(UASMatchItemSetDataAsset* DataAsset)
+void UASMatchItemSetSlotUserWidget::SetDataAsset(UASItemSetDataAsset* DataAsset)
 {
 	if (!IsValid(DataAsset))
 	{
@@ -16,7 +17,7 @@ void UASMatchItemSetSlotUserWidget::SetDataAsset(UASMatchItemSetDataAsset* DataA
 		return;
 	}
 
-	DataAssetId = DataAsset->GetPrimaryAssetId();
+	ItemSetDataAsset = DataAsset;
 
 	if (ThumbnailImage != nullptr)
 	{
@@ -29,9 +30,9 @@ void UASMatchItemSetSlotUserWidget::SetDataAsset(UASMatchItemSetDataAsset* DataA
 	}
 }
 
-FPrimaryAssetId UASMatchItemSetSlotUserWidget::GetDataAssetId() const
+FPrimaryAssetId UASMatchItemSetSlotUserWidget::GetItemSetDataAssetId() const
 {
-	return DataAssetId;
+	return IsValid(ItemSetDataAsset) ? ItemSetDataAsset->GetPrimaryAssetId() : FPrimaryAssetId();
 }
 
 void UASMatchItemSetSlotUserWidget::ChangeButtonState(bool bIsSelected)
@@ -73,7 +74,15 @@ void UASMatchItemSetSlotUserWidget::OnClickedButton()
 	if (bSelected)
 		return;
 
-	OnSelected.Broadcast(this);
+	auto PlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
+	if (IsValid(PlayerState))
+	{
+		PlayerState->ServerSetItemSetDataAsset(ItemSetDataAsset);
 
-	ChangeButtonState(true);
+		OnClickedSlot.Broadcast(this);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }

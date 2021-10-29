@@ -6,14 +6,14 @@
 #include "GameFramework/PlayerState.h"
 #include "ASPlayerState.generated.h"
 
+class UASItemSetDataAsset;
+
 UCLASS()
 class ARENASHOOTERS_API AASPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 	
 public:
-	AASPlayerState();
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void SetPlayerName(const FString& S) override;
@@ -31,12 +31,23 @@ public:
 	void OnKill();
 	void OnDie();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetItemSetDataAsset(UASItemSetDataAsset* DataAsset);
+	bool ServerSetItemSetDataAsset_Validate(UASItemSetDataAsset* DataAsset);
+	void ServerSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset);
+
+	UASItemSetDataAsset* GetItemSetDataAsset() const;
+	FPrimaryAssetId GetItemSetDataAssetId() const;
+
 protected:
 	UFUNCTION()
 	void OnRep_KillCount();
 
 	UFUNCTION()
 	void OnRep_DeathCount();
+
+	UFUNCTION()
+	void OnRep_ItemSetDataAsset();
 
 public:
 	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedPlayerNameEvent, FString);
@@ -51,10 +62,16 @@ public:
 	DECLARE_EVENT_OneParam(AASPlayerState, FOnChangedDeathCountEvent, int32);
 	FOnChangedDeathCountEvent OnChangedDeathCount;
 
+	DECLARE_EVENT_OneParam(AASPlayerState, FOnSetItemSetDataAssetEvent, UASItemSetDataAsset*);
+	FOnSetItemSetDataAssetEvent OnSetItemSetDataAsset;
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_KillCount)
 	int32 KillCount;
 
 	UPROPERTY(ReplicatedUsing = OnRep_DeathCount)
 	int32 DeathCount;
+
+	UPROPERTY(ReplicatedUsing = OnRep_ItemSetDataAsset)
+	UASItemSetDataAsset* ItemSetDataAsset;
 };

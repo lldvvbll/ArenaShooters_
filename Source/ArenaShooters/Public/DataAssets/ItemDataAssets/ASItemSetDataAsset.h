@@ -4,15 +4,15 @@
 
 #include "ArenaShooters.h"
 #include "Engine/DataAsset.h"
-#include "ASMatchItemSetDataAsset.generated.h"
+#include "ASItemSetDataAsset.generated.h"
 
 UCLASS()
-class ARENASHOOTERS_API UASMatchItemSetDataAsset : public UPrimaryDataAsset
+class ARENASHOOTERS_API UASItemSetDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UASMatchItemSetDataAsset();
+	UASItemSetDataAsset();
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 

@@ -3,10 +3,8 @@
 
 #include "Controller/ASPlayerState.h"
 #include "Net/UnrealNetwork.h"
-
-AASPlayerState::AASPlayerState()
-{
-}
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
+#include "GameMode/ASMatchGameStateBase.h"
 
 void AASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -14,6 +12,7 @@ void AASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(AASPlayerState, KillCount);
 	DOREPLIFETIME(AASPlayerState, DeathCount);
+	DOREPLIFETIME(AASPlayerState, ItemSetDataAsset);
 }
 
 void AASPlayerState::SetPlayerName(const FString& S)
@@ -84,6 +83,33 @@ void AASPlayerState::OnDie()
 	ModifyDeathCount(1);
 }
 
+bool AASPlayerState::ServerSetItemSetDataAsset_Validate(UASItemSetDataAsset* DataAsset)
+{
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (!IsValid(GameState))
+	{
+		AS_LOG_S(Error);
+		return false;
+	}
+
+	return GameState->IsValidItemSetDataAsset(DataAsset);
+}
+
+void AASPlayerState::ServerSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset)
+{
+	ItemSetDataAsset = DataAsset;
+}
+
+UASItemSetDataAsset* AASPlayerState::GetItemSetDataAsset() const
+{
+	return ItemSetDataAsset;
+}
+
+FPrimaryAssetId AASPlayerState::GetItemSetDataAssetId() const
+{
+	return (ItemSetDataAsset != nullptr ? ItemSetDataAsset->GetPrimaryAssetId() : FPrimaryAssetId());
+}
+
 void AASPlayerState::OnRep_KillCount()
 {
 	OnChangedKillCount.Broadcast(KillCount);
@@ -92,4 +118,9 @@ void AASPlayerState::OnRep_KillCount()
 void AASPlayerState::OnRep_DeathCount()
 {
 	OnChangedDeathCount.Broadcast(DeathCount);
+}
+
+void AASPlayerState::OnRep_ItemSetDataAsset()
+{
+	OnSetItemSetDataAsset.Broadcast(ItemSetDataAsset);
 }

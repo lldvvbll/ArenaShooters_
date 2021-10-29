@@ -9,7 +9,7 @@
 
 class UASItemFactoryComponent;
 class AASPlayerState;
-class UASMatchItemSetDataAsset;
+class UASItemSetDataAsset;
 
 UCLASS()
 class ARENASHOOTERS_API AASMatchGameStateBase : public AGameState
@@ -50,7 +50,8 @@ public:
 	FDateTime GetMatchFinishTime() const;
 	void SetMatchFinishTime(float FinishTime);
 
-	TArray<UASMatchItemSetDataAsset*> GetMatchItemSetDataAssets() const;
+	TArray<UASItemSetDataAsset*> GetItemSetDataAssets() const;
+	bool IsValidItemSetDataAsset(UASItemSetDataAsset* DataAsset) const;
 
 protected:
 	virtual void OnChangedPlayerName(FString Name);
@@ -108,5 +109,5 @@ protected:
 	float MatchFinishTime;
 
 	UPROPERTY(EditDefaultsOnly)
-	TArray<FPrimaryAssetId> MatchItemSetAssetIds;
+	TArray<FPrimaryAssetId> ItemSetAssetIds;
 };

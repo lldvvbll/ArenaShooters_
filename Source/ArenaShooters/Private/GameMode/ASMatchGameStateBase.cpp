@@ -8,7 +8,7 @@
 #include "Controller/ASPlayerState.h"
 #include "Controller/ASPlayerController.h"
 #include "ASAssetManager.h"
-#include "DataAssets/MatchGameDataAssets/ASMatchItemSetDataAsset.h"
+#include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
 
 AASMatchGameStateBase::AASMatchGameStateBase()
 {
@@ -44,7 +44,7 @@ void AASMatchGameStateBase::PostInitializeComponents()
 		}
 	}
 
-	TArray<UASMatchItemSetDataAsset*> DummyArrayForAssetLoading = GetMatchItemSetDataAssets();
+	TArray<UASItemSetDataAsset*> DummyArrayForAssetLoading = GetItemSetDataAssets();
 }
 
 void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
@@ -56,6 +56,19 @@ void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
 		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
 		if (IsValid(ASPlayerState))
 		{
+			if (GetNetMode() == NM_DedicatedServer)
+			{
+				TArray<UASItemSetDataAsset*> DataAssets = GetItemSetDataAssets();
+				if (DataAssets.Num() > 0)
+				{
+					ASPlayerState->ServerSetItemSetDataAsset(DataAssets[0]);
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+
 			OnAddedPlayerState.Broadcast(ASPlayerState);
 
 			ASPlayerState->OnChangedPlayerName.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerName);
@@ -182,17 +195,17 @@ void AASMatchGameStateBase::SetMatchFinishTime(float FinishTime)
 	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
 }
 
-TArray<UASMatchItemSetDataAsset*> AASMatchGameStateBase::GetMatchItemSetDataAssets() const
+TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 {
-	TArray<UASMatchItemSetDataAsset*> DataAssets;
+	TArray<UASItemSetDataAsset*> DataAssets;
 
 	UASAssetManager& AssetManager = UASAssetManager::Get();
-	for (auto& AssetId : MatchItemSetAssetIds)
+	for (auto& AssetId : ItemSetAssetIds)
 	{
-		auto MatchItemSetAsset = AssetManager.GetDataAsset<UASMatchItemSetDataAsset>(AssetId);
-		if (IsValid(MatchItemSetAsset))
+		auto ItemSetAsset = AssetManager.GetDataAsset<UASItemSetDataAsset>(AssetId);
+		if (IsValid(ItemSetAsset))
 		{
-			DataAssets.Emplace(MatchItemSetAsset);
+			DataAssets.Emplace(ItemSetAsset);
 		}
 		else
 		{
@@ -201,6 +214,17 @@ TArray<UASMatchItemSetDataAsset*> AASMatchGameStateBase::GetMatchItemSetDataAsse
 	}
 
 	return DataAssets;
+}
+
+bool AASMatchGameStateBase::IsValidItemSetDataAsset(UASItemSetDataAsset* DataAsset) const
+{
+	if (!IsValid(DataAsset))
+	{
+		AS_LOG_S(Error);
+		return false;
+	}
+
+	return ItemSetAssetIds.Contains(DataAsset->GetPrimaryAssetId());
 }
 
 void AASMatchGameStateBase::OnChangedPlayerName(FString Name)

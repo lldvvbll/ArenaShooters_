@@ -8,6 +8,7 @@
 
 class UASMatchItemSetSlotUserWidget;
 class UScrollBox;
+class UASItemSetDataAsset;
 
 UCLASS()
 class ARENASHOOTERS_API UASMatchItemSetSelectUserWidget : public UUserWidget
@@ -16,8 +17,9 @@ class ARENASHOOTERS_API UASMatchItemSetSelectUserWidget : public UUserWidget
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
-	void OnSelectedSlot(UASMatchItemSetSlotUserWidget* SelectedSlot);
+	void OnClickedSlot(UASMatchItemSetSlotUserWidget* ClickedSlot);
 
 protected:
 	UPROPERTY()

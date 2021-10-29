@@ -15,8 +15,7 @@ void UASStatusComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	CurrentHealth = MaxHealth;
-	CurrentStemina = MaxStemina;
+	SetStatusDefaults();
 }
 
 void UASStatusComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -72,6 +71,12 @@ void UASStatusComponent::SetCurrentStemina(float NewStemina)
 void UASStatusComponent::ModifyCurrentStemina(float Value)
 {
 	SetCurrentStemina(CurrentStemina + Value);
+}
+
+void UASStatusComponent::SetStatusDefaults()
+{
+	CurrentHealth = MaxHealth;
+	CurrentStemina = MaxStemina;
 }
 
 void UASStatusComponent::OnRep_CurrentHealth()
