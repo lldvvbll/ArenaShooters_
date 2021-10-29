@@ -32,7 +32,6 @@ public:
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
 protected:
-	virtual void GenericPlayerInitialization(AController* C) override;
 	virtual void HandleMatchHasStarted() override;
 
 	void SetPrepareTimer();

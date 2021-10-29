@@ -175,43 +175,6 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 	}
 }
 
-void AASMatchGameModeBase::GenericPlayerInitialization(AController* C)
-{
-	Super::GenericPlayerInitialization(C);
-
-	if (IsValid(C))
-	{
-		if (IsValid(ASMatchGameState))
-		{
-			auto PlayerState = C->GetPlayerState<AASPlayerState>();
-			if (IsValid(PlayerState))
-			{
-				TArray<UASItemSetDataAsset*> DataAssets = ASMatchGameState->GetItemSetDataAssets();
-				if (DataAssets.Num() > 0)
-				{
-					PlayerState->ServerSetItemSetDataAsset(DataAssets[0]);
-				}
-				else
-				{
-					AS_LOG_S(Error);
-				}
-			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-}
-
 void AASMatchGameModeBase::HandleMatchHasStarted()
 {
 	Super::HandleMatchHasStarted();
