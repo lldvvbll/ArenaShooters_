@@ -65,6 +65,7 @@ public:
 	bool AddItemToInventory(UASItem* NewItem);
 	TArray<TWeakObjectPtr<UASItem>> GetInventoryItems() const;
 	bool Contains(UASItem* InItem) const;
+	ItemBoolPair RemoveFromInventory(UASItem* InItem);
 
 	int32 GetAmmoCountInInventory(EAmmoType AmmoType) const;
 	TArray<UASAmmo*> GetAmmos(EAmmoType AmmoType) const;
@@ -95,6 +96,7 @@ private:
 	void SpawnArmorActor(UASArmor& Armor, const FName& AttachSocket);
 
 	EWeaponSlotType GetWeaponSlotTypeFromWeapon(UASWeapon* InWeapon);
+	EArmorSlotType GetArmorSlotTypeFromArmor(UASArmor* InArmor);
 
 	UFUNCTION()
 	void OnRep_WeaponSlots(TArray<UASItem*>& OldWeaponSlots);

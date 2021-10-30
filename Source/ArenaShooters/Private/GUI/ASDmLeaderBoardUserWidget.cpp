@@ -8,15 +8,6 @@
 #include "GameMode/ASDeathmatchGameState.h"
 #include "Controller/ASPlayerState.h"
 
-void UASDmLeaderBoardUserWidget::ChangeToMatchResultWidget()
-{
-	if (TitleTextBlock != nullptr)
-	{
-		TitleTextBlock->SetColorAndOpacity(MatchResultTitleColor);
-		TitleTextBlock->SetText(FText::FromString(TEXT("MATCH RESULT")));
-	}
-}
-
 void UASDmLeaderBoardUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -29,6 +20,17 @@ void UASDmLeaderBoardUserWidget::NativeConstruct()
 	if (IsValid(GameState))
 	{
 		GameState->OnUpdatedRanking.AddUObject(this, &UASDmLeaderBoardUserWidget::UpdateRanking);
+
+		if (GameState->GetInnerMatchState() == EInnerMatchState::Finish)
+		{
+			if (TitleTextBlock != nullptr)
+			{
+				FText TitleText = FText::FromString(TEXT("MATCH RESULT"));
+
+				TitleTextBlock->SetColorAndOpacity(MatchResultTitleColor);
+				TitleTextBlock->SetText(TitleText);
+			}
+		}
 
 		if (GoalNumOfKillsTextBlock != nullptr)
 		{

@@ -25,24 +25,12 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);
 	DOREPLIFETIME(AASMatchGameStateBase, InnerMatchState);
 	DOREPLIFETIME(AASMatchGameStateBase, MatchFinishTime);
+	DOREPLIFETIME(AASMatchGameStateBase, RestartTime);	
 }
 
 void AASMatchGameStateBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		auto GameInst = GetGameInstance<UASGameInstance>();
-		if (IsValid(GameInst))
-		{
-			SetInnerMatchState(GameInst->GetInnerMatchState());
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
 
 	TArray<UASItemSetDataAsset*> DummyArrayForAssetLoading = GetItemSetDataAssets();
 }
@@ -195,6 +183,18 @@ void AASMatchGameStateBase::SetMatchFinishTime(float FinishTime)
 	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
 }
 
+FDateTime AASMatchGameStateBase::GetRestartTime() const
+{
+	return RestartTime;
+}
+
+void AASMatchGameStateBase::SetRestartTime(float Time)
+{
+	RestartTime = Time;
+
+	OnSetRestartTime.Broadcast(RestartTime);
+}
+
 TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 {
 	TArray<UASItemSetDataAsset*> DataAssets;
@@ -269,6 +269,20 @@ void AASMatchGameStateBase::OnRep_InnerMatchState()
 void AASMatchGameStateBase::OnRep_MatchFinishTime()
 {
 	OnSetMatchFinishTime.Broadcast(MatchFinishTime);
+}
+
+void AASMatchGameStateBase::OnRep_RestartTime()
+{
+	OnSetRestartTime.Broadcast(RestartTime);
+
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
+		if (IsValid(PlayerController))
+		{
+			PlayerController->ShowRestartTimerWidget(RestartTime);
+		}
+	}
 }
 
 AASPlayerState* AASMatchGameStateBase::GetPlayerStateOfTopKillCount() const

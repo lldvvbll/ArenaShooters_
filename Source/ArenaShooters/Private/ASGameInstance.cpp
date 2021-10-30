@@ -35,8 +35,6 @@ void UASGameInstance::Init()
 	{
 		AS_LOG_S(Error);
 	}
-
-	InnerMatchState = EInnerMatchState::Prepare;
 }
 
 void UASGameInstance::SearchServer()
@@ -74,21 +72,6 @@ void UASGameInstance::JoinServer(const FOnlineSessionSearchResult& SearchResult)
 	{
 		AS_LOG_S(Error);
 	}
-}
-
-EInnerMatchState UASGameInstance::GetInnerMatchState() const
-{
-	return InnerMatchState;
-}
-
-void UASGameInstance::SetInnerMatchState(EInnerMatchState State)
-{
-	InnerMatchState = State;
-}
-
-bool UASGameInstance::IsMatchProcess() const
-{
-	return InnerMatchState == EInnerMatchState::Process;
 }
 
 void UASGameInstance::OnStart()

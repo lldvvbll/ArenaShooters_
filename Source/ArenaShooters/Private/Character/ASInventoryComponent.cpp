@@ -295,24 +295,13 @@ ItemBoolPair UASInventoryComponent::RemoveItem(UASItem* InItem)
 		case EItemType::Armor:
 			if (auto Armor = Cast<UASArmor>(InItem))
 			{
-				ResultPair = RemoveItemFromArmorSlot(GetSuitableArmorSlotType(Armor->GetArmorType()));
+				ResultPair = RemoveItemFromArmorSlot(GetArmorSlotTypeFromArmor(Armor));
 			}
 			break;
 		case EItemType::Ammo:			// fallthough
 		case EItemType::HealingKit:
 			{
-				int32 Idx = InventoryItems.Find(InItem);
-				if (Idx != INDEX_NONE)
-				{
-					ResultPair.Key = InItem;
-					ResultPair.Value = true;
-
-					InventoryItems[Idx] = nullptr;
-					InventoryItems.RemoveAtSwap(Idx);
-
-					OnRemovedItemFromInventory(InItem);
-					OnRemoveInventoryItem.Broadcast(InItem);
-				}
+				ResultPair = RemoveFromInventory(InItem);
 			}
 			break;
 		default:
@@ -585,6 +574,26 @@ bool UASInventoryComponent::Contains(UASItem* InItem) const
 	return false;
 }
 
+ItemBoolPair UASInventoryComponent::RemoveFromInventory(UASItem* InItem)
+{
+	ItemBoolPair ResultPair(nullptr, false);
+
+	int32 Idx = InventoryItems.Find(InItem);
+	if (Idx != INDEX_NONE)
+	{
+		ResultPair.Key = InItem;
+		ResultPair.Value = true;
+
+		InventoryItems[Idx] = nullptr;
+		InventoryItems.RemoveAtSwap(Idx);
+
+		OnRemovedItemFromInventory(InItem);
+		OnRemoveInventoryItem.Broadcast(InItem);
+	}
+
+	return ResultPair;
+}
+
 int32 UASInventoryComponent::GetAmmoCountInInventory(EAmmoType AmmoType) const
 {
 	int32 Count = 0;
@@ -644,7 +653,7 @@ TArray<UASHealingKit*> UASInventoryComponent::GetHealingKits() const
 
 void UASInventoryComponent::ReattachWeaponActor(UASWeapon* InWeapon, const FName& SocketName) const
 {
-	if (InWeapon == nullptr)
+	if (!IsValid(InWeapon))
 	{
 		AS_LOG_S(Error);
 		return;
@@ -660,7 +669,7 @@ void UASInventoryComponent::ReattachWeaponActor(UASWeapon* InWeapon, const FName
 	WeaponActor->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
 	auto ASChar = Cast<AASCharacter>(GetOwner());
-	if (ASChar == nullptr)
+	if (!IsValid(ASChar))
 	{
 		AS_LOG_S(Error);
 		return;
@@ -690,25 +699,18 @@ TArray<TWeakObjectPtr<UASArmor>> UASInventoryComponent::GetCoveringArmors(const 
 
 void UASInventoryComponent::ClearAllItems()
 {
-	for (auto& Weapon : WeaponSlots)
+	TArray<UASItem*> RemoveItems;
+
+	RemoveItems.Append(WeaponSlots);
+	RemoveItems.Append(ArmorSlots);
+	RemoveItems.Append(InventoryItems);
+
+	for (auto& RemovedItem : RemoveItems)
 	{
-		if (Weapon == nullptr)
-			continue;
-
-		UASItemFactoryComponent::DeleteItem(GetWorld(), Weapon);
-	}
-
-	for (auto& Armor : ArmorSlots)
-	{
-		if (Armor == nullptr)
-			continue;
-
-		UASItemFactoryComponent::DeleteItem(GetWorld(), Armor);
-	}
-
-	for (auto& InventoryItem : InventoryItems)
-	{
-		UASItemFactoryComponent::DeleteItem(GetWorld(), InventoryItem);
+		if (RemoveItem(RemovedItem).Value)
+		{
+			UASItemFactoryComponent::DeleteItem(GetWorld(), RemovedItem);
+		}
 	}
 }
 
@@ -1062,6 +1064,21 @@ EWeaponSlotType UASInventoryComponent::GetWeaponSlotTypeFromWeapon(UASWeapon* In
 	}
 
 	return EWeaponSlotType::SlotNum;
+}
+
+EArmorSlotType UASInventoryComponent::GetArmorSlotTypeFromArmor(UASArmor* InArmor)
+{
+	if (InArmor != nullptr)
+	{
+		int32 SlotNum = static_cast<int32>(EArmorSlotType::SlotNum);
+		for (int32 Idx = 0; Idx < SlotNum; ++Idx)
+		{
+			if (ArmorSlots[Idx] == InArmor)
+				return static_cast<EArmorSlotType>(Idx);
+		}
+	}
+
+	return EArmorSlotType::SlotNum;
 }
 
 void UASInventoryComponent::OnRep_WeaponSlots(TArray<UASItem*>& OldWeaponSlots)

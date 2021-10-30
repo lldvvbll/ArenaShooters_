@@ -17,9 +17,6 @@ class ARENASHOOTERS_API UASDmLeaderBoardUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	void ChangeToMatchResultWidget();
-
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

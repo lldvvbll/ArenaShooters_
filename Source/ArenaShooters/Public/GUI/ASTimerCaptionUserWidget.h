@@ -4,24 +4,27 @@
 
 #include "ArenaShooters.h"
 #include "Blueprint/UserWidget.h"
-#include "ASRespawnTimerUserWidget.generated.h"
+#include "ASTimerCaptionUserWidget.generated.h"
 
 class UTextBlock;
 
 UCLASS()
-class ARENASHOOTERS_API UASRespawnTimerUserWidget : public UUserWidget
+class ARENASHOOTERS_API UASTimerCaptionUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
 public:
-	void SetEndTime(const FDateTime& Time);
-	void SetEndTimeByServerWorldTime(float TimeSec);
+	void SetInfo(const FText& Caption, const FDateTime& Time);
+	void SetInfo(const FText& Caption, float TimeSec);
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 protected:
+	UPROPERTY()
+	UTextBlock* CaptionTextBlock;
+
 	UPROPERTY()
 	UTextBlock* CountDownTextBlock;
 

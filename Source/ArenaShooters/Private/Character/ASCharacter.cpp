@@ -195,19 +195,30 @@ void AASCharacter::SetPlayerDefaults()
 		ASStatus->SetStatusDefaults();
 	}
 
-	auto ASPlayerState = GetPlayerState<AASPlayerState>();
-	if (IsValid(ASPlayerState))
+	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+	if (IsValid(GameState))
 	{
-		if (IsValid(ASInventory))
+		if (GameState->IsMatchProcess())
 		{
-			ASInventory->ClearAllItems();
+			auto ASPlayerState = GetPlayerState<AASPlayerState>();
+			if (IsValid(ASPlayerState))
+			{
+				if (IsValid(ASInventory))
+				{
+					ASInventory->ClearAllItems();
 
-			UASItemSetDataAsset* DataAsset = ASPlayerState->GetItemSetDataAsset();
-			ASInventory->EquipItemsByItemSetDataAsset(DataAsset);
-		}
-		else
-		{
-			AS_LOG_S(Error);
+					UASItemSetDataAsset* DataAsset = ASPlayerState->GetItemSetDataAsset();
+					ASInventory->EquipItemsByItemSetDataAsset(DataAsset);
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
 		}
 	}
 	else

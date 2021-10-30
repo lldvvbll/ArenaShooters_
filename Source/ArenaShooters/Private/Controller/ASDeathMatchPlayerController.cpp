@@ -57,7 +57,8 @@ void AASDeathMatchPlayerController::OnChangedInnerMatchState(EInnerMatchState St
 	{
 		if (State == EInnerMatchState::Finish)
 		{
-			ShowDeathmatchResultWidget();
+			RemoveFullScreenWidget();
+			ShowLeaderBoardWidget();
 		}
 	}
 }
@@ -65,33 +66,4 @@ void AASDeathMatchPlayerController::OnChangedInnerMatchState(EInnerMatchState St
 void AASDeathMatchPlayerController::ShowLeaderBoardWidget()
 {
 	ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
-}
-
-void AASDeathMatchPlayerController::ShowDeathmatchResultWidget()
-{
-	UASDmLeaderBoardUserWidget* LeaderBoardWidget = nullptr;
-
-	if (CurrentFullScreenWidget != nullptr)
-	{
-		LeaderBoardWidget = Cast<UASDmLeaderBoardUserWidget>(CurrentFullScreenWidget);
-		if (LeaderBoardWidget == nullptr)
-		{
-			CurrentFullScreenWidget->RemoveFromParent();
-			OnDestructedFullScreenWidget(CurrentFullScreenWidget);
-		}
-	}
-	
-	if (LeaderBoardWidget == nullptr)
-	{
-		LeaderBoardWidget = ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
-	}
-
-	if (LeaderBoardWidget != nullptr)
-	{
-		LeaderBoardWidget->ChangeToMatchResultWidget();
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }

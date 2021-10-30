@@ -50,6 +50,9 @@ public:
 	FDateTime GetMatchFinishTime() const;
 	void SetMatchFinishTime(float FinishTime);
 
+	FDateTime GetRestartTime() const;
+	void SetRestartTime(float Time);
+
 	TArray<UASItemSetDataAsset*> GetItemSetDataAssets() const;
 	bool IsValidItemSetDataAsset(UASItemSetDataAsset* DataAsset) const;
 
@@ -68,6 +71,9 @@ protected:
 	UFUNCTION()
 	void OnRep_MatchFinishTime();
 
+	UFUNCTION()
+	void OnRep_RestartTime();
+
 	AASPlayerState* GetPlayerStateOfTopKillCount() const;
 
 public:
@@ -85,6 +91,9 @@ public:
 
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetMatchFinishTimeEvent, float)
 	FOnSetMatchFinishTimeEvent OnSetMatchFinishTime;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetRestartTimeEvent, float)
+	FOnSetRestartTimeEvent OnSetRestartTime;
 
 	DECLARE_EVENT_ThreeParams(AASMatchGameStateBase, FOnKillEvent, AASPlayerState*, AASPlayerState*, int32)
 	FOnKillEvent OnKill;
@@ -107,6 +116,9 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchFinishTime)
 	float MatchFinishTime;
+
+	UPROPERTY(ReplicatedUsing = OnRep_RestartTime)
+	float RestartTime;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FPrimaryAssetId> ItemSetAssetIds;

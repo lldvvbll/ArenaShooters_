@@ -14,7 +14,7 @@ class UASGameMenuUserWidget;
 class UASPrepareInfoUserWidget;
 class UASHudUserWidget;
 class AASCharacter;
-class UASRespawnTimerUserWidget;
+class UASTimerCaptionUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API AASPlayerController : public APlayerController
@@ -33,6 +33,11 @@ public:
 
 	void SetRespawnTimer(FTimespan Delay);
 	void ClearRespawnTimer();
+	void RespawnPlayer();
+
+	void ShowRestartTimerWidget(float EndTimerSec);
+
+	void RemoveFullScreenWidget();
 
 protected:
 	virtual void BeginPlay() override;
@@ -45,6 +50,7 @@ protected:
 	void ShowInventoryWidget();
 	void ShowGameMenuWidget();
 	void ShowPrepareInfoWidget();
+	void RemovePrepareInfoWidget();
 	void ShowRespawnTimerWidget(float EndTimeSec);
 	void RemoveRespawnTimerWidget();
 
@@ -76,10 +82,6 @@ protected:
 				AS_LOG_S(Error);
 			}
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
 
 		return nullptr;
 	}
@@ -91,6 +93,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_RespawnTime();
+
+	void OnSetRestartTime(float RestartTime);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
@@ -121,10 +125,13 @@ protected:
 	UASHudUserWidget* HudWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = UI)
-	TSubclassOf<UASRespawnTimerUserWidget> RespawnTimerWidgetClass;
+	TSubclassOf<UASTimerCaptionUserWidget> TimerCaptionUserWidgetClass;
 
 	UPROPERTY()
-	UASRespawnTimerUserWidget* RespawnTimerWidget;
+	UASTimerCaptionUserWidget* RespawnTimerWidget;
+
+	UPROPERTY()
+	UASTimerCaptionUserWidget* RestartTimerWidget;
 
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;

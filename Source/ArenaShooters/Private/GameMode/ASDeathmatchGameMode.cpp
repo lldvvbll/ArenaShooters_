@@ -26,7 +26,6 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 			AS_LOG_S(Error);
 		}
 
-
 		if (DmGameState->IsMatchProcess())
 		{
 			if (IsValid(DeadController))

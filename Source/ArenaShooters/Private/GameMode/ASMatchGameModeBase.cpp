@@ -33,15 +33,22 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (!ASGameInstance->IsMatchProcess())
+	if (IsValid(ASMatchGameState))
 	{
-		if (!bSetPrepareTimer && NumPlayers >= MinPlayerCount)
+		if (ASMatchGameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 		{
-			bSetPrepareTimer = true;
+			if (!bSetPrepareTimer && NumPlayers >= MinPlayerCount)
+			{
+				bSetPrepareTimer = true;
 
-			FTimerHandle TimerHandle;
-			GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, 3.0f);
+				FTimerHandle TimerHandle;
+				GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, 3.0f);
+			}
 		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }
 
@@ -100,15 +107,6 @@ void AASMatchGameModeBase::FinishMatch()
 		GetWorldTimerManager().ClearTimer(MatchFinishTimeHandle);
 	}
 
-	if (IsValid(ASGameInstance))
-	{
-		ASGameInstance->SetInnerMatchState(EInnerMatchState::Finish);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-
 	if (IsValid(ASMatchGameState))
 	{
 		ASMatchGameState->OnFinishMatch();
@@ -120,8 +118,7 @@ void AASMatchGameModeBase::FinishMatch()
 
 	if (NumPlayers >= MinPlayerCount)
 	{
-		FTimerHandle TimerHandle;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, PostFinishTime.GetTotalSeconds());
+		SetRestartTimer();
 	}	
 }
 
@@ -175,34 +172,6 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 	}
 }
 
-void AASMatchGameModeBase::HandleMatchHasStarted()
-{
-	Super::HandleMatchHasStarted();
-
-	if (IsValid(ASGameInstance))
-	{
-		if (ASGameInstance->IsMatchProcess())
-		{
-			float MatchProcessTimeSec = MatchProcessTime.GetTotalSeconds();
-			GetWorldTimerManager().SetTimer(MatchFinishTimeHandle, this, &AASMatchGameModeBase::FinishMatch, MatchProcessTimeSec);
-
-			if (IsValid(ASMatchGameState))
-			{
-				float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + MatchProcessTimeSec;
-				ASMatchGameState->SetMatchFinishTime(FinishTime);
-			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-}
-
 void AASMatchGameModeBase::SetPrepareTimer()
 {
 	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
@@ -221,14 +190,53 @@ void AASMatchGameModeBase::SetPrepareTimer()
 
 void AASMatchGameModeBase::OnCalledPrepareTimer()
 {
-	if (IsValid(ASGameInstance))
+	if (IsValid(ASMatchGameState))
 	{
-		ASGameInstance->SetInnerMatchState(EInnerMatchState::Process);
+		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Process);
 	}
 	else
 	{
 		AS_LOG_S(Error);
 	}
-	
+
+	SetProcessTimer();
+}
+
+void AASMatchGameModeBase::SetProcessTimer()
+{
+	float MatchProcessTimeSec = MatchProcessTime.GetTotalSeconds();
+	GetWorldTimerManager().SetTimer(MatchFinishTimeHandle, this, &AASMatchGameModeBase::FinishMatch, MatchProcessTimeSec);
+
+	if (IsValid(ASMatchGameState))
+	{
+		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + MatchProcessTimeSec;
+		ASMatchGameState->SetMatchFinishTime(FinishTime);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASMatchGameModeBase::SetRestartTimer()
+{
+	float RestartTime = PostFinishTime.GetTotalSeconds();
+
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::OnCalledRestartTimer, RestartTime);
+
+	if (IsValid(ASMatchGameState))
+	{
+		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + RestartTime;
+		ASMatchGameState->SetRestartTime(FinishTime);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASMatchGameModeBase::OnCalledRestartTimer()
+{
 	RestartGame();
 }

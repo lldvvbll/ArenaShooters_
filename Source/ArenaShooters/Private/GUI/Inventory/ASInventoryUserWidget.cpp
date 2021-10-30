@@ -62,6 +62,30 @@ void UASInventoryUserWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 
+	AASCharacter* ASChar = GetASCharacter();
+	if (IsValid(ASChar))
+	{
+		ASChar->OnGroundItemAdd.RemoveAll(this);
+		ASChar->OnGroundItemRemove.RemoveAll(this);
+
+		ASInventoryComp = ASChar->GetInventoryComponent();
+		if (IsValid(ASInventoryComp))
+		{
+			ASInventoryComp->OnAddInventoryItem.RemoveAll(this);
+			ASInventoryComp->OnRemoveInventoryItem.RemoveAll(this);
+			ASInventoryComp->OnInsertWeapon.RemoveAll(this);
+			ASInventoryComp->OnInsertArmor.RemoveAll(this);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
 	OnDestructed.Broadcast(this);
 }
 

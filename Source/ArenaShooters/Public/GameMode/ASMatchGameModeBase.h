@@ -32,10 +32,13 @@ public:
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
 protected:
-	virtual void HandleMatchHasStarted() override;
-
 	void SetPrepareTimer();
 	void OnCalledPrepareTimer();
+
+	void SetProcessTimer();
+
+	void SetRestartTimer();
+	void OnCalledRestartTimer();
 
 protected:
 	UPROPERTY()

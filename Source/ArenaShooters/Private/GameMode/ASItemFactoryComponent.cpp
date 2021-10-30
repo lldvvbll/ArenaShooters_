@@ -67,21 +67,21 @@ bool UASItemFactoryComponent::DeleteItem(UWorld* World, UASItem* InItem)
 		return false;
 	}
 
-	if (World == nullptr)
+	if (!IsValid(World))
 	{
 		AS_LOG_S(Error);
 		return false;
 	}
 
 	AGameStateBase* GameState = World->GetGameState();
-	if (GameState == nullptr)
+	if (!IsValid(GameState))
 	{
 		AS_LOG_S(Error);
 		return nullptr;
 	}
 
 	auto ItemFactoryComp = Cast<UASItemFactoryComponent>(GameState->FindComponentByClass(UASItemFactoryComponent::StaticClass()));
-	if (ItemFactoryComp == nullptr)
+	if (!IsValid(ItemFactoryComp))
 	{
 		AS_LOG_S(Error);
 		return nullptr;
