@@ -79,7 +79,7 @@ TArray<TWeakObjectPtr<UASItem>> AASDroppedItemActor::GetItems() const
 
 void AASDroppedItemActor::AddItem(UASItem* InItem)
 {
-	if (InItem == nullptr)
+	if (!IsValid(InItem))
 	{
 		AS_LOG_S(Error);
 		return;
@@ -93,6 +93,14 @@ void AASDroppedItemActor::AddItem(UASItem* InItem)
 	}
 
 	ASItems.Emplace(InItem);
+}
+
+void AASDroppedItemActor::AddItems(const TArray<UASItem*>& InItems)
+{
+	for (auto& Item : InItems)
+	{
+		AddItem(Item);
+	}
 }
 
 bool AASDroppedItemActor::RemoveItem(UASItem* InItem)
@@ -111,7 +119,7 @@ bool AASDroppedItemActor::RemoveItem(UASItem* InItem)
 
 	InItem->SetOwner(nullptr);
 
-	if (ASItems.Num() == 0)
+	if (ASItems.Num() <= 0)
 	{
 		SetSelfDestroy(3.0f);
 	}
@@ -144,6 +152,11 @@ void AASDroppedItemActor::BeginPlay()
 				continue;
 
 			ASItems.Emplace(UASItemFactoryComponent::NewASItem(GetWorld(), this, ItemDataAsset, Count));
+		}
+
+		if (ASItems.Num() <= 0)
+		{
+			SetSelfDestroy(3.0f);
 		}
 	}	
 }

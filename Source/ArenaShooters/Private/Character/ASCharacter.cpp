@@ -102,14 +102,6 @@ void AASCharacter::PostInitializeComponents()
 	if (USkeletalMeshComponent* SkMesh = GetMesh())
 	{
 		ASAnimInstance = Cast<UASAnimInstance>(SkMesh->GetAnimInstance());
-		if (ASAnimInstance != nullptr)
-		{
-			ASAnimInstance->OnReloadComplete.AddUObject(this, &AASCharacter::ServerCompleteReload);
-			ASAnimInstance->OnReloadEnd.AddUObject(this, &AASCharacter::EndReload);
-			ASAnimInstance->OnChangeWeaponEnd.AddUObject(this, &AASCharacter::ServerEndSelectWeapon);
-			ASAnimInstance->OnUseHealingKitComplete.AddUObject(this, &AASCharacter::ServerCompleteHealingKit);
-			ASAnimInstance->OnUseHealingKitEnd.AddUObject(this, &AASCharacter::EndHealingKit);
-		}
 	}
 
 	if (ASInventory != nullptr)
@@ -121,6 +113,18 @@ void AASCharacter::PostInitializeComponents()
 void AASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		if (ASAnimInstance != nullptr)
+		{
+			ASAnimInstance->OnReloadComplete.AddUObject(this, &AASCharacter::ServerCompleteReload);
+			ASAnimInstance->OnReloadEnd.AddUObject(this, &AASCharacter::EndReload);
+			ASAnimInstance->OnChangeWeaponEnd.AddUObject(this, &AASCharacter::ServerEndSelectWeapon);
+			ASAnimInstance->OnUseHealingKitComplete.AddUObject(this, &AASCharacter::ServerCompleteHealingKit);
+			ASAnimInstance->OnUseHealingKitEnd.AddUObject(this, &AASCharacter::EndHealingKit);
+		}
+	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 	if (IsValid(GameState))
@@ -727,6 +731,17 @@ void AASCharacter::DropItem(UASItem* InItem)
 	ServerDropItem(InItem);
 }
 
+void AASCharacter::DropAllItems()
+{
+	if (ASInventory == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	SpawnDroppedItemsActor(ASInventory->RemoveAllItems());
+}
+
 void AASCharacter::MulticastPlayPickUpItemMontage_Implementation()
 {
 	if (GetLocalRole() == ROLE_Authority)
@@ -1260,23 +1275,6 @@ void AASCharacter::ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotT
 			bChangeWeapon = true;
 		}
 	}
-	else
-	{
-		// todo: delete
-		FPrimaryAssetId& WeaponAssetId = (WeaponSlotType == EWeaponSlotType::Main) ? TestARAssetId : TestPistolAssetId;
-
-		if (auto WeaponDataAsset = UASAssetManager::Get().GetDataAsset<UASWeaponDataAsset>(WeaponAssetId))
-		{
-			UASItem* OldWeapon = nullptr;
-			if (ASInventory->InsertWeapon(WeaponSlotType, UASItemFactoryComponent::NewASItem<UASWeapon>(GetWorld(), this, WeaponDataAsset), OldWeapon))
-			{
-				if (OldWeapon != nullptr)
-				{
-					AS_LOG_S(Error);
-				}
-			}
-		}
-	}
 }
 
 void AASCharacter::ServerEndSelectWeapon_Implementation()
@@ -1530,15 +1528,39 @@ void AASCharacter::ServerChangeFireMode_Implementation()
 
 void AASCharacter::SpawnDroppedItemActor(UASItem* DroppingItem)
 {
-	if (DroppingItem == nullptr)
+	if (!IsValid(DroppingItem))
+	{
+		AS_LOG_S(Error);
 		return;
+	}		
 
 	USkeletalMeshComponent* SkeletalMeshComp = GetMesh();
 	FVector Location = (SkeletalMeshComp != nullptr ? SkeletalMeshComp->GetComponentLocation() : GetActorLocation());
 
-	if (auto DroppedItemActor = GetWorld()->SpawnActor<AASDroppedItemActor>(DroppingItem->GetDroppedItemActorClass(), Location, GetActorRotation()))
+	auto DroppedItemActor = GetWorld()->SpawnActor<AASDroppedItemActor>(DroppingItem->GetDroppedItemActorClass(), Location, GetActorRotation());
+	if (IsValid(DroppedItemActor))
 	{
 		DroppedItemActor->AddItem(DroppingItem);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
+void AASCharacter::SpawnDroppedItemsActor(const TArray<UASItem*>& DroppingItems)
+{
+	USkeletalMeshComponent* SkeletalMeshComp = GetMesh();
+	FVector Location = (SkeletalMeshComp != nullptr ? SkeletalMeshComp->GetComponentLocation() : GetActorLocation());
+
+	auto DroppedItemActor = GetWorld()->SpawnActor<AASDroppedItemActor>(DroppedItemBoxActorClass, Location, GetActorRotation());
+	if (IsValid(DroppedItemActor))
+	{
+		DroppedItemActor->AddItems(DroppingItems);
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }
 
@@ -1687,6 +1709,8 @@ void AASCharacter::Die()
 
 		bDead = true;
 		SetCanBeDamaged(false);
+
+		DropAllItems();
 
 		StartRagdoll();
 	}

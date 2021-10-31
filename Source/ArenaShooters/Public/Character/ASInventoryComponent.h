@@ -52,6 +52,7 @@ public:
 	bool SelectWeapon(EWeaponSlotType SlotType);
 
 	ItemBoolPair RemoveItem(UASItem* InItem);
+	TArray<UASItem*> RemoveAllItems();
 
 	ItemPtrBoolPair FindItemFromWeaponSlot(EWeaponSlotType SlotType) const;
 	ItemPtrBoolPair SetItemToWeaponSlot(EWeaponSlotType SlotType, UASItem* NewItem);

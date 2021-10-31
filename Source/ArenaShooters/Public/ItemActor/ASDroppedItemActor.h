@@ -23,6 +23,7 @@ public:
 
 	TArray<TWeakObjectPtr<UASItem>> GetItems() const;
 	void AddItem(UASItem* InItem);
+	void AddItems(const TArray<UASItem*>& InItems);
 	bool RemoveItem(UASItem* InItem);
 
 	void SetSelfDestroy(float InLifeSpan);

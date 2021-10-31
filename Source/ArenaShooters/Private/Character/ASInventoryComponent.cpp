@@ -313,6 +313,27 @@ ItemBoolPair UASInventoryComponent::RemoveItem(UASItem* InItem)
 	return ResultPair;
 }
 
+TArray<UASItem*> UASInventoryComponent::RemoveAllItems()
+{
+	TArray<UASItem*> Items;
+	Items.Append(WeaponSlots);
+	Items.Append(ArmorSlots);
+	Items.Append(InventoryItems);
+
+	TArray<UASItem*> RemovedItems;
+	RemovedItems.Reserve(Items.Num());
+
+	for (auto& Item : Items)
+	{
+		if (RemoveItem(Item).Value)
+		{
+			RemovedItems.Emplace(Item);
+		}
+	}
+
+	return RemovedItems;
+}
+
 ItemPtrBoolPair UASInventoryComponent::FindItemFromWeaponSlot(EWeaponSlotType SlotType) const
 {
 	ItemPtrBoolPair ResultPair(nullptr, false);
@@ -699,18 +720,11 @@ TArray<TWeakObjectPtr<UASArmor>> UASInventoryComponent::GetCoveringArmors(const 
 
 void UASInventoryComponent::ClearAllItems()
 {
-	TArray<UASItem*> RemoveItems;
+	TArray<UASItem*> RemovedItems = RemoveAllItems();
 
-	RemoveItems.Append(WeaponSlots);
-	RemoveItems.Append(ArmorSlots);
-	RemoveItems.Append(InventoryItems);
-
-	for (auto& RemovedItem : RemoveItems)
+	for (auto& RemovedItem : RemovedItems)
 	{
-		if (RemoveItem(RemovedItem).Value)
-		{
-			UASItemFactoryComponent::DeleteItem(GetWorld(), RemovedItem);
-		}
+		UASItemFactoryComponent::DeleteItem(GetWorld(), RemovedItem);
 	}
 }
 

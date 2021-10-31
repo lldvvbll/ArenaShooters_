@@ -86,6 +86,7 @@ public:
 	void PickUpArmor(EArmorSlotType SlotType, UASArmor* NewArmor);
 	void PickUpInventoryItem(UASItem* NewItem);
 	void DropItem(UASItem* InItem);
+	void DropAllItems();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayPickUpItemMontage();
@@ -179,6 +180,7 @@ protected:
 	void ServerChangeFireMode_Implementation();
 
 	void SpawnDroppedItemActor(UASItem* DroppingItem);
+	void SpawnDroppedItemsActor(const TArray<UASItem*>& DroppingItems);
 	void OnRemoveGroundItem(const TWeakObjectPtr<UASItem>& Item);
 
 	UFUNCTION(Server, Reliable)
@@ -250,7 +252,7 @@ public:
 	DECLARE_EVENT(AASCharacter, FOnPlayShootMontageEvent)
 	FOnPlayShootMontageEvent OnPlayShootMontage;
 
-private:
+protected:
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = true))
 	USpringArmComponent* CameraBoom;
 
@@ -351,20 +353,13 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem* BloodParticle;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AASDroppedItemActor> DroppedItemBoxActorClass;
+
 	float CurrentBulletSpread;
 	float MinBulletSpread;
 	float MaxBulletSpread;
 	float BulletSpreadAmountPerShot;
 	float BulletSpreadRecoverySpeed;
-
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Test, Meta = (AllowPrivateAccess = true))
-	FPrimaryAssetId TestARAssetId;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Test, Meta = (AllowPrivateAccess = true))
-	FPrimaryAssetId TestPistolAssetId;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Test, Meta = (AllowPrivateAccess = true))
-	FPrimaryAssetId TestArmorAssetId;
 };
 
