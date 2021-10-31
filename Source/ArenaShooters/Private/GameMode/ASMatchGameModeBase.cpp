@@ -85,6 +85,40 @@ void AASMatchGameModeBase::Tick(float DeltaSeconds)
 
 }
 
+void AASMatchGameModeBase::InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer)
+{
+	Super::InitStartSpot_Implementation(StartSpot, NewPlayer);
+
+	if (IsValid(NewPlayer))
+	{
+		if (IsValid(StartSpot))
+		{
+			APawn* Pawn = NewPlayer->GetPawn();
+			if (IsValid(Pawn))
+			{
+				FRotator InitialControllerRot = StartSpot->GetActorRotation();
+				InitialControllerRot.Roll = 0.f;
+
+				Pawn->TeleportTo(StartSpot->GetActorLocation(), InitialControllerRot);
+
+				NewPlayer->StartSpot = StartSpot;
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}	
+}
+
 int32 AASMatchGameModeBase::GetMaxPlayerCount() const
 {
 	return MaxPlayerCount;
@@ -100,6 +134,22 @@ int32 AASMatchGameModeBase::GetGoalNumOfKills() const
 	return GoalNumOfKills;
 }
 
+void AASMatchGameModeBase::ProcessMatch()
+{
+	PrepareAllPlayerStart();
+
+	if (IsValid(ASMatchGameState))
+	{
+		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Process);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	SetProcessTimer();
+}
+
 void AASMatchGameModeBase::FinishMatch()
 {
 	if (GetWorldTimerManager().IsTimerActive(MatchFinishTimeHandle))
@@ -109,7 +159,7 @@ void AASMatchGameModeBase::FinishMatch()
 
 	if (IsValid(ASMatchGameState))
 	{
-		ASMatchGameState->OnFinishMatch();
+		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Finish);
 	}
 	else
 	{
@@ -175,7 +225,7 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 void AASMatchGameModeBase::SetPrepareTimer()
 {
 	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
-	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::OnCalledPrepareTimer, PrepareTimeSec);
+	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::ProcessMatch, PrepareTimeSec);
 
 	if (IsValid(ASMatchGameState))
 	{
@@ -186,20 +236,6 @@ void AASMatchGameModeBase::SetPrepareTimer()
 	{
 		AS_LOG_S(Error);
 	}
-}
-
-void AASMatchGameModeBase::OnCalledPrepareTimer()
-{
-	if (IsValid(ASMatchGameState))
-	{
-		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Process);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-
-	SetProcessTimer();
 }
 
 void AASMatchGameModeBase::SetProcessTimer()
@@ -239,4 +275,8 @@ void AASMatchGameModeBase::SetRestartTimer()
 void AASMatchGameModeBase::OnCalledRestartTimer()
 {
 	RestartGame();
+}
+
+void AASMatchGameModeBase::PrepareAllPlayerStart()
+{
 }

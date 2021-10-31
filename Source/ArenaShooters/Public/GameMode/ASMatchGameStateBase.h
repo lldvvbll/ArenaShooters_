@@ -45,8 +45,6 @@ public:
 	void MulticastOnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount);
 	void MulticastOnKill_Implementation(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount);
 
-	virtual void OnFinishMatch();
-
 	FDateTime GetMatchFinishTime() const;
 	void SetMatchFinishTime(float FinishTime);
 

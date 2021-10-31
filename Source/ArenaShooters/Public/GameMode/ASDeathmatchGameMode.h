@@ -15,7 +15,13 @@ class ARENASHOOTERS_API AASDeathmatchGameMode : public AASMatchGameModeBase
 	GENERATED_BODY()
 
 public:
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual bool ShouldSpawnAtStartSpot(AController* Player) override;
+
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController) override;
+
+protected:
+	virtual void PrepareAllPlayerStart() override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

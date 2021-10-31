@@ -166,11 +166,6 @@ void AASMatchGameStateBase::MulticastOnKill_Implementation(AASPlayerState* Kille
 	OnKill.Broadcast(KillerPlayerState, DeadPlayerState, KillCount);
 }
 
-void AASMatchGameStateBase::OnFinishMatch()
-{
-	SetInnerMatchState(EInnerMatchState::Finish);
-}
-
 FDateTime AASMatchGameStateBase::GetMatchFinishTime() const
 {
 	return MatchFinishTime;

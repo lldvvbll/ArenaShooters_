@@ -59,12 +59,6 @@ void AASDeathmatchGameState::RemovePlayerState(APlayerState* PlayerState)
 	}
 }
 
-void AASDeathmatchGameState::OnFinishMatch()
-{
-	Super::OnFinishMatch();
-
-}
-
 const TArray<FRankedPlayerState>& AASDeathmatchGameState::GetRankedPlayerStates() const
 {
 	return RankedPlayerStates;

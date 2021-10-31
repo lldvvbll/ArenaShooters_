@@ -24,21 +24,23 @@ public:
 	virtual void InitGameState();
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer) override;
+
 	int32 GetMaxPlayerCount() const;
 	int32 GetMinPlayerCount() const;
 	int32 GetGoalNumOfKills() const;
 
-	virtual void FinishMatch();
+	void ProcessMatch();
+	void FinishMatch();
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
 protected:
 	void SetPrepareTimer();
-	void OnCalledPrepareTimer();
-
 	void SetProcessTimer();
-
 	void SetRestartTimer();
 	void OnCalledRestartTimer();
+
+	virtual void PrepareAllPlayerStart();
 
 protected:
 	UPROPERTY()
