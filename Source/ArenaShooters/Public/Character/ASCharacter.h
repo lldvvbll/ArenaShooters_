@@ -101,6 +101,9 @@ public:
 	void StartRagdoll();
 	void EndRagdoll();
 
+	void TurnOnInvincible(float Duration);
+	void TurnOffInvincible();
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
@@ -243,6 +246,9 @@ protected:
 	AActor* FindPickableActor() const;
 	bool IsInteractableActor(AActor* InActor) const;
 
+	UFUNCTION()
+	void OnRep_bInvincible();
+
 public:
 	DECLARE_EVENT_OneParam(AASCharacter, FOnScopeEvent, const TWeakObjectPtr<UASWeapon>&)
 	FOnScopeEvent OnScope;
@@ -375,5 +381,10 @@ protected:
 	bool bTracePickingUp;
 	float PickingUpTraceElapseTime;
 	float PickingUpTraceInterval;
+
+	FTimerHandle InvincibleTimerHandle;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bInvincible)
+	bool bInvincible;
 };
 

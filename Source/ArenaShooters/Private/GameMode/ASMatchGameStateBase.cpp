@@ -139,6 +139,7 @@ EInnerMatchState AASMatchGameStateBase::GetInnerMatchState() const
 void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
 {
 	InnerMatchState = State;
+	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 
 	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
@@ -152,8 +153,6 @@ void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
 			AS_LOG_S(Error);
 		}
 	}
-
-	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 }
 
 bool AASMatchGameStateBase::IsMatchProcess() const

@@ -25,6 +25,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer) override;
+	virtual void SetPlayerDefaults(APawn* PlayerPawn) override;
 
 	int32 GetMaxPlayerCount() const;
 	int32 GetMinPlayerCount() const;
@@ -72,4 +73,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)
 	FTimespan PostFinishTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = Setting)
+	float RespawnInvicibleTimeSec;
 };

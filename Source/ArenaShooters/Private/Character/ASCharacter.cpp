@@ -202,6 +202,7 @@ void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AASCharacter, bDead);
 	DOREPLIFETIME(AASCharacter, bChangeWeapon);
 	DOREPLIFETIME(AASCharacter, bUseHealingKit);
+	DOREPLIFETIME(AASCharacter, bInvincible);	
 }
 
 void AASCharacter::SetPlayerDefaults()
@@ -973,6 +974,33 @@ void AASCharacter::EndRagdoll()
 	{
 		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+}
+
+void AASCharacter::TurnOnInvincible(float Duration)
+{
+	if (Duration <= 0.0f)
+		return;
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(InvincibleTimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InvincibleTimerHandle);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(InvincibleTimerHandle, this, &AASCharacter::TurnOffInvincible, Duration);
+
+	SetCanBeDamaged(false);
+	bInvincible = true;
+}
+
+void AASCharacter::TurnOffInvincible()
+{
+	if (GetWorld()->GetTimerManager().IsTimerActive(InvincibleTimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InvincibleTimerHandle);
+	}
+
+	SetCanBeDamaged(true);
+	bInvincible = false;
 }
 
 void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -2208,4 +2236,23 @@ bool AASCharacter::IsInteractableActor(AActor* InActor) const
 		return false;
 
 	return true;
+}
+
+void AASCharacter::OnRep_bInvincible()
+{
+	if (bInvincible)
+	{
+		if (USkeletalMeshComponent* SkeletalMeshComp = GetMesh())
+		{
+			SkeletalMeshComp->SetScalarParameterValueOnMaterials(TEXT("bShowEffect"), 1.0f);
+			SkeletalMeshComp->SetVectorParameterValueOnMaterials(TEXT("EffectColor"), FVector(FLinearColor::Yellow));
+		}
+	}
+	else
+	{
+		if (USkeletalMeshComponent* SkeletalMeshComp = GetMesh())
+		{
+			SkeletalMeshComp->SetScalarParameterValueOnMaterials(TEXT("bShowEffect"), 0.0f);
+		}
+	}
 }

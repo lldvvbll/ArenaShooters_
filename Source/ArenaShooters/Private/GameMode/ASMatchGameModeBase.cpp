@@ -8,6 +8,7 @@
 #include "Controller/ASPlayerState.h"
 #include "Common/ASEnums.h"
 #include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
+#include "Character/ASCharacter.h"
 
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
@@ -117,6 +118,27 @@ void AASMatchGameModeBase::InitStartSpot_Implementation(AActor* StartSpot, ACont
 	{
 		AS_LOG_S(Error);
 	}	
+}
+
+void AASMatchGameModeBase::SetPlayerDefaults(APawn* PlayerPawn)
+{
+	Super::SetPlayerDefaults(PlayerPawn);
+
+	if (IsValid(ASMatchGameState))
+	{
+		if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
+		{
+			auto Character = Cast<AASCharacter>(PlayerPawn);
+			if (IsValid(Character))
+			{
+				Character->TurnOnInvincible(RespawnInvicibleTimeSec);
+			}
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 int32 AASMatchGameModeBase::GetMaxPlayerCount() const
