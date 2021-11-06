@@ -13,6 +13,11 @@
 #include "Components/PanelWidget.h"
 #include "Common/ASEnums.h"
 
+const TWeakObjectPtr<UASItem>& UASItemUserWidget::GetItem() const
+{
+	return Item;
+}
+
 void UASItemUserWidget::SetItem(const TWeakObjectPtr<UASItem>& NewItem)
 {
 	Item = NewItem;

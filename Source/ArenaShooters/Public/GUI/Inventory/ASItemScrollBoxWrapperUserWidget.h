@@ -37,4 +37,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Meta = (AllowPrivateAccess = true))
 	TSubclassOf<UASItemUserWidget> ItemWidgetClass;
+
+	UPROPERTY()
+	TArray<UASItemUserWidget*> CachedItemWidgets;
 };

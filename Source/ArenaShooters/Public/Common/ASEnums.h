@@ -28,8 +28,8 @@ UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	None,
-	Pistol,
 	AssaultRifle,
+	Pistol,
 };
 
 UENUM(BlueprintType)

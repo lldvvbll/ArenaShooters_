@@ -19,6 +19,7 @@ class ARENASHOOTERS_API UASItemUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	const TWeakObjectPtr<UASItem>& GetItem() const;
 	void SetItem(const TWeakObjectPtr<UASItem>& NewItem);
 	bool HasItem(const TWeakObjectPtr<UASItem>& InItem) const;
 

@@ -8,6 +8,7 @@
 #include "Components/ScrollBox.h"
 #include "Item/ASItem.h"
 #include "Character/ASCharacter.h"
+#include "Common/ASStatics.h"
 
 void UASItemScrollBoxWrapperUserWidget::AddItemsToScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items)
 {
@@ -22,9 +23,33 @@ void UASItemScrollBoxWrapperUserWidget::AddItemsToScrollBox(const TArray<TWeakOb
 		if (auto ItemWidget = CreateWidget<UASItemUserWidget>(ItemScrollBox, ItemWidgetClass))
 		{
 			ItemWidget->SetItem(Item);
-			ItemScrollBox->AddChild(ItemWidget);
+			CachedItemWidgets.Emplace(ItemWidget);
 		}
 	}
+
+	CachedItemWidgets.Sort(
+		[](const UASItemUserWidget& Left, const UASItemUserWidget& Right)
+		{
+			const TWeakObjectPtr<UASItem>& LeftItemPtr = Left.GetItem();
+			const TWeakObjectPtr<UASItem>& RightItemPtr = Right.GetItem();
+
+			if (LeftItemPtr.IsValid() && RightItemPtr.IsValid())
+			{
+				return UASStatics::CompareItemForSorting(LeftItemPtr.Get(), RightItemPtr.Get());
+			}
+			else if (RightItemPtr.IsValid())
+			{
+				return false;
+			}
+
+			return true;
+		});
+
+	ItemScrollBox->ClearChildren();
+	for (auto& ItemWidget : CachedItemWidgets)
+	{
+		ItemScrollBox->AddChild(ItemWidget);
+	}	
 }
 
 void UASItemScrollBoxWrapperUserWidget::RemoveItemsFromScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items)
@@ -50,6 +75,7 @@ void UASItemScrollBoxWrapperUserWidget::RemoveItemsFromScrollBox(const TArray<TW
 
 			if (ItemWidget->HasItem(Item))
 			{
+				CachedItemWidgets.Remove(ItemWidget);
 				RemoveItemIndices.Emplace(Idx);
 			}
 		}
