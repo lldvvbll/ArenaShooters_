@@ -8,10 +8,7 @@
 void UASDmRankingSlotUserWidget::SetPlayerInfo(int32 Rank, AASPlayerState* PlayerState)
 {
 	if (!IsValid(PlayerState))
-	{
-		AS_LOG_S(Error);
 		return;
-	}
 
 	PlayerStatePtr = MakeWeakObjectPtr(PlayerState);
 	if (!PlayerStatePtr.IsValid())

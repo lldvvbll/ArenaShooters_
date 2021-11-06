@@ -29,10 +29,16 @@ AASDroppedItemActor::AASDroppedItemActor()
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComp"));
 	SkeletalMeshComp->SetCollisionProfileName(TEXT("NoCollision"));
 	SkeletalMeshComp->SetIsReplicated(true);
+	SkeletalMeshComp->SetRenderCustomDepth(false);
+	SkeletalMeshComp->SetCustomDepthStencilWriteMask(ERendererStencilMask::ERSM_Default);
+	SkeletalMeshComp->SetCustomDepthStencilValue(1);
 
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
 	StaticMeshComp->SetCollisionProfileName(TEXT("NoCollision"));
 	StaticMeshComp->SetIsReplicated(true);
+	StaticMeshComp->SetRenderCustomDepth(false);
+	StaticMeshComp->SetCustomDepthStencilWriteMask(ERendererStencilMask::ERSM_Default);
+	StaticMeshComp->SetCustomDepthStencilValue(1);
 
 	RootComponent = Collision;
 	SkeletalMeshComp->SetupAttachment(RootComponent);
@@ -44,6 +50,13 @@ void AASDroppedItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AASDroppedItemActor, ASItems);
+}
+
+void AASDroppedItemActor::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+
 }
 
 void AASDroppedItemActor::SetSkeletalMesh(USkeletalMesh* InSkelMesh)
@@ -75,6 +88,11 @@ TArray<TWeakObjectPtr<UASItem>> AASDroppedItemActor::GetItems() const
 	}
 
 	return Result;
+}
+
+int32 AASDroppedItemActor::GetItemNum() const
+{
+	return ASItems.Num();
 }
 
 void AASDroppedItemActor::AddItem(UASItem* InItem)
@@ -131,6 +149,19 @@ void AASDroppedItemActor::SetSelfDestroy(float InLifeSpan)
 {
 	SetActorHiddenInGame(InLifeSpan > 0.0f);
 	SetLifeSpan(InLifeSpan);
+}
+
+void AASDroppedItemActor::ShowOutline(bool bShow)
+{
+	if (SkeletalMeshComp != nullptr)
+	{
+		SkeletalMeshComp->SetRenderCustomDepth(bShow);
+	}
+
+	if (StaticMeshComp != nullptr)
+	{
+		StaticMeshComp->SetRenderCustomDepth(bShow);
+	}
 }
 
 void AASDroppedItemActor::BeginPlay()

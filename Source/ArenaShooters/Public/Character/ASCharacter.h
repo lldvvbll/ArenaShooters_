@@ -50,6 +50,8 @@ public:
 	bool IsSprinted() const;
 	float GetTotalTurnValue() const;
 	EWeaponType GetUsingWeaponType() const;
+	TWeakObjectPtr<UASWeapon> GetUsingWeapon() const;
+	TWeakObjectPtr<AASWeaponActor> GetUsingWeaponActor() const;
 	FRotator GetAimOffsetRotator() const;
 	EShootingStanceType GetShootingStance() const;
 
@@ -69,12 +71,12 @@ public:
 	void ServerPickUpArmor_Implementation(EArmorSlotType SlotType, UASArmor* NewArmor);
 
 	UFUNCTION(Server, Reliable)
-	void ServerDropItem(UASItem* InItem);
-	void ServerDropItem_Implementation(UASItem* InItem);
-
-	UFUNCTION(Server, Reliable)
 	void ServerPickUpInventoryItem(UASItem* NewItem);
 	void ServerPickUpInventoryItem_Implementation(UASItem* NewItem);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDropItem(UASItem* InItem);
+	void ServerDropItem_Implementation(UASItem* InItem);
 
 	bool RemoveItem(UASItem* InItem);
 
@@ -82,6 +84,7 @@ public:
 	void OnDestructedFullScreenWidget(UUserWidget* DestructedWidget);
 	bool IsShownFullScreenWidget() const;
 
+	void PicUpItem(UASItem* InItem);
 	void PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon);
 	void PickUpArmor(EArmorSlotType SlotType, UASArmor* NewArmor);
 	void PickUpInventoryItem(UASItem* NewItem);
@@ -120,7 +123,7 @@ protected:
 	void ChangeFireMode();
 	void Reload();
 	void HealingKit();
-	void DoFunction();
+	void Interact();
 
 	void Shoot();
 	void ResetAimKeyState();
@@ -236,6 +239,10 @@ protected:
 
 	void OnChangedInnerMatchState(EInnerMatchState State);
 
+	void HighlightingPickableActor();
+	AActor* FindPickableActor() const;
+	bool IsInteractableActor(AActor* InActor) const;
+
 public:
 	DECLARE_EVENT_OneParam(AASCharacter, FOnScopeEvent, const TWeakObjectPtr<UASWeapon>&)
 	FOnScopeEvent OnScope;
@@ -251,6 +258,9 @@ public:
 
 	DECLARE_EVENT(AASCharacter, FOnPlayShootMontageEvent)
 	FOnPlayShootMontageEvent OnPlayShootMontage;
+
+	DECLARE_EVENT_OneParam(AASCharacter, FOnTracePickingUpEvent, AActor*)
+	FOnTracePickingUpEvent OnTracePickingUp;
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = true))
@@ -327,7 +337,7 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_ShootingStance)
 	EShootingStanceType ShootingStance;
 
-	TSet<TPair<TWeakObjectPtr<AASDroppedItemActor>, FDelegateHandle>> GroundItemActorSet;
+	TSet<TWeakObjectPtr<AASDroppedItemActor>> GroundItemActorSet;
 
 	UPROPERTY(ReplicatedUsing = OnRep_bReloading)
 	bool bReloading;
@@ -361,5 +371,9 @@ protected:
 	float MaxBulletSpread;
 	float BulletSpreadAmountPerShot;
 	float BulletSpreadRecoverySpeed;
+
+	bool bTracePickingUp;
+	float PickingUpTraceElapseTime;
+	float PickingUpTraceInterval;
 };
 

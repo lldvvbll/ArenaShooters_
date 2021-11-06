@@ -17,16 +17,21 @@ public:
 	AASDroppedItemActor();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
 
 	void SetSkeletalMesh(USkeletalMesh* InSkelMesh);
 	void SetStaticMesh(UStaticMesh* InStaticMesh);
 
 	TArray<TWeakObjectPtr<UASItem>> GetItems() const;
+	int32 GetItemNum() const;
+
 	void AddItem(UASItem* InItem);
 	void AddItems(const TArray<UASItem*>& InItems);
 	bool RemoveItem(UASItem* InItem);
 
 	void SetSelfDestroy(float InLifeSpan);
+
+	void ShowOutline(bool bShow);
 
 protected:
 	virtual void BeginPlay() override;

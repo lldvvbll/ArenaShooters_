@@ -55,6 +55,9 @@ AASCharacter::AASCharacter()
 	MaxBulletSpread = TNumericLimits<float>::Max();
 	BulletSpreadAmountPerShot = TNumericLimits<float>::Max();
 	BulletSpreadRecoverySpeed = 0.0f;
+	bTracePickingUp = false;
+	PickingUpTraceElapseTime = 0.0f;
+	PickingUpTraceInterval = 0.1f;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -170,6 +173,20 @@ void AASCharacter::Tick(float DeltaSeconds)
 	{
 		CurrentBulletSpread = FMath::FInterpConstantTo(CurrentBulletSpread, MinBulletSpread, DeltaSeconds, BulletSpreadRecoverySpeed);
 	}
+
+	if (bTracePickingUp && IsLocallyControlled())
+	{
+		if (PickingUpTraceElapseTime < PickingUpTraceInterval)
+		{
+			PickingUpTraceElapseTime += DeltaSeconds;
+		}
+		else
+		{
+			HighlightingPickableActor();
+
+			PickingUpTraceElapseTime = 0.0f;
+		}
+	}
 }
 
 void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -193,6 +210,16 @@ void AASCharacter::SetPlayerDefaults()
 
 	bDead = false;
 	SetCanBeDamaged(true);
+
+	if (bUseHealingKit)
+	{
+		MulticastCancelUseHealingKit();
+	}
+
+	if (ShootingStance != EShootingStanceType::None)
+	{
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
 
 	if (IsValid(ASStatus))
 	{
@@ -259,14 +286,14 @@ void AASCharacter::Falling()
 
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		if (ShootingStance != EShootingStanceType::None)
-		{
-			ServerChangeShootingStance(EShootingStanceType::None);
-		}
-
 		if (bUseHealingKit)
 		{
 			MulticastCancelUseHealingKit();
+		}
+
+		if (ShootingStance != EShootingStanceType::None)
+		{
+			ServerChangeShootingStance(EShootingStanceType::None);
 		}
 	}
 }
@@ -323,10 +350,16 @@ void AASCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		if (auto DroppedItemActor = Cast<AASDroppedItemActor>(OtherActor))
 		{
-			FDelegateHandle Handle = DroppedItemActor->OnRemoveItemEvent.AddUObject(this, &AASCharacter::OnRemoveGroundItem);
-			GroundItemActorSet.Emplace(TPair<TWeakObjectPtr<AASDroppedItemActor>, FDelegateHandle>(MakeWeakObjectPtr(DroppedItemActor), Handle));
+			DroppedItemActor->OnRemoveItemEvent.AddUObject(this, &AASCharacter::OnRemoveGroundItem);
+			GroundItemActorSet.Emplace(TWeakObjectPtr<AASDroppedItemActor>(MakeWeakObjectPtr(DroppedItemActor)));
 
 			OnGroundItemAdd.Broadcast(DroppedItemActor->GetItems());
+
+			if (!bTracePickingUp && GroundItemActorSet.Num() > 0)
+			{
+				bTracePickingUp = true;
+				PickingUpTraceElapseTime = 0.0f;
+			}
 		}
 	}	
 }
@@ -340,18 +373,26 @@ void AASCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 
 	if (IsLocallyControlled())
 	{
-		if (auto DroppedItemActor = Cast<AASDroppedItemActor>(OtherActor))
+		auto DroppedItemActor = Cast<AASDroppedItemActor>(OtherActor);
+		if (IsValid(DroppedItemActor))
 		{
+			DroppedItemActor->ShowOutline(false);
+
 			for (auto Itr = GroundItemActorSet.CreateIterator(); Itr; ++Itr)
 			{
-				if ((Itr->Key).IsValid() && (Itr->Key).Get() == DroppedItemActor)
+				if (Itr->IsValid() && Itr->Get() == DroppedItemActor)
 				{
-					DroppedItemActor->OnRemoveItemEvent.Remove(Itr->Value);
+					DroppedItemActor->OnRemoveItemEvent.RemoveAll(this);
 					Itr.RemoveCurrent();
 
 					OnGroundItemRemove.Broadcast(DroppedItemActor->GetItems());
 					break;
 				}
+			}
+
+			if (bTracePickingUp && GroundItemActorSet.Num() <= 0)
+			{
+				bTracePickingUp = false;
 			}
 		}
 	}
@@ -370,6 +411,16 @@ float AASCharacter::GetTotalTurnValue() const
 EWeaponType AASCharacter::GetUsingWeaponType() const
 {
 	return (ASInventory != nullptr) ? ASInventory->GetSelectedWeaponType() : EWeaponType::None;
+}
+
+TWeakObjectPtr<UASWeapon> AASCharacter::GetUsingWeapon() const
+{
+	return (ASInventory != nullptr) ? ASInventory->GetSelectedWeapon() : TWeakObjectPtr<UASWeapon>();
+}
+
+TWeakObjectPtr<AASWeaponActor> AASCharacter::GetUsingWeaponActor() const
+{
+	return (ASInventory != nullptr) ? ASInventory->GetSelectedWeaponActor() : TWeakObjectPtr<AASWeaponActor>();
 }
 
 FRotator AASCharacter::GetAimOffsetRotator() const
@@ -424,12 +475,12 @@ TArray<TWeakObjectPtr<UASItem>> AASCharacter::GetGroundItems() const
 {
 	TArray<TWeakObjectPtr<UASItem>> GroundItems;
 
-	for (auto& Pair : GroundItemActorSet)
+	for (auto& Item : GroundItemActorSet)
 	{
-		if (!(Pair.Key).IsValid())
+		if (!Item.IsValid())
 			continue;
 
-		GroundItems += (Pair.Key)->GetItems();
+		GroundItems += Item->GetItems();
 	}
 
 	return GroundItems;
@@ -449,10 +500,14 @@ void AASCharacter::ServerPickUpWeapon_Implementation(EWeaponSlotType SlotType, U
 		return;
 	}
 
+	if (bReloading)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
 	if (!ASInventory->IsSuitableWeaponSlot(SlotType, NewWeapon))
 		return;
-
-	MulticastPlayPickUpItemMontage();
 
 	auto DroppedItemActor = Cast<AASDroppedItemActor>(NewWeapon->GetOwner());
 	if (!IsValid(DroppedItemActor))
@@ -460,6 +515,19 @@ void AASCharacter::ServerPickUpWeapon_Implementation(EWeaponSlotType SlotType, U
 		AS_LOG_S(Error);
 		return;
 	}
+
+	if (!IsInteractableActor(DroppedItemActor))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (GetShootingStance() != EShootingStanceType::None)
+	{
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
+
+	MulticastPlayPickUpItemMontage();
 
 	if (!DroppedItemActor->RemoveItem(NewWeapon))
 	{
@@ -470,7 +538,10 @@ void AASCharacter::ServerPickUpWeapon_Implementation(EWeaponSlotType SlotType, U
 	UASItem* OldWeapon = nullptr;
 	if (ASInventory->InsertWeapon(SlotType, NewWeapon, OldWeapon))
 	{
-		SpawnDroppedItemActor(OldWeapon);
+		if (OldWeapon != nullptr)
+		{
+			SpawnDroppedItemActor(OldWeapon);
+		}		
 	}
 	else
 	{
@@ -493,17 +564,34 @@ void AASCharacter::ServerPickUpArmor_Implementation(EArmorSlotType SlotType, UAS
 		return;
 	}
 
+	if (bReloading)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
 	if (!ASInventory->IsSuitableArmorSlot(SlotType, NewArmor))
 		return;
-
-	MulticastPlayPickUpItemMontage();
-
+		
 	auto DroppedItemActor = Cast<AASDroppedItemActor>(NewArmor->GetOwner());
 	if (!IsValid(DroppedItemActor))
 	{
 		AS_LOG_S(Error);
 		return;
 	}
+
+	if (!IsInteractableActor(DroppedItemActor))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (GetShootingStance() != EShootingStanceType::None)
+	{
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
+
+	MulticastPlayPickUpItemMontage();
 
 	if (!DroppedItemActor->RemoveItem(NewArmor))
 	{
@@ -514,11 +602,70 @@ void AASCharacter::ServerPickUpArmor_Implementation(EArmorSlotType SlotType, UAS
 	UASItem* OldArmor = nullptr;
 	if (ASInventory->InsertArmor(SlotType, NewArmor, OldArmor))
 	{
-		SpawnDroppedItemActor(OldArmor);
+		if (OldArmor != nullptr)
+		{
+			SpawnDroppedItemActor(OldArmor);
+		}
 	}
 	else
 	{
 		DroppedItemActor->AddItem(NewArmor);
+		AS_LOG_S(Error);
+	}
+}
+
+void AASCharacter::ServerPickUpInventoryItem_Implementation(UASItem* NewItem)
+{
+	if (ASInventory == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (bUseHealingKit)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (bReloading)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (!ASInventory->IsEnableToAddItemToInventory(NewItem))
+		return;
+
+	auto DroppedItemActor = Cast<AASDroppedItemActor>(NewItem->GetOwner());
+	if (!IsValid(DroppedItemActor))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (!IsInteractableActor(DroppedItemActor))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (GetShootingStance() != EShootingStanceType::None)
+	{
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
+
+	MulticastPlayPickUpItemMontage();
+
+	if (!DroppedItemActor->RemoveItem(NewItem))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (!ASInventory->AddItemToInventory(NewItem))
+	{
+		DroppedItemActor->AddItem(NewItem);
 		AS_LOG_S(Error);
 	}
 }
@@ -531,7 +678,7 @@ void AASCharacter::ServerDropItem_Implementation(UASItem* InItem)
 		return;
 	}
 
-	if (InItem == nullptr)
+	if (!IsValid(InItem))
 	{
 		AS_LOG_S(Error);
 		return;
@@ -557,7 +704,7 @@ void AASCharacter::ServerDropItem_Implementation(UASItem* InItem)
 				MulticastCancelReload();
 			}
 		}
-	}	
+	}
 
 	ItemBoolPair ResultPair = ASInventory->RemoveItem(InItem);
 	if (!ResultPair.Value)
@@ -567,45 +714,6 @@ void AASCharacter::ServerDropItem_Implementation(UASItem* InItem)
 	}
 
 	SpawnDroppedItemActor(ResultPair.Key);
-}
-
-void AASCharacter::ServerPickUpInventoryItem_Implementation(UASItem* NewItem)
-{
-	if (ASInventory == nullptr)
-	{
-		AS_LOG_S(Error);
-		return;
-	}
-
-	if (bUseHealingKit)
-	{
-		AS_LOG_S(Error);
-		return;
-	}
-
-	if (!ASInventory->IsEnableToAddItemToInventory(NewItem))
-		return;
-
-	MulticastPlayPickUpItemMontage();
-
-	auto DroppedItemActor = Cast<AASDroppedItemActor>(NewItem->GetOwner());
-	if (!IsValid(DroppedItemActor))
-	{
-		AS_LOG_S(Error);
-		return;
-	}
-
-	if (!DroppedItemActor->RemoveItem(NewItem))
-	{
-		AS_LOG_S(Error);
-		return;
-	}
-
-	if (!ASInventory->AddItemToInventory(NewItem))
-	{
-		DroppedItemActor->AddItem(NewItem);
-		AS_LOG_S(Error);
-	}
 }
 
 bool AASCharacter::RemoveItem(UASItem* InItem)
@@ -639,6 +747,54 @@ bool AASCharacter::IsShownFullScreenWidget() const
 	return bShownFullScreenWidget;
 }
 
+void AASCharacter::PicUpItem(UASItem* InItem)
+{
+	if (ASInventory == nullptr)
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (!IsValid(InItem))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (bUseHealingKit)
+		return;
+
+	if (bReloading)
+		return;
+
+	switch (InItem->GetItemType())
+	{
+	case EItemType::Weapon:
+		if (auto Weapon = Cast<UASWeapon>(InItem))
+		{
+			EWeaponSlotType SlotType = UASInventoryComponent::GetSuitableWeaponSlotType(Weapon->GetWeaponType());
+			PickUpWeapon(SlotType, Weapon);
+		}
+		break;
+	case EItemType::Armor:
+		if (auto Armor = Cast<UASArmor>(InItem))
+		{
+			EArmorSlotType SlotType = UASInventoryComponent::GetSuitableArmorSlotType(Armor->GetArmorType());
+			PickUpArmor(SlotType, Armor);
+		}
+		break;
+	case EItemType::Ammo:			// fallthough
+	case EItemType::HealingKit:
+		{
+			PickUpInventoryItem(InItem);
+		}
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
+}
+
 void AASCharacter::PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon)
 {
 	if (ASInventory == nullptr)
@@ -648,10 +804,10 @@ void AASCharacter::PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon)
 	}
 
 	if (bUseHealingKit)
-	{
-		AS_LOG_S(Error);
 		return;
-	}
+
+	if (bReloading)
+		return;
 
 	if (!ASInventory->IsSuitableWeaponSlot(SlotType, NewWeapon))
 	{
@@ -671,10 +827,10 @@ void AASCharacter::PickUpArmor(EArmorSlotType SlotType, UASArmor* NewArmor)
 	}
 
 	if (bUseHealingKit)
-	{
-		AS_LOG_S(Error);
 		return;
-	}
+
+	if (bReloading)
+		return;
 
 	if (!ASInventory->IsSuitableArmorSlot(SlotType, NewArmor))
 	{
@@ -694,10 +850,10 @@ void AASCharacter::PickUpInventoryItem(UASItem* NewItem)
 	}
 
 	if (bUseHealingKit)
-	{
-		AS_LOG_S(Error);
 		return;
-	}
+
+	if (bReloading)
+		return;
 
 	if (!ASInventory->IsEnableToAddItemToInventory(NewItem))
 	{
@@ -836,7 +992,7 @@ void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("ChangeFireMode", IE_Pressed, this, &AASCharacter::ChangeFireMode);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AASCharacter::Reload);
 	PlayerInputComponent->BindAction("HealingKit", IE_Pressed, this, &AASCharacter::HealingKit);
-	PlayerInputComponent->BindAction("Function", IE_Pressed, this, &AASCharacter::DoFunction);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AASCharacter::Interact);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AASCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AASCharacter::MoveRight);
@@ -1118,8 +1274,22 @@ void AASCharacter::HealingKit()
 	}
 }
 
-void AASCharacter::DoFunction()
+void AASCharacter::Interact()
 {
+	if (GroundItemActorSet.Num() == 0)
+		return;
+
+	AActor* PickableActor = FindPickableActor();
+	if (IsValid(PickableActor))
+	{
+		if (auto DroppedItemActor = Cast<AASDroppedItemActor>(PickableActor))
+		{
+			if (DroppedItemActor->GetItemNum() == 1 && GroundItemActorSet.Contains(DroppedItemActor))
+			{
+				PicUpItem(DroppedItemActor->GetItems()[0].Get());
+			}
+		}
+	}
 }
 
 void AASCharacter::Shoot()
@@ -1981,4 +2151,61 @@ void AASCharacter::OnChangedInnerMatchState(EInnerMatchState State)
 			break;
 		}
 	}
+}
+
+void AASCharacter::HighlightingPickableActor()
+{
+	AActor* PickableActor = FindPickableActor();
+
+	auto DroppedItemActor = Cast<AASDroppedItemActor>(PickableActor);
+	bool bDroppedItemActorValid = IsValid(DroppedItemActor);
+
+	for (auto& ItemPtr : GroundItemActorSet)
+	{
+		if (!ItemPtr.IsValid())
+			continue;
+
+		ItemPtr->ShowOutline(bDroppedItemActorValid && ItemPtr == DroppedItemActor && DroppedItemActor->GetItemNum() == 1);
+	}
+}
+
+AActor* AASCharacter::FindPickableActor() const
+{
+	constexpr float TraceLen = 500.0f;
+
+	FVector CamLoc = FollowCamera->GetComponentLocation();
+	FVector CamForward = FollowCamera->GetForwardVector().GetSafeNormal();
+
+	auto PC = GetController<APlayerController>();
+	if (IsValid(PC) && PC->PlayerCameraManager != nullptr)
+	{
+		CamLoc = PC->PlayerCameraManager->GetCameraLocation();
+		CamForward = PC->PlayerCameraManager->GetCameraRotation().Vector();
+	}
+
+	FVector EndLoc = CamLoc + (CamForward * TraceLen);
+
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors, false);
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActors(AttachedActors);
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, CamLoc, EndLoc, ECC_GameTraceChannel5, QueryParams))
+	{
+		return HitResult.GetActor();
+	}
+
+	return nullptr;
+}
+
+bool AASCharacter::IsInteractableActor(AActor* InActor) const
+{
+	constexpr float InteractableLenSquared = 200.0f * 200.0f;
+
+	if ((InActor->GetActorLocation() - GetActorLocation()).SizeSquared() > InteractableLenSquared)
+		return false;
+
+	return true;
 }

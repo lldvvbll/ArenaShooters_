@@ -105,7 +105,7 @@ EArmorSlotType UASInventoryComponent::GetSuitableArmorSlotType(EArmorType ArmorT
 
 bool UASInventoryComponent::IsSuitableWeaponSlot(EWeaponSlotType SlotType, const UASWeapon* Weapon)
 {
-	if (Weapon == nullptr)
+	if (!IsValid(Weapon))
 	{
 		AS_LOG_S(Error);
 		return false;
@@ -123,7 +123,7 @@ bool UASInventoryComponent::IsSuitableWeaponSlot(EWeaponSlotType SlotType, const
 
 bool UASInventoryComponent::IsSuitableArmorSlot(EArmorSlotType SlotType, const UASArmor* Armor)
 {
-	if (Armor == nullptr)
+	if (!IsValid(Armor))
 	{
 		AS_LOG_S(Error);
 		return false;
@@ -282,7 +282,7 @@ ItemBoolPair UASInventoryComponent::RemoveItem(UASItem* InItem)
 {
 	ItemBoolPair ResultPair(nullptr, false);
 
-	if (InItem != nullptr)
+	if (IsValid(InItem))
 	{
 		switch (InItem->GetItemType())
 		{
