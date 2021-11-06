@@ -66,6 +66,7 @@ void AASPlayerController::OnChangedInnerMatchState(EInnerMatchState State)
 			break;
 		case EInnerMatchState::Process:
 			{
+				RemoveFullScreenWidget();
 				RemovePrepareInfoWidget();
 			}
 			break;
