@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 
 const FName AASWeaponActor::MuzzleSocketName = TEXT("MuzzleFlash");
+const FName AASWeaponActor::CameraSocketName = TEXT("CameraSocket");
 
 AASWeaponActor::AASWeaponActor()
 {
@@ -18,7 +19,7 @@ AASWeaponActor::AASWeaponActor()
 	ScopeCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ScopeCamera"));
 
 	RootComponent = WeaponMesh;
-	ScopeCamera->SetupAttachment(RootComponent);
+	ScopeCamera->SetupAttachment(RootComponent, CameraSocketName);
 }
 
 FVector AASWeaponActor::GetMuzzleLocation() const

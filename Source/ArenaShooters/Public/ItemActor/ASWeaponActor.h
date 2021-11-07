@@ -21,6 +21,7 @@ public:
 
 protected:
 	static const FName MuzzleSocketName;
+	static const FName CameraSocketName;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
