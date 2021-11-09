@@ -49,6 +49,7 @@ public:
 
 	bool IsSprinted() const;
 	float GetTotalTurnValue() const;
+	float GetInclineValue() const;
 	EWeaponType GetUsingWeaponType() const;
 	TWeakObjectPtr<UASWeapon> GetUsingWeapon() const;
 	TWeakObjectPtr<AASWeaponActor> GetUsingWeaponActor() const;
@@ -113,6 +114,7 @@ protected:
 	void Turn(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+	void Incline(float Value);
 
 	void Sprint();
 	void SprintEnd();
@@ -248,6 +250,10 @@ protected:
 
 	UFUNCTION()
 	void OnRep_bInvincible();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInclineValue(float Value);
+	void ServerInclineValue_Implementation(float Value);
 
 public:
 	DECLARE_EVENT_OneParam(AASCharacter, FOnScopeEvent, const TWeakObjectPtr<UASWeapon>&)
@@ -386,5 +392,19 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_bInvincible)
 	bool bInvincible;
+
+	UPROPERTY(Replicated)
+	float InclineValue;
+
+	UPROPERTY(EditDefaultsOnly, Category = Camera, Meta = (AllowPrivateAccess = true))
+	FVector AimingCamRightOffset;
+
+	UPROPERTY(EditDefaultsOnly, Category = Camera, Meta = (AllowPrivateAccess = true))
+	FVector AimingCamLeftOffset;
+
+	UPROPERTY(EditDefaultsOnly, Category = Camera, Meta = (AllowPrivateAccess = true))
+	float InclineSpeed;
+
+	FVector CurrentAimingCamInclineOffset;
 };
 

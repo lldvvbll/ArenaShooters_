@@ -58,6 +58,9 @@ AASCharacter::AASCharacter()
 	bTracePickingUp = false;
 	PickingUpTraceElapseTime = 0.0f;
 	PickingUpTraceInterval = 0.1f;
+	AimingCamRightOffset = FVector(0.0f, 60.0f, 70.0f);
+	AimingCamLeftOffset = FVector(0.0f, -30.0f, 70.0f);
+	InclineSpeed = 500.0f;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -187,6 +190,28 @@ void AASCharacter::Tick(float DeltaSeconds)
 			PickingUpTraceElapseTime = 0.0f;
 		}
 	}
+
+	if (IsLocallyControlled())
+	{
+		if (GetShootingStance() == EShootingStanceType::Aiming)
+		{
+			FVector TargetSocketOffset;
+			if (InclineValue > 0.0f)
+			{
+				TargetSocketOffset = AimingCamRightOffset;
+			}
+			else if (InclineValue < 0.0f)
+			{
+				TargetSocketOffset = AimingCamLeftOffset;
+			}
+			else
+			{
+				TargetSocketOffset = AimingCamOffset;
+			}
+
+			CameraBoom->SocketOffset = FMath::VInterpConstantTo(CameraBoom->SocketOffset, TargetSocketOffset, DeltaSeconds, InclineSpeed);
+		}
+	}
 }
 
 void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -196,13 +221,14 @@ void AASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AASCharacter, bSprinted);
 	DOREPLIFETIME_CONDITION(AASCharacter, TurnValue, COND_SimulatedOnly);
 	DOREPLIFETIME_CONDITION(AASCharacter, TurnRateValue, COND_SimulatedOnly);
-	DOREPLIFETIME_CONDITION(AASCharacter, AimOffsetRotator, COND_SimulatedOnly); 
+	DOREPLIFETIME_CONDITION(AASCharacter, AimOffsetRotator, COND_SimulatedOnly);
 	DOREPLIFETIME(AASCharacter, ShootingStance);
 	DOREPLIFETIME(AASCharacter, bReloading);
 	DOREPLIFETIME(AASCharacter, bDead);
 	DOREPLIFETIME(AASCharacter, bChangeWeapon);
 	DOREPLIFETIME(AASCharacter, bUseHealingKit);
-	DOREPLIFETIME(AASCharacter, bInvincible);	
+	DOREPLIFETIME(AASCharacter, bInvincible);
+	DOREPLIFETIME_CONDITION(AASCharacter, InclineValue, COND_SimulatedOnly);
 }
 
 void AASCharacter::SetPlayerDefaults()
@@ -407,6 +433,11 @@ bool AASCharacter::IsSprinted() const
 float AASCharacter::GetTotalTurnValue() const
 {
 	return TurnValue + TurnRateValue;
+}
+
+float AASCharacter::GetInclineValue() const
+{
+	return InclineValue;
 }
 
 EWeaponType AASCharacter::GetUsingWeaponType() const
@@ -1028,6 +1059,7 @@ void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("TurnRate", this, &AASCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AASCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("Incline", this, &AASCharacter::Incline);
 }
 
 void AASCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -1105,6 +1137,12 @@ void AASCharacter::TurnAtRate(float Rate)
 void AASCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AASCharacter::Incline(float Value)
+{
+	InclineValue = Value;
+	ServerInclineValue(Value);
 }
 
 void AASCharacter::Sprint()
@@ -2255,4 +2293,9 @@ void AASCharacter::OnRep_bInvincible()
 			SkeletalMeshComp->SetScalarParameterValueOnMaterials(TEXT("bShowEffect"), 0.0f);
 		}
 	}
+}
+
+void AASCharacter::ServerInclineValue_Implementation(float Value)
+{
+	InclineValue = Value;
 }

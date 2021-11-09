@@ -34,6 +34,7 @@ void UASAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		AimYaw = FMath::ClampAngle(AimRot.Yaw, -90.0f, 90.0f);
 		AimPitch = FMath::ClampAngle(AimRot.Pitch, -90.0f, 90.0f);
 	}
+	InclineValue = ASChar->GetInclineValue();
 }
 
 void UASAnimInstance::NativeBeginPlay()

@@ -14,6 +14,10 @@ class ARENASHOOTERS_API AASWeaponActor : public AActor
 public:	
 	AASWeaponActor();
 
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void BecomeViewTarget(APlayerController* PC) override;
+	virtual void EndViewTarget(APlayerController* PC) override;
+
 	FVector GetMuzzleLocation() const;
 	void GetMuzzleLocationAndRotation(FVector& OutLocation, FRotator& OutRotation) const;
 
@@ -29,4 +33,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	UCameraComponent* ScopeCamera;
+
+	bool bBecomeViewTarget;
 };

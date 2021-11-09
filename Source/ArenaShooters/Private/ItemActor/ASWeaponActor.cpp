@@ -9,7 +9,7 @@ const FName AASWeaponActor::CameraSocketName = TEXT("CameraSocket");
 
 AASWeaponActor::AASWeaponActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetCanBeDamaged(false);
 
@@ -20,6 +20,54 @@ AASWeaponActor::AASWeaponActor()
 
 	RootComponent = WeaponMesh;
 	ScopeCamera->SetupAttachment(RootComponent, CameraSocketName);
+}
+
+void AASWeaponActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bBecomeViewTarget)
+	{
+		if (WeaponMesh != nullptr)
+		{
+			if (ScopeCamera != nullptr)
+			{
+				FRotator SocketRotator = WeaponMesh->GetSocketRotation(CameraSocketName);
+				ScopeCamera->SetRelativeRotation(FRotator(0.0f, 0.0f, -SocketRotator.Roll));
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}	
+}
+
+void AASWeaponActor::BecomeViewTarget(APlayerController* PC)
+{
+	Super::BecomeViewTarget(PC);
+
+	bBecomeViewTarget = true;
+}
+
+void AASWeaponActor::EndViewTarget(APlayerController* PC)
+{
+	Super::EndViewTarget(PC);
+
+	bBecomeViewTarget = false;
+
+	if (ScopeCamera != nullptr)
+	{
+		ScopeCamera->SetRelativeRotation(FRotator::ZeroRotator);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 FVector AASWeaponActor::GetMuzzleLocation() const
