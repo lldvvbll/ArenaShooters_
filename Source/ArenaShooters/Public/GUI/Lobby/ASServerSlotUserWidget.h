@@ -18,13 +18,19 @@ class ARENASHOOTERS_API UASServerSlotUserWidget : public UUserWidget
 public:
 	void SetServerInfo(const FOnlineSessionSearchResult& NewSearchResult);
 
+	void SetButtonEnable(bool bIsEnable);
+
 protected:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
 	void JoinServer();
 	
-private:
+public:
+	DECLARE_EVENT(UASServerSlotUserWidget, FOnButtonClickedEvent);
+	FOnButtonClickedEvent OnButtonClicked;
+
+protected:
 	FOnlineSessionSearchResult SearchResult;
 
 	UPROPERTY()

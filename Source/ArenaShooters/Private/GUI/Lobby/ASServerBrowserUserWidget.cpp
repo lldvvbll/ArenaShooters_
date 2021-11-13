@@ -116,6 +116,7 @@ void UASServerBrowserUserWidget::OnSearchSessionResult(const TArray<FOnlineSessi
 				continue;
 
 			ServerSlot->SetServerInfo(Result);
+			ServerSlot->OnButtonClicked.AddUObject(this, &UASServerBrowserUserWidget::OnJoinButtonClicked);
 
 			ServerListScrollBox->AddChild(ServerSlot);
 		}
@@ -127,4 +128,23 @@ void UASServerBrowserUserWidget::OnSearchSessionResult(const TArray<FOnlineSessi
 
 		AS_LOG(Warning, TEXT("SessionResults Count: %d"), NewSessionResults.Num());
 	}	
+}
+
+void UASServerBrowserUserWidget::OnJoinButtonClicked()
+{
+	if (ServerListScrollBox != nullptr)
+	{
+		for (auto& ServerSlot : ServerListScrollBox->GetAllChildren())
+		{
+			if (auto ServerSlotWidget = Cast<UASServerSlotUserWidget>(ServerSlot))
+			{
+				ServerSlotWidget->SetButtonEnable(false);
+			}			
+		}
+	}
+
+	if (RefreshButton != nullptr)
+	{
+		RefreshButton->SetIsEnabled(false);
+	}
 }

@@ -34,6 +34,8 @@ protected:
 
 	void OnSearchSessionResult(const TArray<FOnlineSessionSearchResult>& NewSessionResults);
 
+	void OnJoinButtonClicked();
+
 protected:
 	UPROPERTY()
 	UASMainMenuUserWidget* MainMenuWidget;

@@ -47,6 +47,14 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	}
 }
 
+void UASServerSlotUserWidget::SetButtonEnable(bool bIsEnable)
+{
+	if (JoinButton != nullptr)
+	{
+		JoinButton->SetIsEnabled(bIsEnable);
+	}
+}
+
 void UASServerSlotUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -69,4 +77,6 @@ void UASServerSlotUserWidget::JoinServer()
 	{
 		GameInst->JoinServer(SearchResult);
 	}
+
+	OnButtonClicked.Broadcast();
 }
