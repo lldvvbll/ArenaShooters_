@@ -11,6 +11,7 @@ class UCircularThrobber;
 class UScrollBox;
 class UASServerSlotUserWidget;
 class UASMainMenuUserWidget;
+class USizeBox;
 
 UCLASS()
 class ARENASHOOTERS_API UASServerBrowserUserWidget : public UUserWidget
@@ -53,4 +54,7 @@ protected:
 	TSubclassOf<UASServerSlotUserWidget> ServerSlotWidgetClass;
 
 	FDelegateHandle OnSearchSessionResultDelegateHandle;
+
+	UPROPERTY()
+	USizeBox* ServerNotFoundSizeBox;
 };

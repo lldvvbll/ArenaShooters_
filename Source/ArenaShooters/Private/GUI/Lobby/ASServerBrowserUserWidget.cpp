@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/CircularThrobber.h"
 #include "Components/ScrollBox.h"
+#include "Components/SizeBox.h"
 #include "ASGameInstance.h"
 
 void UASServerBrowserUserWidget::SearchServer()
@@ -45,6 +46,7 @@ void UASServerBrowserUserWidget::NativeConstruct()
 	RefreshButton = Cast<UButton>(GetWidgetFromName(TEXT("RefreshButton")));
 	SearchCircularThrobber = Cast<UCircularThrobber>(GetWidgetFromName(TEXT("SearchCircularThrobber")));
 	ServerListScrollBox = Cast<UScrollBox>(GetWidgetFromName(TEXT("ServerListScrollBox")));
+	ServerNotFoundSizeBox = Cast<USizeBox>(GetWidgetFromName(TEXT("SB_ServerNotFound")));
 
 	if (BackButton != nullptr)
 	{
@@ -116,6 +118,11 @@ void UASServerBrowserUserWidget::OnSearchSessionResult(const TArray<FOnlineSessi
 			ServerSlot->SetServerInfo(Result);
 
 			ServerListScrollBox->AddChild(ServerSlot);
+		}
+
+		if (ServerListScrollBox->GetChildrenCount() <= 0)
+		{
+			ServerListScrollBox->AddChild(ServerNotFoundSizeBox);
 		}
 
 		AS_LOG(Warning, TEXT("SessionResults Count: %d"), NewSessionResults.Num());

@@ -18,10 +18,9 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	PrepareTime = 10.0f;
 	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
-	MaxPlayerCount = 16;
+	MaxPlayerCount = 1;
 	MinPlayerCount = 1;
 	GoalNumOfKills = 1;
-	bSetPrepareTimer = false;
 }
 
 void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
