@@ -6,13 +6,21 @@
 #include "Engine/GameInstance.h"
 #include "ASGameInstance.generated.h"
 
-#define NUMOPENPUBCONN "NUMOPENPUBCONN"
+#define NUMOPENPUBCONN FName(TEXT("NUMOPENPUBCONN"))
 #define SERVER_NAME FName(TEXT("SERVER_NAME"))
+#define PREPARED_MATCH FName(TEXT("PREPARED_MATCH"))
 
 class FOnlineSessionSearch;
 class FOnlineSessionSearchResult;
+class FVariantData;
+class FOnlineSearchSettings;
 
 namespace EOnJoinSessionCompleteResult
+{
+	enum Type;
+}
+
+namespace EOnlineComparisonOp
 {
 	enum Type;
 }
@@ -28,6 +36,11 @@ public:
 	void SearchServer();
 	void JoinServer(const FOnlineSessionSearchResult& SearchResult);
 
+	void SetPreparedMatchToSession(bool bPrepared);
+
+	const FString& GetNetworkFailureMessage() const;
+	void ClearNetworkFailureMessage();
+
 protected:
 	virtual void OnStart() override;
 
@@ -37,8 +50,14 @@ protected:
 	virtual void OnRegisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful);
 	virtual void OnUnregisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful);
 
-protected:
+	void TravelBySession(FName SessionName);
+
+	void BroadcastNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString = TEXT(""));
+
 	bool IsOnlineSubsystemSteam() const;
+
+	TArray<FOnlineSessionSearchResult> FilterSessionResults(const TArray<FOnlineSessionSearchResult>& SearchResults, const FOnlineSearchSettings& SearchSettings) const;
+	bool CompareVariants(const FVariantData& A, const FVariantData& B, EOnlineComparisonOp::Type Comparator) const;
 
 public:
 	DECLARE_EVENT_OneParam(UASGameInstance, FOnSearchSessionResultEvent, const TArray<FOnlineSessionSearchResult>&);
@@ -46,4 +65,6 @@ public:
 
 protected:
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+
+	FString NetworkFailureMessage;
 };

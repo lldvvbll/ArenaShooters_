@@ -43,6 +43,8 @@ protected:
 
 	virtual void PrepareAllPlayerStart();
 
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+
 protected:
 	UPROPERTY()
 	UASGameInstance* ASGameInstance;
@@ -50,6 +52,7 @@ protected:
 	UPROPERTY()
 	AASMatchGameStateBase* ASMatchGameState;
 
+	FTimerHandle PlayerWaitingTimerHandle;
 	FTimerHandle PrepareTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)

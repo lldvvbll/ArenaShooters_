@@ -9,6 +9,9 @@
 #include "Common/ASEnums.h"
 #include "DataAssets/ItemDataAssets/ASItemSetDataAsset.h"
 #include "Character/ASCharacter.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "OnlineSessionSettings.h"
 
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
@@ -18,16 +21,35 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	MaxPlayerCount = 16;
 	MinPlayerCount = 1;
 	GoalNumOfKills = 1;
+	bSetPrepareTimer = false;
 }
 
 void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
 
-	if (ErrorMessage.Len() > 0)
+	if (!ErrorMessage.IsEmpty())
 		return;
 
+	if (NumPlayers >= MaxPlayerCount)
+	{
+		ErrorMessage = TEXT("Server Full");
+		return;
+	}
 
+	if (IsValid(ASMatchGameState))
+	{
+		if (bSetPrepareTimer || ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
+		{
+			ErrorMessage = TEXT("Match is Aleady Started");
+			return;
+		}
+	}
+	else
+	{
+		ErrorMessage = TEXT("Invalid GameState");
+		return;
+	}
 }
 
 void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -38,12 +60,14 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		if (ASMatchGameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 		{
-			if (!bSetPrepareTimer && NumPlayers >= MinPlayerCount)
+			if (NumPlayers >= MinPlayerCount)
 			{
-				bSetPrepareTimer = true;
+				if (GetWorldTimerManager().IsTimerActive(PlayerWaitingTimerHandle))
+				{
+					GetWorldTimerManager().ClearTimer(PlayerWaitingTimerHandle);
+				}
 
-				FTimerHandle TimerHandle;
-				GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, 3.0f);
+				GetWorldTimerManager().SetTimer(PlayerWaitingTimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, 10.0f);
 			}
 		}
 	}
@@ -62,6 +86,16 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	{
 		AS_LOG_S(Error);
 	}
+
+	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &AASMatchGameModeBase::OnCreateSessionComplete);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 void AASMatchGameModeBase::InitGameState()
@@ -73,10 +107,16 @@ void AASMatchGameModeBase::InitGameState()
 	{
 		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
 		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
+		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
 	}
 	else
 	{
 		AS_LOG_S(Error);
+	}
+
+	if (auto GameInstance = GetGameInstance<UASGameInstance>())
+	{
+		GameInstance->SetPreparedMatchToSession(false);
 	}
 }
 
@@ -246,6 +286,13 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 
 void AASMatchGameModeBase::SetPrepareTimer()
 {
+	bSetPrepareTimer = true;
+
+	if (auto GameInstance = GetGameInstance<UASGameInstance>())
+	{
+		GameInstance->SetPreparedMatchToSession(true);
+	}
+
 	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
 	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::ProcessMatch, PrepareTimeSec);
 
@@ -301,4 +348,30 @@ void AASMatchGameModeBase::OnCalledRestartTimer()
 
 void AASMatchGameModeBase::PrepareAllPlayerStart()
 {
+}
+
+void AASMatchGameModeBase::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+		if (SessionInterface.IsValid())
+		{
+			if (FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName))
+			{
+				if (MaxPlayerCount > SessionSettings->NumPublicConnections)
+				{
+					MaxPlayerCount = SessionSettings->NumPublicConnections;
+				}
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}	
 }

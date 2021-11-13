@@ -30,15 +30,8 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	if (PlayersTextBlock != nullptr)
 	{
 		int32 NumOpenPublicConnections = 0;
-
-		FString NumOpenPublicConnectionsStr;
-		if (SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnectionsStr))
+		if (!SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnections))
 		{
-			NumOpenPublicConnections = FCString::Atoi(*NumOpenPublicConnectionsStr);
-		}
-		else
-		{
-			NumOpenPublicConnections = SearchResult.Session.NumOpenPublicConnections;
 			AS_LOG_S(Error);
 		}
 

@@ -5,29 +5,42 @@
 #include "Components/TextBlock.h"
 #include "GameMode/ASMatchGameStateBase.h"
 
-void UASTimerCaptionUserWidget::SetInfo(const FText& Caption, const FDateTime& Time)
+void UASTimerCaptionUserWidget::SetInfo(const FText& Caption, const FDateTime& InEndTime, bool bShowTime/* = true*/)
 {
 	bSetEndTime = true;
-	EndTime = Time;
+	EndTime = InEndTime;
 
 	if (CaptionTextBlock != nullptr)
 	{
 		CaptionTextBlock->SetText(Caption);
 	}
+
+	if (CountDownTextBlock != nullptr)
+	{
+		if (!bShowTime)
+		{
+			CountDownTextBlock->SetVisibility(ESlateVisibility::Hidden);
+		}		
+	}
 }
 
-void UASTimerCaptionUserWidget::SetInfo(const FText& Caption, float TimeSec)
+void UASTimerCaptionUserWidget::SetInfoWithEndTime(const FText& Caption, float EndTimeSec, bool bShowTime/* = true*/)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 	if (IsValid(GameState))
 	{
-		float DeltaTime = TimeSec - GameState->GetServerWorldTimeSeconds();
-		SetInfo(Caption, FDateTime::Now() + FTimespan::FromSeconds(DeltaTime));
+		float DeltaTime = EndTimeSec - GameState->GetServerWorldTimeSeconds();
+		SetInfoWithDuration(Caption, DeltaTime, bShowTime);
 	}
 	else
 	{
 		AS_LOG_S(Error);
 	}
+}
+
+void UASTimerCaptionUserWidget::SetInfoWithDuration(const FText& Caption, float Duration, bool bShowTime)
+{
+	SetInfo(Caption, FDateTime::Now() + FTimespan::FromSeconds(Duration), bShowTime);
 }
 
 void UASTimerCaptionUserWidget::NativeConstruct()
@@ -44,18 +57,18 @@ void UASTimerCaptionUserWidget::NativeTick(const FGeometry& MyGeometry, float In
 
 	if (bSetEndTime)
 	{
+		FTimespan RemainTime = EndTime - FDateTime::Now();
+		int32 RemainSeconds = RemainTime.GetTotalSeconds();
+		if (RemainSeconds <= 0)
+		{
+			RemainSeconds = 0;
+			bSetEndTime = false;
+
+			RemoveFromParent();
+		}
+		
 		if (CountDownTextBlock != nullptr)
 		{
-			FTimespan RemainTime = EndTime - FDateTime::Now();
-			int32 RemainSeconds = RemainTime.GetTotalSeconds();
-			if (RemainSeconds <= 0)
-			{
-				RemainSeconds = 0;
-				bSetEndTime = false;
-
-				RemoveFromParent();
-			}
-
 			CountDownTextBlock->SetText(FText::FromString(FString::FromInt(RemainSeconds)));
 		}
 	}

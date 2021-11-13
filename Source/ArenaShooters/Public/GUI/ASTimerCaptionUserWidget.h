@@ -14,8 +14,9 @@ class ARENASHOOTERS_API UASTimerCaptionUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	void SetInfo(const FText& Caption, const FDateTime& Time);
-	void SetInfo(const FText& Caption, float TimeSec);
+	void SetInfo(const FText& Caption, const FDateTime& InEndTime, bool bShowTime = true);
+	void SetInfoWithEndTime(const FText& Caption, float EndTimeSec, bool bShowTime = true);
+	void SetInfoWithDuration(const FText& Caption, float Duration, bool bShowTime = true);
 
 protected:
 	virtual void NativeConstruct() override;

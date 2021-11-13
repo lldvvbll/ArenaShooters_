@@ -150,7 +150,7 @@ void AASPlayerController::ShowRestartTimerWidget(float EndTimerSec)
 		RestartTimerWidget->AddToViewport(5);
 
 		FText Caption = FText::FromString(TEXT("RESTART IN"));
-		RestartTimerWidget->SetInfo(Caption, EndTimerSec);
+		RestartTimerWidget->SetInfoWithEndTime(Caption, EndTimerSec);
 	}
 }
 
@@ -276,7 +276,7 @@ void AASPlayerController::ShowRespawnTimerWidget(float EndTimeSec)
 		RespawnTimerWidget->AddToViewport(2);
 
 		FText Caption = FText::FromString(TEXT("RESPAWN IN"));
-		RespawnTimerWidget->SetInfo(Caption, EndTimeSec);
+		RespawnTimerWidget->SetInfoWithEndTime(Caption, EndTimeSec);
 
 		if (CurrentFullScreenWidget != nullptr)
 		{
