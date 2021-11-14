@@ -18,7 +18,7 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	PrepareTime = 10.0f;
 	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
-	MaxPlayerCount = 1;
+	MaxPlayerCount = 16;
 	MinPlayerCount = 1;
 	GoalNumOfKills = 1;
 }

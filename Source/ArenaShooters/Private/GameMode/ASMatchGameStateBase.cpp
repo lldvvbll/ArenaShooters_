@@ -241,6 +241,44 @@ void AASMatchGameStateBase::OnChangedPlayerDeathCount(int32 Count)
 void AASMatchGameStateBase::OnRep_StartTimeForProcess()
 {
 	OnStartTimeForProcess.Broadcast(StartTimeForProcess);
+
+	float DeltaTimeSec = StartTimeForProcess - GetServerWorldTimeSeconds();
+	if (DeltaTimeSec > 5.0f)
+	{
+		DeltaTimeSec -= 5.0f;
+	}
+
+	if (DeltaTimeSec < 0.01f)
+	{
+		DeltaTimeSec = 0.01f;
+	}
+
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle,
+		[this]()
+		{
+			for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+			{
+				auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
+				if (IsValid(PlayerController))
+				{
+					APawn* Pawn = PlayerController->GetPawn();
+					if (IsValid(Pawn))
+					{
+						Pawn->DisableInput(nullptr);
+					}
+					else
+					{
+						AS_LOG_S(Error);
+					}
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}
+		},
+		DeltaTimeSec, false);
 }
 
 void AASMatchGameStateBase::OnRep_InnerMatchState()

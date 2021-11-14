@@ -1034,6 +1034,29 @@ void AASCharacter::TurnOffInvincible()
 	bInvincible = false;
 }
 
+void AASCharacter::StopAllActions()
+{
+	if (bSprinted)
+	{
+		ServerSprintEnd();
+	}
+
+	if (ShootingStance != EShootingStanceType::None)
+	{
+		ServerChangeShootingStance(EShootingStanceType::None);
+	}
+
+	if (bReloading)
+	{
+		MulticastCancelReload();
+	}
+
+	if (bUseHealingKit)
+	{
+		MulticastCancelUseHealingKit();
+	}
+}
+
 void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	check(PlayerInputComponent);
@@ -1923,25 +1946,7 @@ void AASCharacter::Die()
 
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		if (bSprinted)
-		{
-			ServerSprintEnd();
-		}
-
-		if (ShootingStance != EShootingStanceType::None)
-		{
-			ServerChangeShootingStance(EShootingStanceType::None);
-		}
-
-		if (bReloading)
-		{
-			MulticastCancelReload();
-		}
-
-		if (bUseHealingKit)
-		{
-			MulticastCancelUseHealingKit();
-		}
+		StopAllActions();
 
 		bDead = true;
 		SetCanBeDamaged(false);
@@ -2181,6 +2186,7 @@ void AASCharacter::OnChangedInnerMatchState(EInnerMatchState State)
 		case EInnerMatchState::Process:
 			{
 				SetCanBeDamaged(true);
+				StopAllActions();
 			}
 			break;
 		case EInnerMatchState::Finish:

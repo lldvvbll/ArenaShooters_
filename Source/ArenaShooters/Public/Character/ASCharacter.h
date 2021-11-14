@@ -105,6 +105,8 @@ public:
 	void TurnOnInvincible(float Duration);
 	void TurnOffInvincible();
 
+	void StopAllActions();
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
