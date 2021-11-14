@@ -126,6 +126,24 @@ void UASGameInstance::OnStart()
 		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
 		if (SessionInterface.IsValid())
 		{
+			FString ServerName = TEXT("ArenaShooters - Test");
+
+			TArray<FString> Tokens;
+			TArray<FString> Switches;
+			FCommandLine::Parse(FCommandLine::Get(), Tokens, Switches);
+			for (auto& PairStr : Switches)
+			{
+				FString Key;
+				FString Value;
+				UGameplayStatics::GetKeyValue(PairStr, Key, Value);
+
+				if (Key.Compare(TEXT("servername"), ESearchCase::IgnoreCase) == 0)
+				{
+					ServerName = Value.Replace(TEXT("\""), TEXT(""));
+					break;
+				}
+			}
+
 			FString LoadedMapName = GetWorld()->GetMapName();
 			if (LoadedMapName.IsEmpty())
 			{
@@ -136,7 +154,7 @@ void UASGameInstance::OnStart()
 			SessionSettings.bAllowJoinInProgress = true;
 			SessionSettings.bShouldAdvertise = true;
 			SessionSettings.NumPublicConnections = 16;
-			SessionSettings.Set(SERVER_NAME, FString(TEXT("Test Server Name")), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			SessionSettings.Set(SERVER_NAME, ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(SETTING_MAPNAME, LoadedMapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(NUMOPENPUBCONN, SessionSettings.NumPublicConnections, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(PREPARED_MATCH, false, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);

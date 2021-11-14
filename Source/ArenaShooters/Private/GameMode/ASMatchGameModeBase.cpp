@@ -23,6 +23,28 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	GoalNumOfKills = 1;
 }
 
+void AASMatchGameModeBase::InitGameState()
+{
+	Super::InitGameState();
+
+	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
+	if (IsValid(ASMatchGameState))
+	{
+		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
+		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
+		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	if (auto GameInstance = GetGameInstance<UASGameInstance>())
+	{
+		GameInstance->SetPreparedMatchToSession(false);
+	}
+}
+
 void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
@@ -94,28 +116,6 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	else
 	{
 		AS_LOG_S(Error);
-	}
-}
-
-void AASMatchGameModeBase::InitGameState()
-{
-	Super::InitGameState();
-
-	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
-	if (IsValid(ASMatchGameState))
-	{
-		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
-		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
-		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
-
-	if (auto GameInstance = GetGameInstance<UASGameInstance>())
-	{
-		GameInstance->SetPreparedMatchToSession(false);
 	}
 }
 

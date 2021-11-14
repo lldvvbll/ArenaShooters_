@@ -18,10 +18,10 @@ class ARENASHOOTERS_API AASMatchGameModeBase : public AGameMode
 public:
 	AASMatchGameModeBase();
 
+	virtual void InitGameState() override;
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void PreInitializeComponents() override;
-	virtual void InitGameState();
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer) override;
