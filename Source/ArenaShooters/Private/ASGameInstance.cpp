@@ -162,20 +162,16 @@ void UASGameInstance::OnStart()
 	}
 	else if (GIsClient)
 	{
-		if (FString(FCommandLine::Get()).Find(TEXT("-skipsteamcheck")) == INDEX_NONE)
+		if (!IsOnlineSubsystemSteam())
 		{
-			if (!IsOnlineSubsystemSteam())
+			auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
+			if (PlayerCtrlr != nullptr)
 			{
-				auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
-				if (PlayerCtrlr != nullptr)
-				{
-					PlayerCtrlr->NotifyMessage(TEXT("Not logged in to Steam.\nPlease log in to Steam and restart the game."), 0.0f);
-				}
-				else
-				{
-					AS_LOG_S(Error);
-					return;
-				}
+				PlayerCtrlr->NotifyMessage(TEXT("You are not logged in to Steam.\nPlease log in to Steam and restart the game."), 0.0f);
+			}
+			else
+			{
+				AS_LOG_S(Error);
 			}
 		}
 
