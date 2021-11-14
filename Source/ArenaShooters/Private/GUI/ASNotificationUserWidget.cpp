@@ -11,8 +11,11 @@ void UASNotificationUserWidget::SetInfo(const FString& Message, float Duration)
 		MessageTextBlock->SetText(FText::FromString(Message));
 	}
 
-	ExpireTime = FDateTime::Now() + FTimespan::FromSeconds(Duration);
-	bSetDuration = true;
+	if (Duration > 0.0f)
+	{
+		ExpireTime = FDateTime::Now() + FTimespan::FromSeconds(Duration);
+		bSetDuration = true;
+	}
 }
 
 void UASNotificationUserWidget::NativeConstruct()

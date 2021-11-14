@@ -46,11 +46,9 @@ void UASGameInstance::SearchServer()
 		SessionSearch->MaxSearchResults = 200000;
 		SessionSearch->TimeoutInSeconds = 60.0f;
 
-		//if (FString(FCommandLine::Get()).Find(TEXT("-searchlan")) != INDEX_NONE)
 		if (!IsOnlineSubsystemSteam())
 		{
 			SessionSearch->bIsLanQuery = true;
-			//SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 		}
 
 		SessionSearch->QuerySettings.Set(NUMOPENPUBCONN, 1, EOnlineComparisonOp::GreaterThanEquals);
@@ -143,15 +141,13 @@ void UASGameInstance::OnStart()
 			SessionSettings.Set(NUMOPENPUBCONN, SessionSettings.NumPublicConnections, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(PREPARED_MATCH, false, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
-			//if (FString(FCommandLine::Get()).Find(TEXT("-lan")) != INDEX_NONE)
-			if (!IsOnlineSubsystemSteam())
+			if (IsOnlineSubsystemSteam())
 			{
-				SessionSettings.bIsLANMatch = true;
-				//SessionSettings.bUsesPresence = true;
+				SessionSettings.bIsDedicated = true;
 			}
 			else
 			{
-				SessionSettings.bIsDedicated = true;
+				SessionSettings.bIsLANMatch = true;
 			}
 
 			if (!SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings))
@@ -166,6 +162,23 @@ void UASGameInstance::OnStart()
 	}
 	else if (GIsClient)
 	{
+		if (FString(FCommandLine::Get()).Find(TEXT("-skipsteamcheck")) == INDEX_NONE)
+		{
+			if (!IsOnlineSubsystemSteam())
+			{
+				auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
+				if (PlayerCtrlr != nullptr)
+				{
+					PlayerCtrlr->NotifyMessage(TEXT("Not logged in to Steam.\nPlease log in to Steam and restart the game."), 0.0f);
+				}
+				else
+				{
+					AS_LOG_S(Error);
+					return;
+				}
+			}
+		}
+
 		GEngine->OnNetworkFailure().AddUObject(this, &UASGameInstance::BroadcastNetworkFailure);
 	}
 }
@@ -318,7 +331,7 @@ void UASGameInstance::TravelBySession(FName SessionName)
 		return;
 	}
 
-	auto PlayerCtrlr = Cast<AASLobbyPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
 	if (PlayerCtrlr == nullptr)
 	{
 		AS_LOG_S(Error);

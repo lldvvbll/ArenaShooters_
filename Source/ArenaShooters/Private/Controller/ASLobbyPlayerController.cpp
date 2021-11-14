@@ -23,6 +23,17 @@ void AASLobbyPlayerController::ShowMainMenu()
 	}	
 }
 
+void AASLobbyPlayerController::NotifyMessage(const FString& Message, float Duration/* = 5.0f*/)
+{
+	auto NotiWidget = CreateWidget<UASNotificationUserWidget>(this, NotificationWidgetClass);
+	if (NotiWidget != nullptr)
+	{
+		NotiWidget->AddToViewport(5);
+
+		NotiWidget->SetInfo(Message, Duration);
+	}
+}
+
 void AASLobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -40,16 +51,5 @@ void AASLobbyPlayerController::BeginPlay()
 				GameInstance->ClearNetworkFailureMessage();
 			}
 		}
-	}
-}
-
-void AASLobbyPlayerController::NotifyMessage(const FString& Message, float Duration/* = 5.0f*/)
-{
-	auto NotiWidget = CreateWidget<UASNotificationUserWidget>(this, NotificationWidgetClass);
-	if (NotiWidget != nullptr)
-	{
-		NotiWidget->AddToViewport(5);
-
-		NotiWidget->SetInfo(Message, Duration);
 	}
 }

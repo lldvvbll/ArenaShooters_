@@ -17,11 +17,10 @@ class ARENASHOOTERS_API AASLobbyPlayerController : public APlayerController
 
 public:
 	void ShowMainMenu();
+	void NotifyMessage(const FString& Message, float Duration = 5.0f);
 
 protected:
 	virtual void BeginPlay() override;
-
-	void NotifyMessage(const FString& Message, float Duration = 5.0f);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
