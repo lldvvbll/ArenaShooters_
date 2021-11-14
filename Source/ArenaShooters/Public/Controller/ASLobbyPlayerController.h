@@ -8,7 +8,7 @@
 
 class UASMainMenuUserWidget;
 class UASServerBrowserUserWidget;
-class UASTimerCaptionUserWidget;
+class UASNotificationUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API AASLobbyPlayerController : public APlayerController
@@ -21,7 +21,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void ShowCaption(const FString& Caption, float CaptionLifeTimeSec = 5.0f);
+	void NotifyMessage(const FString& Message, float Duration = 5.0f);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
@@ -31,5 +31,5 @@ protected:
 	UASMainMenuUserWidget* MainMenuWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = UI)
-	TSubclassOf<UASTimerCaptionUserWidget> TimerCaptionUserWidgetClass;
+	TSubclassOf<UASNotificationUserWidget> NotificationWidgetClass;
 };

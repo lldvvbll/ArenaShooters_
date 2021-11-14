@@ -4,7 +4,7 @@
 #include "Controller/ASLobbyPlayerController.h"
 #include "GUI/Lobby/ASMainMenuUserWidget.h"
 #include "GUI/Lobby/ASServerBrowserUserWidget.h"
-#include "GUI/ASTimerCaptionUserWidget.h"
+#include "GUI/ASNotificationUserWidget.h"
 #include "ASGameInstance.h"
 
 void AASLobbyPlayerController::ShowMainMenu()
@@ -36,20 +36,20 @@ void AASLobbyPlayerController::BeginPlay()
 			FString ErrorMsg = GameInstance->GetNetworkFailureMessage();
 			if (!ErrorMsg.IsEmpty())
 			{
-				ShowCaption(ErrorMsg);
+				NotifyMessage(ErrorMsg);
 				GameInstance->ClearNetworkFailureMessage();
 			}
 		}
 	}
 }
 
-void AASLobbyPlayerController::ShowCaption(const FString& Caption, float CaptionLifeTimeSec/* = 5.0f*/)
+void AASLobbyPlayerController::NotifyMessage(const FString& Message, float Duration/* = 5.0f*/)
 {
-	auto CaptionWidget = CreateWidget<UASTimerCaptionUserWidget>(this, TimerCaptionUserWidgetClass);
-	if (CaptionWidget != nullptr)
+	auto NotiWidget = CreateWidget<UASNotificationUserWidget>(this, NotificationWidgetClass);
+	if (NotiWidget != nullptr)
 	{
-		CaptionWidget->AddToViewport(5);
+		NotiWidget->AddToViewport(5);
 
-		CaptionWidget->SetInfoWithDuration(FText::FromString(Caption), CaptionLifeTimeSec, false);
+		NotiWidget->SetInfo(Message, Duration);
 	}
 }

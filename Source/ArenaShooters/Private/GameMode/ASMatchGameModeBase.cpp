@@ -32,7 +32,7 @@ void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Addre
 
 	if (NumPlayers >= MaxPlayerCount)
 	{
-		ErrorMessage = TEXT("Server Full");
+		ErrorMessage = TEXT("Server is Full");
 		return;
 	}
 
