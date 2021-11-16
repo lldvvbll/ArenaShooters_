@@ -242,43 +242,26 @@ void AASMatchGameStateBase::OnRep_StartTimeForProcess()
 {
 	OnStartTimeForProcess.Broadcast(StartTimeForProcess);
 
-	float DeltaTimeSec = StartTimeForProcess - GetServerWorldTimeSeconds();
-	if (DeltaTimeSec > 5.0f)
+	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
-		DeltaTimeSec -= 5.0f;
-	}
-
-	if (DeltaTimeSec < 0.01f)
-	{
-		DeltaTimeSec = 0.01f;
-	}
-
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle,
-		[this]()
+		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
+		if (IsValid(PlayerController))
 		{
-			for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+			APawn* Pawn = PlayerController->GetPawn();
+			if (IsValid(Pawn))
 			{
-				auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
-				if (IsValid(PlayerController))
-				{
-					APawn* Pawn = PlayerController->GetPawn();
-					if (IsValid(Pawn))
-					{
-						Pawn->DisableInput(nullptr);
-					}
-					else
-					{
-						AS_LOG_S(Error);
-					}
-				}
-				else
-				{
-					AS_LOG_S(Error);
-				}
+				Pawn->DisableInput(nullptr);
 			}
-		},
-		DeltaTimeSec, false);
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
 }
 
 void AASMatchGameStateBase::OnRep_InnerMatchState()

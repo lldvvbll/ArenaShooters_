@@ -50,16 +50,13 @@ public:
 	bool IsSprinted() const;
 	float GetTotalTurnValue() const;
 	float GetInclineValue() const;
+
 	EWeaponType GetUsingWeaponType() const;
 	TWeakObjectPtr<UASWeapon> GetUsingWeapon() const;
 	TWeakObjectPtr<AASWeaponActor> GetUsingWeaponActor() const;
+
 	FRotator GetAimOffsetRotator() const;
 	EShootingStanceType GetShootingStance() const;
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayShootMontage();
-	void MulticastPlayShootMontage_Implementation();
-
 	UASInventoryComponent* GetInventoryComponent();
 	TArray<TWeakObjectPtr<UASItem>> GetGroundItems() const;
 
@@ -85,16 +82,14 @@ public:
 	void OnDestructedFullScreenWidget(UUserWidget* DestructedWidget);
 	bool IsShownFullScreenWidget() const;
 
-	void PicUpItem(UASItem* InItem);
+	bool CanPickUpItem() const;
+	void PickUpItem(UASItem* InItem);
 	void PickUpWeapon(EWeaponSlotType SlotType, UASWeapon* NewWeapon);
 	void PickUpArmor(EArmorSlotType SlotType, UASArmor* NewArmor);
 	void PickUpInventoryItem(UASItem* NewItem);
-	void DropItem(UASItem* InItem);
-	void DropAllItems();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayPickUpItemMontage();
-	void MulticastPlayPickUpItemMontage_Implementation();
+	bool CanDropItem() const;
+	void DropItem(UASItem* InItem);
 
 	UASStatusComponent* GetStatusComponent();
 	bool IsDead() const;
@@ -118,21 +113,35 @@ protected:
 	void LookUpAtRate(float Rate);
 	void Incline(float Value);
 
+	bool CanSprint() const;
 	void Sprint();
 	void SprintEnd();
+
 	void ToggleCrouch();
 	void PressedAimButton();
 	void ReleasedAimButton();
+
+	bool CanSelectWeapon() const;
 	void SelectMainWeapon();
 	void SelectSubWeapon();
+
 	void PressedShootButton();
 	void ReleasedShootButton();
+
+	bool CanChangeFireMode() const;
 	void ChangeFireMode();
+	
+	bool CanReload() const;
 	void Reload();
-	void HealingKit();
+	
+	bool CanUseHealingKit() const;
+	void UseHealingKit();
+
 	void Interact();
 
+	bool CanShoot() const;
 	void Shoot();
+
 	void ResetAimKeyState();
 
 	UFUNCTION(Server, Reliable)
@@ -160,12 +169,9 @@ protected:
 	void ServerSelectWeapon(EWeaponSlotType WeaponSlotType);
 	void ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotType);
 
-	UFUNCTION(Server, Reliable)
-	void ServerEndSelectWeapon();
-	void ServerEndSelectWeapon_Implementation();
-
-	UFUNCTION()
-	void OnRep_bChangeWeapon();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayChangeWeaponMontage();
+	void MulticastPlayChangeWeaponMontage_Implementation();
 
 	UFUNCTION(Server, Reliable)
 	void ServerChangeShootingStance(EShootingStanceType NewShootingStance);
@@ -185,6 +191,10 @@ protected:
 	bool ServerShoot_Validate(const FVector& MuzzleLocation, const FRotator& ShootRotation);
 	void ServerShoot_Implementation(const FVector& MuzzleLocation, const FRotator& ShootRotation);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayShootMontage();
+	void MulticastPlayShootMontage_Implementation();
+
 	UFUNCTION(Server, Reliable)
 	void ServerChangeFireMode();
 	void ServerChangeFireMode_Implementation();
@@ -197,23 +207,15 @@ protected:
 	void ServerBeginReload();
 	void ServerBeginReload_Implementation();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerCompleteReload();
-	bool ServerCompleteReload_Validate();
-	void ServerCompleteReload_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	void ServerEndReload();
-	void ServerEndReload_Implementation();
-
-	void EndReload();
+	void CompleteReload();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastCancelReload();
-	void MulticastCancelReload_Implementation();
+	void MulticastPlayReloadMontage();
+	void MulticastPlayReloadMontage_Implementation();
 
-	UFUNCTION()
-	void OnRep_bReloading(bool OldbReloading);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStopReloadMontage();
+	void MulticastStopReloadMontage_Implementation();
 
 	void Die();
 
@@ -224,25 +226,22 @@ protected:
 	void ServerBeginHealingKit(UASHealingKit* InHealingKit);
 	void ServerBeginHealingKit_Implementation(UASHealingKit* InHealingKit);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerCompleteHealingKit();
-	bool ServerCompleteHealingKit_Validate();
-	void ServerCompleteHealingKit_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	void ServerEndHealingKit();
-	void ServerEndHealingKit_Implementation();
-
-	void EndHealingKit();
-
-	UFUNCTION()
-	void OnRep_bUseHealingKit(bool OldbUseHealingKit);
+	void CompleteUseHealingKit();
+	void OnEndUseHealingKitMontage();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastCancelUseHealingKit();
-	void MulticastCancelUseHealingKit_Implementation();
+	void MulticastPlayUseHealingKitMontage();
+	void MulticastPlayUseHealingKitMontage_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStopUseHealingKitMontage();
+	void MulticastStopUseHealingKitMontage_Implementation();
 
 	void OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& InOldWeapon, const TWeakObjectPtr<UASWeapon>& InNewWeapon);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayPickUpItemMontage();
+	void MulticastPlayPickUpItemMontage_Implementation();
 
 	void OnChangedInnerMatchState(EInnerMatchState State);
 
@@ -353,21 +352,10 @@ protected:
 
 	TSet<TWeakObjectPtr<AASDroppedItemActor>> GroundItemActorSet;
 
-	UPROPERTY(ReplicatedUsing = OnRep_bReloading)
-	bool bReloading;
-
-	FDateTime ReloadStartTime;
-
 	UPROPERTY(ReplicatedUsing = OnRep_bDead)
 	bool bDead;
 
-	UPROPERTY(ReplicatedUsing = OnRep_bChangeWeapon)
-	bool bChangeWeapon;
-
 	bool bShownFullScreenWidget;
-
-	UPROPERTY(ReplicatedUsing = OnRep_bUseHealingKit)
-	bool bUseHealingKit;
 
 	UPROPERTY()
 	UASHealingKit* UsingHealingKit;

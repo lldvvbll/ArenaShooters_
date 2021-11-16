@@ -24,10 +24,20 @@ public:
 	bool IsActualSprinted() const;
 
 	void PlayShootMontage(EWeaponType WeaponType);
+
 	void PlayReloadMontage(EWeaponType WeaponType);
-	void PlayEquipMontage(EWeaponType WeaponType);
+	void StopReloadMontage();
+	bool IsPlayingReloadMontage() const;
+
+	void PlayEquipWeaponMontage(EWeaponType WeaponType);
+	bool IsPlayingEquipWeaponMontage() const;
+
 	void PlayPickUpItemMontage();
+
 	void PlayUseHealingKitMontage();
+	void StopUseHealingKitMontage();
+	bool IsPlayingUseHealingKitMontage() const;
+
 	void PlayHitReactMontage();
 
 protected:
@@ -46,12 +56,6 @@ protected:
 public:
 	DECLARE_EVENT(UASAnimInstance, FOnReloadCompleteEvent);
 	FOnReloadCompleteEvent OnReloadComplete;
-
-	DECLARE_EVENT(UASAnimInstance, FOnReloadEndEvent);
-	FOnReloadEndEvent OnReloadEnd;
-
-	DECLARE_EVENT(UASAnimInstance, FOnChangeWeaponEndEvent);
-	FOnChangeWeaponEndEvent OnChangeWeaponEnd;
 
 	DECLARE_EVENT(UASAnimInstance, FOnUseHealingKitCompleteEvent);
 	FOnUseHealingKitCompleteEvent OnUseHealingKitComplete;

@@ -62,7 +62,7 @@ void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Addre
 	{
 		if (bSetPrepareTimer || ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
-			ErrorMessage = TEXT("Match is Aleady Started");
+			ErrorMessage = TEXT("Match is Already Started");
 			return;
 		}
 	}

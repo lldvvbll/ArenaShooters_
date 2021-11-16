@@ -185,7 +185,7 @@ void UASGameInstance::OnStart()
 			auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
 			if (PlayerCtrlr != nullptr)
 			{
-				PlayerCtrlr->NotifyMessage(TEXT("You are not logged in to Steam.\nPlease log in to Steam and restart the game."), 0.0f);
+				PlayerCtrlr->NotifyMessage(TEXT("You are not logged in to Steam.\nPlease log in to Steam and restart the game."), 10.0f);
 			}
 			else
 			{

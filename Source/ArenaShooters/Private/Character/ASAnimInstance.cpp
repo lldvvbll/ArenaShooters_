@@ -100,7 +100,25 @@ void UASAnimInstance::PlayReloadMontage(EWeaponType WeaponType)
 	}
 }
 
-void UASAnimInstance::PlayEquipMontage(EWeaponType WeaponType)
+void UASAnimInstance::StopReloadMontage()
+{
+	if (Montage_IsPlaying(ARReloadMontage))
+	{
+		Montage_Stop(0.2f, ARReloadMontage);
+	}
+
+	if (Montage_IsPlaying(PistolReloadMontage))
+	{
+		Montage_Stop(0.2f, PistolReloadMontage);
+	}
+}
+
+bool UASAnimInstance::IsPlayingReloadMontage() const
+{
+	return Montage_IsPlaying(ARReloadMontage) || Montage_IsPlaying(PistolReloadMontage);
+}
+
+void UASAnimInstance::PlayEquipWeaponMontage(EWeaponType WeaponType)
 {
 	switch (WeaponType)
 	{
@@ -120,6 +138,11 @@ void UASAnimInstance::PlayEquipMontage(EWeaponType WeaponType)
 	}
 }
 
+bool UASAnimInstance::IsPlayingEquipWeaponMontage() const
+{
+	return Montage_IsPlaying(PistolEquipMontage) || Montage_IsPlaying(AREquipMontage);
+}
+
 void UASAnimInstance::PlayPickUpItemMontage()
 {
 	Montage_Play(PickUpItemMontage);
@@ -128,6 +151,19 @@ void UASAnimInstance::PlayPickUpItemMontage()
 void UASAnimInstance::PlayUseHealingKitMontage()
 {
 	Montage_Play(UseHealingKitMontage);
+}
+
+void UASAnimInstance::StopUseHealingKitMontage()
+{
+	if (Montage_IsPlaying(UseHealingKitMontage))
+	{
+		Montage_Stop(0.2f, UseHealingKitMontage);
+	}	
+}
+
+bool UASAnimInstance::IsPlayingUseHealingKitMontage() const
+{
+	return Montage_IsPlaying(UseHealingKitMontage);
 }
 
 void UASAnimInstance::PlayHitReactMontage()
@@ -140,15 +176,7 @@ void UASAnimInstance::OnMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 	if (Montage == nullptr)
 		return;
 
-	if (Montage == PistolReloadMontage || Montage == ARReloadMontage)
-	{
-		OnReloadEnd.Broadcast();
-	}
-	else if (Montage == PistolEquipMontage || Montage == AREquipMontage)
-	{
-		OnChangeWeaponEnd.Broadcast();
-	}
-	else if (Montage == UseHealingKitMontage)
+	if (Montage == UseHealingKitMontage)
 	{
 		OnUseHealingKitEnd.Broadcast();
 	}
