@@ -9,8 +9,6 @@
 
 void UASCrossHairUserWidget::OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon)
 {
-	ESlateVisibility BarVisibility = ESlateVisibility::Visible;
-
 	if (NewWeapon.IsValid())
 	{
 		constexpr float ReduceRate = 4000.0f * 0.15f;
@@ -26,33 +24,65 @@ void UASCrossHairUserWidget::OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeap
 		MaxBarOffset = TNumericLimits<float>::Max();
 		OffsetPerShot = TNumericLimits<float>::Max();
 		RecoverySpeed = 0.0f;
-
-		BarVisibility = ESlateVisibility::Hidden;
 	}
 
 	CurrentBarOffset = MinBarOffset;
 
-	if (TopBar != nullptr)
+	if (!NewWeapon.IsValid())
 	{
-		TopBar->SetVisibility(BarVisibility);
+		SetBarVisibility(false);
 	}
-	if (BottomBar != nullptr)
+}
+
+void UASCrossHairUserWidget::OnChangedShootingStance(EShootingStanceType NewShootingStance)
+{
+	switch (NewShootingStance)
 	{
-		BottomBar->SetVisibility(BarVisibility);
-	}
-	if (LeftBar != nullptr)
-	{
-		LeftBar->SetVisibility(BarVisibility);
-	}
-	if (RightBar != nullptr)
-	{
-		RightBar->SetVisibility(BarVisibility);
+	case EShootingStanceType::None:
+	case EShootingStanceType::Scoping:
+		{
+			SetBarVisibility(false);
+		}
+		break;
+	case EShootingStanceType::Aiming:
+		{
+			SetBarVisibility(true);
+		}		
+		break;
+	default:
+		checkNoEntry();
+		break;
 	}
 }
 
 void UASCrossHairUserWidget::SpreadBar()
 {
 	CurrentBarOffset = FMath::Clamp(CurrentBarOffset + OffsetPerShot, MinBarOffset, MaxBarOffset);
+}
+
+void UASCrossHairUserWidget::SetBarVisibility(bool bVisible)
+{
+	ESlateVisibility BarVisibility = (bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+
+	if (TopBar != nullptr)
+	{
+		TopBar->SetVisibility(BarVisibility);
+	}
+
+	if (BottomBar != nullptr)
+	{
+		BottomBar->SetVisibility(BarVisibility);
+	}
+
+	if (LeftBar != nullptr)
+	{
+		LeftBar->SetVisibility(BarVisibility);
+	}
+
+	if (RightBar != nullptr)
+	{
+		RightBar->SetVisibility(BarVisibility);
+	}
 }
 
 void UASCrossHairUserWidget::NativeConstruct()
@@ -74,6 +104,7 @@ void UASCrossHairUserWidget::NativeConstruct()
 		}
 
 		Char->OnPlayShootMontage.AddUObject(this, &UASCrossHairUserWidget::SpreadBar);
+		Char->OnChangedShootingStance.AddUObject(this, &UASCrossHairUserWidget::OnChangedShootingStance);
 	}
 }
 

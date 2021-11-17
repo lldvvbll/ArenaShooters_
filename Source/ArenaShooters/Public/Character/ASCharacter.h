@@ -170,8 +170,8 @@ protected:
 	void ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotType);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayChangeWeaponMontage();
-	void MulticastPlayChangeWeaponMontage_Implementation();
+	void MulticastPlayChangeWeaponMontage(EWeaponType WeaponType);
+	void MulticastPlayChangeWeaponMontage_Implementation(EWeaponType WeaponType);
 
 	UFUNCTION(Server, Reliable)
 	void ServerChangeShootingStance(EShootingStanceType NewShootingStance);
@@ -274,6 +274,9 @@ public:
 
 	DECLARE_EVENT_OneParam(AASCharacter, FOnTracePickingUpEvent, AActor*)
 	FOnTracePickingUpEvent OnTracePickingUp;
+
+	DECLARE_EVENT_OneParam(AASCharacter, FOnChangedShootingStanceEvent, EShootingStanceType)
+	FOnChangedShootingStanceEvent OnChangedShootingStance;
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = true))

@@ -1744,7 +1744,8 @@ void AASCharacter::ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotT
 	if (!ResultPair.Value)
 		return;
 
-	if (ResultPair.Key != nullptr)
+	UASWeapon* NewWeapon = Cast<UASWeapon>(ResultPair.Key);
+	if (IsValid(NewWeapon))
 	{
 		if (ASAnimInstance->IsPlayingReloadMontage())
 		{
@@ -1753,16 +1754,16 @@ void AASCharacter::ServerSelectWeapon_Implementation(EWeaponSlotType WeaponSlotT
 
 		if (ASInventory->SelectWeapon(WeaponSlotType))
 		{
-			MulticastPlayChangeWeaponMontage();
+			MulticastPlayChangeWeaponMontage(NewWeapon->GetWeaponType());
 		}
 	}
 }
 
-void AASCharacter::MulticastPlayChangeWeaponMontage_Implementation()
+void AASCharacter::MulticastPlayChangeWeaponMontage_Implementation(EWeaponType WeaponType)
 {
 	if (ASAnimInstance != nullptr)
 	{
-		ASAnimInstance->PlayEquipWeaponMontage(GetUsingWeaponType());
+		ASAnimInstance->PlayEquipWeaponMontage(WeaponType);
 	}
 }
 
@@ -1822,6 +1823,8 @@ void AASCharacter::ServerChangeShootingStance_Implementation(EShootingStanceType
 		checkNoEntry();
 		break;
 	}
+
+	OnChangedShootingStance.Broadcast(ShootingStance);
 }
 
 void AASCharacter::OnRep_ShootingStance(EShootingStanceType OldShootingStance)
@@ -1863,6 +1866,8 @@ void AASCharacter::OnRep_ShootingStance(EShootingStanceType OldShootingStance)
 		checkNoEntry();
 		break;
 	}
+
+	OnChangedShootingStance.Broadcast(ShootingStance);
 }
 
 bool AASCharacter::CanAimOrScope() const
@@ -1909,6 +1914,7 @@ void AASCharacter::StartAiming()
 	}	
 
 	SetMaxWalkSpeedRate(AimingSpeedRate);
+
 	if (CameraBoom != nullptr)
 	{
 		CameraBoom->TargetArmLength = AimingCamArmLength;
@@ -1928,6 +1934,7 @@ void AASCharacter::EndAiming()
 	}
 
 	SetMaxWalkSpeedRate(1.0f);
+
 	if (CameraBoom != nullptr)
 	{
 		CameraBoom->TargetArmLength = NormalCamArmLength;
@@ -1944,6 +1951,7 @@ void AASCharacter::StartScoping()
 	}
 
 	SetMaxWalkSpeedRate(AimingSpeedRate);
+
 	if (ASInventory != nullptr)
 	{
 		OnScope.Broadcast(ASInventory->GetSelectedWeapon());

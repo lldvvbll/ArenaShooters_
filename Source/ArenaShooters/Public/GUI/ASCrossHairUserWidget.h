@@ -4,6 +4,7 @@
 
 #include "ArenaShooters.h"
 #include "Blueprint/UserWidget.h"
+#include "Common/ASEnums.h"
 #include "ASCrossHairUserWidget.generated.h"
 
 class UImage;
@@ -16,7 +17,10 @@ class ARENASHOOTERS_API UASCrossHairUserWidget : public UUserWidget
 	
 public:
 	void OnChangeSelectedWeapon(const TWeakObjectPtr<UASWeapon>& OldWeapon, const TWeakObjectPtr<UASWeapon>& NewWeapon);
+	void OnChangedShootingStance(EShootingStanceType NewShootingStance);
+
 	void SpreadBar();
+	void SetBarVisibility(bool bVisible);
 
 protected:
 	virtual void NativeConstruct() override;
