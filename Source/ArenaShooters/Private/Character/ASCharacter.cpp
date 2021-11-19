@@ -376,7 +376,7 @@ void AASCharacter::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimit
 
 	auto Bullet = Cast<AASBullet>(Other);
 	bool bHitByBullet = (MyComp == GetMesh() && Bullet != nullptr);
-
+	
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		if (bHitByBullet)
@@ -398,14 +398,17 @@ void AASCharacter::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimit
 			UGameplayStatics::SpawnEmitterAttached(BloodParticle, MyComp, NAME_None, HitLocation, HitNormal.ToOrientationRotator(),
 				EAttachLocation::KeepWorldPosition);
 
-			if (ASAnimInstance != nullptr)
+			if (!IsLocallyControlled() || ShootingStance != EShootingStanceType::Scoping)
 			{
-				ASAnimInstance->PlayHitReactMontage();
-			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
+				if (ASAnimInstance != nullptr)
+				{
+					ASAnimInstance->PlayHitReactMontage();
+				}
+				else
+				{
+					AS_LOG_S(Error);
+				}
+			}			
 		}
 	}
 }

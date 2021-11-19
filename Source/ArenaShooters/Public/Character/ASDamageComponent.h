@@ -21,7 +21,6 @@ public:
 	UASDamageComponent();
 
 	virtual void InitializeComponent() override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void TakeBulletDamage(AASBullet* InBullet, const FHitResult& InHit);
 

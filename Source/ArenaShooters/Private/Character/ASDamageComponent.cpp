@@ -34,12 +34,6 @@ void UASDamageComponent::InitializeComponent()
 	DamageDataAsset = UASAssetManager::Get().GetDataAsset<UASDamageDataAsset>(DamageAssetId);
 }
 
-void UASDamageComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-}
-
 void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult& InHit)
 {
 	if (!IsValid(InBullet))
