@@ -8,6 +8,7 @@
 
 class UASDeathMatchRankingUserWidget;
 class UASDmLeaderBoardUserWidget;
+class AASPlayerState;
 
 UCLASS()
 class ARENASHOOTERS_API AASDeathMatchPlayerController : public AASPlayerController
@@ -24,8 +25,10 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	virtual void OnChangedInnerMatchState(EInnerMatchState State) override;
-	
+
 	void ShowLeaderBoardWidget();
+
+	void OnChangedDeathCount(int32 NewDeathCount);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
@@ -38,4 +41,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASDmLeaderBoardUserWidget> DmLeaderBoardWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	FText ItemSetChangeButtonNotification;
 };

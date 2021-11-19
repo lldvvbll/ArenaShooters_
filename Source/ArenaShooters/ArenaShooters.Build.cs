@@ -12,6 +12,7 @@ public class ArenaShooters : ModuleRules
 		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore",
 			"OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam",
+			"EngineSettings",
 		});
 
 		//DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");

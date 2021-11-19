@@ -15,6 +15,8 @@ class UASPrepareInfoUserWidget;
 class UASHudUserWidget;
 class AASCharacter;
 class UASTimerCaptionUserWidget;
+class AASPlayerState;
+class UASNotificationUserWidget;
 
 UCLASS()
 class ARENASHOOTERS_API AASPlayerController : public APlayerController
@@ -40,6 +42,8 @@ public:
 	void RemoveFullScreenWidget();
 
 	void GoToMainMenu();
+
+	void NotifyMessage(const FString& Message, float Duration = 5.0f);
 
 protected:
 	virtual void BeginPlay() override;
@@ -142,4 +146,7 @@ protected:
 	float RespawnTime;
 
 	FTimerHandle RespawnTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UASNotificationUserWidget> NotificationWidgetClass;
 };

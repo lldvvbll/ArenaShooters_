@@ -6,6 +6,7 @@
 #include "GUI/ASDmLeaderBoardUserWidget.h"
 #include "GameMode/ASMatchGameStateBase.h"
 #include "Character/ASCharacter.h"
+#include "Controller/ASPlayerState.h"
 
 AASDeathMatchPlayerController::AASDeathMatchPlayerController()
 {
@@ -31,14 +32,32 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 					bCreateRankingWidget = true;
 				}
 			}
-		}		
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+
+		auto ASPlayerState = GetPlayerState<AASPlayerState>();
+		if (IsValid(ASPlayerState))
+		{
+			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASDeathMatchPlayerController::OnChangedDeathCount);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
 	}
 }
 
 void AASDeathMatchPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-		
+
+	if (IsLocalPlayerController())
+	{
+		NotifyMessage(ItemSetChangeButtonNotification.ToString(), 10.0f);
+	}
 }
 
 void AASDeathMatchPlayerController::SetupInputComponent()
@@ -66,4 +85,12 @@ void AASDeathMatchPlayerController::OnChangedInnerMatchState(EInnerMatchState St
 void AASDeathMatchPlayerController::ShowLeaderBoardWidget()
 {
 	ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
+}
+
+void AASDeathMatchPlayerController::OnChangedDeathCount(int32 NewDeathCount)
+{
+	if (IsLocalPlayerController())
+	{
+		NotifyMessage(ItemSetChangeButtonNotification.ToString(), 3.0f);
+	}
 }

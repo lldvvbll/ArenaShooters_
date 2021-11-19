@@ -16,6 +16,8 @@
 #include "GUI/ASTimerCaptionUserWidget.h"
 #include "GameMapsSettings.h"
 #include "ASGameInstance.h"
+#include "Controller/ASPlayerState.h"
+#include "GUI/ASNotificationUserWidget.h"
 
 AASPlayerController::AASPlayerController()
 {
@@ -180,6 +182,17 @@ void AASPlayerController::GoToMainMenu()
 	}
 }
 
+void AASPlayerController::NotifyMessage(const FString& Message, float Duration/* = 5.0f*/)
+{
+	auto NotiWidget = CreateWidget<UASNotificationUserWidget>(this, NotificationWidgetClass);
+	if (NotiWidget != nullptr)
+	{
+		NotiWidget->AddToViewport(5);
+
+		NotiWidget->SetInfo(Message, Duration);
+	}
+}
+
 void AASPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -205,6 +218,10 @@ void AASPlayerController::BeginPlay()
 			{
 				ShowPrepareInfoWidget();
 			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
 		}
 	}
 }
