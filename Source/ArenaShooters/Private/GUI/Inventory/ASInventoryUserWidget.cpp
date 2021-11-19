@@ -7,6 +7,7 @@
 #include "GUI/Inventory/ASWeaponSlotUserWidget.h"
 #include "GUI/Inventory/ASArmorSlotUserWidget.h"
 #include "GUI/Inventory/ASItemScrollBoxWrapperUserWidget.h"
+#include "GUI/Inventory/ASItemDragDropOperation.h"
 #include "Character/ASInventoryComponent.h"
 #include "Item/ASItem.h"
 #include "Item/ASWeapon.h"
@@ -94,6 +95,51 @@ FReply UASInventoryUserWidget::NativeOnMouseButtonDown(const FGeometry& InGeomet
 	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
 	return Reply;
+}
+
+bool UASInventoryUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	if (Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation))
+		return true;
+
+	if (auto DragDropOp = Cast<UASItemDragDropOperation>(InOperation))
+	{
+		const TWeakObjectPtr<UASItem>& Item = DragDropOp->GetItem();
+		if (Item.IsValid())
+		{
+			UWidget* SuitableWidget = FindSuitableToDropInventoryWidget(Item);
+			if (SuitableWidget != nullptr)
+			{
+				UWidget* ParentWidget = DragDropOp->GetParentWidget();
+				if (ParentWidget != SuitableWidget)
+				{
+					auto ASChar = GetOwningPlayerPawn<AASCharacter>();
+					if (IsValid(ASChar))
+					{
+						ASChar->PickUpItem(Item.Get());
+					}
+					else
+					{
+						AS_LOG_S(Error);
+					}
+				}
+			}
+			else
+			{
+				AS_LOG_S(Error);
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+
+	return false;
 }
 
 AASCharacter* UASInventoryUserWidget::GetASCharacter() const
@@ -264,4 +310,75 @@ void UASInventoryUserWidget::OnRemoveInventoryItem(const TWeakObjectPtr<UASItem>
 void UASInventoryUserWidget::BackToGame()
 {
 	RemoveFromParent();
+}
+
+UUserWidget* UASInventoryUserWidget::FindSuitableToDropInventoryWidget(const TWeakObjectPtr<UASItem>& DopItem) const
+{
+	if (!DopItem.IsValid())
+	{
+		AS_LOG_S(Error);
+		return nullptr;
+	}
+	
+	UUserWidget* ReturnWidget = nullptr;
+
+	EItemType ItemType = DopItem->GetItemType();
+	switch (ItemType)
+	{
+	case EItemType::Weapon:
+		if (auto Weapon = Cast<UASWeapon>(DopItem))
+		{
+			EWeaponSlotType SlotType = UASInventoryComponent::GetSuitableWeaponSlotType(Weapon->GetWeaponType());
+			switch (SlotType)
+			{
+			case EWeaponSlotType::Main:
+				ReturnWidget = MainWeaponSlotWidget;
+				break;
+			case EWeaponSlotType::Sub:
+				ReturnWidget = SubWeaponSlotWidget;
+				break;
+			default:
+				checkNoEntry();
+				break;
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+		break;
+	case EItemType::Armor:
+		if (auto Armor = Cast<UASArmor>(DopItem))
+		{
+			EArmorSlotType SlotType = UASInventoryComponent::GetSuitableArmorSlotType(Armor->GetArmorType());
+			switch (SlotType)
+			{
+			case EArmorSlotType::Helmet:
+				ReturnWidget = HelmetSlotWidget;
+				break;
+			case EArmorSlotType::Jacket:
+				ReturnWidget = JacketSlotWidget;
+				break;
+			default:
+				checkNoEntry();
+				break;
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+		break;
+	case EItemType::Ammo:			// fallthrough
+	case EItemType::HealingKit:
+		{
+			ReturnWidget = InventoryItemScrollBoxWrapperWidget;
+		}
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
+
+	return ReturnWidget;
 }

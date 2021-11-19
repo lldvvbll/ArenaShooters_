@@ -87,6 +87,11 @@ void UASItemScrollBoxWrapperUserWidget::RemoveItemsFromScrollBox(const TArray<TW
 	}
 }
 
+bool UASItemScrollBoxWrapperUserWidget::IsInventoryScrollBoxWrapperWidget() const
+{
+	return bInventoryScrollBoxWrapper;
+}
+
 void UASItemScrollBoxWrapperUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -147,12 +152,12 @@ bool UASItemScrollBoxWrapperUserWidget::NativeOnDrop(const FGeometry& InGeometry
 	if (Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation))
 		return true;
 
-	if (GetOperationParentWidget(InOperation) != ItemScrollBox)
+	TWeakObjectPtr<UASItem> Item = GetASItemFromDragDropOperation(InOperation);
+	if (Item.IsValid())
 	{
-		TWeakObjectPtr<UASItem> Item = GetASItemFromDragDropOperation(InOperation);
-		if (Item.IsValid())
+		if (bInventoryScrollBoxWrapper)
 		{
-			if (bInventoryScrollBoxWrapper)
+			if (GetOperationParentWidget(InOperation) != ItemScrollBox)
 			{
 				EItemType ItemType = Item->GetItemType();
 				if (ItemType != EItemType::Weapon && ItemType != EItemType::Armor)
@@ -164,15 +169,23 @@ bool UASItemScrollBoxWrapperUserWidget::NativeOnDrop(const FGeometry& InGeometry
 					}
 				}
 			}
-			else
+		}
+		else
+		{
+			if (GetOperationParentWidget(InOperation) != ItemScrollBox)
 			{
 				if (auto ASChar = Cast<AASCharacter>(GetOwningPlayerPawn()))
 				{
 					ASChar->DropItem(Item.Get());
-					return true;
 				}
 			}
+
+			return true;
 		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 
 	return false;

@@ -25,6 +25,7 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	AASCharacter* GetASCharacter() const;
 	
@@ -41,6 +42,8 @@ protected:
 
 	UFUNCTION()
 	void BackToGame();
+
+	UUserWidget* FindSuitableToDropInventoryWidget(const TWeakObjectPtr<UASItem>& DopItem) const;
 
 public:
 	DECLARE_EVENT_OneParam(UASInventoryUserWidget, FOnConstructedEvent, UUserWidget*);

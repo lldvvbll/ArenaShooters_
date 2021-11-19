@@ -19,6 +19,8 @@ public:
 	void AddItemsToScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items);
 	void RemoveItemsFromScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items);
 
+	bool IsInventoryScrollBoxWrapperWidget() const;
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeOnDragEnter(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
