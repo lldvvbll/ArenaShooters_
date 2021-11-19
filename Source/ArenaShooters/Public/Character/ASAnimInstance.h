@@ -53,6 +53,9 @@ protected:
 	UFUNCTION()
 	void AnimNotify_HitReact();
 
+	UFUNCTION()
+	void OnLanded(const FHitResult& Hit);
+
 public:
 	DECLARE_EVENT(UASAnimInstance, FOnReloadCompleteEvent);
 	FOnReloadCompleteEvent OnReloadComplete;
@@ -138,4 +141,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	float InclineValue;
+
+	UPROPERTY(EditDefaultsOnly, Meta = (AllowPrivateAccess = true))
+	USoundWave* FootstepSound;
 };

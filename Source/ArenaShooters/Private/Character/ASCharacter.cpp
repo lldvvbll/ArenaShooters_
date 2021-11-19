@@ -160,51 +160,43 @@ void AASCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (bPressedAimButton && IsLocallyControlled() && CanAimOrScope())
+	if (IsLocallyControlled())
 	{
-		AimKeyHoldTime += DeltaSeconds;
-		if (AimKeyHoldTime >= MaxAimKeyHoldTime)
+		if (bPressedAimButton && CanAimOrScope())
 		{
-			ResetAimKeyState();
-			ServerChangeShootingStance(EShootingStanceType::Aiming);
+			AimKeyHoldTime += DeltaSeconds;
+			if (AimKeyHoldTime >= MaxAimKeyHoldTime)
+			{
+				ResetAimKeyState();
+				ServerChangeShootingStance(EShootingStanceType::Aiming);
+			}
 		}
-	}
 
-	if (ShootingStance != EShootingStanceType::None)
-	{
-		if (IsLocallyControlled() || GetLocalRole() == ROLE_Authority)
+		if (bPressedShootButton)
+		{
+			Shoot();
+		}
+
+		if (bTracePickingUp)
+		{
+			if (PickingUpTraceElapseTime < PickingUpTraceInterval)
+			{
+				PickingUpTraceElapseTime += DeltaSeconds;
+			}
+			else
+			{
+				HighlightingPickableActor();
+
+				PickingUpTraceElapseTime = 0.0f;
+			}
+		}
+
+		if (ShootingStance != EShootingStanceType::None)
 		{
 			AimOffsetRotator = (GetControlRotation() - GetActorRotation()).GetNormalized();
 		}
-	}
 
-	if (bPressedShootButton && IsLocallyControlled())
-	{
-		Shoot();
-	}
-
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		CurrentBulletSpread = FMath::FInterpConstantTo(CurrentBulletSpread, MinBulletSpread, DeltaSeconds, BulletSpreadRecoverySpeed);
-	}
-
-	if (bTracePickingUp && IsLocallyControlled())
-	{
-		if (PickingUpTraceElapseTime < PickingUpTraceInterval)
-		{
-			PickingUpTraceElapseTime += DeltaSeconds;
-		}
-		else
-		{
-			HighlightingPickableActor();
-
-			PickingUpTraceElapseTime = 0.0f;
-		}
-	}
-
-	if (IsLocallyControlled())
-	{
-		if (GetShootingStance() == EShootingStanceType::Aiming)
+		if (ShootingStance == EShootingStanceType::Aiming)
 		{
 			FVector TargetSocketOffset;
 			if (InclineValue > 0.0f)
@@ -222,6 +214,16 @@ void AASCharacter::Tick(float DeltaSeconds)
 
 			CameraBoom->SocketOffset = FMath::VInterpConstantTo(CameraBoom->SocketOffset, TargetSocketOffset, DeltaSeconds, InclineSpeed);
 		}
+	}
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		if (ShootingStance != EShootingStanceType::None)
+		{
+			AimOffsetRotator = (GetControlRotation() - GetActorRotation()).GetNormalized();
+		}
+
+		CurrentBulletSpread = FMath::FInterpConstantTo(CurrentBulletSpread, MinBulletSpread, DeltaSeconds, BulletSpreadRecoverySpeed);
 	}
 }
 
@@ -307,6 +309,8 @@ void AASCharacter::Jump()
 
 void AASCharacter::Falling()
 {
+	Super::Falling();
+
 	if (IsLocallyControlled())
 	{
 		if (bIsCrouched)

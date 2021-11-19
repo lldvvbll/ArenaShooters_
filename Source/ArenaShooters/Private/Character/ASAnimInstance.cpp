@@ -53,6 +53,8 @@ void UASAnimInstance::NativeBeginPlay()
 	bLocallyControlled = ASChar->IsLocallyControlled();
 
 	OnMontageEnded.AddDynamic(this, &UASAnimInstance::OnMontageEnd);
+
+	ASChar->LandedDelegate.AddDynamic(this, &UASAnimInstance::OnLanded);
 }
 
 bool UASAnimInstance::IsActualSprinted() const
@@ -194,12 +196,29 @@ void UASAnimInstance::AnimNotify_UseHealingKitComplete()
 
 void UASAnimInstance::AnimNotify_HitReact()
 {
-	ASChar = Cast<AASCharacter>(TryGetPawnOwner());
 	if (!::IsValid(ASChar))
+	{
+		AS_LOG_S(Error);
 		return;
+	}
 	
 	if (ASChar->IsLocallyControlled())
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), BodyHitSound, ASChar->GetActorLocation());
-	}	
+	}
+}
+
+void UASAnimInstance::OnLanded(const FHitResult& Hit)
+{
+	if (IsValid(ASChar))
+	{
+		if (ASChar->IsLocallyControlled())
+		{
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FootstepSound, ASChar->GetActorLocation());
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
