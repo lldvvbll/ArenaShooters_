@@ -156,6 +156,27 @@ void AASCharacter::BeginPlay()
 	}
 }
 
+void AASCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (ASInventory != nullptr)
+	{
+		ASInventory->ClearAllItems();
+	}
+
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors, false);
+
+	for (auto& AttachedActor : AttachedActors)
+	{
+		if (!IsValid(AttachedActor))
+			continue;
+
+		AttachedActor->Destroy();
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 void AASCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
