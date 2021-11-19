@@ -6,6 +6,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Controller/ASPlayerController.h"
 #include "Character/ASCharacter.h"
+#include "ASGameInstance.h"
 
 void UASGameMenuUserWidget::NativeConstruct()
 {
@@ -88,12 +89,20 @@ void UASGameMenuUserWidget::OnClickedKeySettingsBackButton()
 
 void UASGameMenuUserWidget::OnClickedGoToMainMenuButton()
 {
-	// todo: ±¸Çö
+	auto PC = GetOwningPlayer<AASPlayerController>();
+	if (IsValid(PC))
+	{
+		PC->GoToMainMenu();
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
 }
 
 void UASGameMenuUserWidget::OnClickedQuitGameButton()
 {
-	GetOwningPlayer()->ConsoleCommand("quit");
+	GetOwningPlayer()->ConsoleCommand(TEXT("quit"));
 }
 
 void UASGameMenuUserWidget::OnEscKeyPressed()

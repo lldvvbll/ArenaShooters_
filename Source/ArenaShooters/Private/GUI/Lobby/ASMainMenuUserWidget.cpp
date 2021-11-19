@@ -107,7 +107,7 @@ void UASMainMenuUserWidget::OnClickedKeySettingsBackButton()
 
 void UASMainMenuUserWidget::OnClickedExitButton()
 {
-	GetOwningPlayer()->ConsoleCommand("quit");
+	GetOwningPlayer()->ConsoleCommand(TEXT("quit"));
 }
 
 void UASMainMenuUserWidget::OnEscKeyPressed()

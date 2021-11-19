@@ -117,6 +117,27 @@ void UASGameInstance::ClearNetworkFailureMessage()
 	NetworkFailureMessage.Empty();
 }
 
+void UASGameInstance::DestroySession()
+{
+	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+	if (SessionInterface.IsValid())
+	{
+		FNamedOnlineSession* NamedSession = SessionInterface->GetNamedSession(NAME_GameSession);
+		if (NamedSession != nullptr)
+		{
+			SessionInterface->DestroySession(NAME_GameSession);
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+	else
+	{
+		AS_LOG_S(Error);
+	}
+}
+
 void UASGameInstance::OnStart()
 {
 	Super::OnStart();
@@ -357,18 +378,7 @@ void UASGameInstance::TravelBySession(FName SessionName)
 
 void UASGameInstance::BroadcastNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
 {
-	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(World);
-	if (!SessionInterface.IsValid())
-	{
-		AS_LOG_S(Error);
-		return;
-	}
-
-	FNamedOnlineSession* NamedSession = SessionInterface->GetNamedSession(NAME_GameSession);
-	if (NamedSession != nullptr)
-	{
-		SessionInterface->DestroySession(NAME_GameSession);
-	}
+	DestroySession();
 
 	NetworkFailureMessage = ErrorString;
 }

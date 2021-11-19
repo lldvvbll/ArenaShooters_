@@ -39,6 +39,8 @@ public:
 
 	void RemoveFullScreenWidget();
 
+	void GoToMainMenu();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

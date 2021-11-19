@@ -41,6 +41,8 @@ public:
 	const FString& GetNetworkFailureMessage() const;
 	void ClearNetworkFailureMessage();
 
+	void DestroySession();
+
 protected:
 	virtual void OnStart() override;
 

@@ -14,6 +14,8 @@
 #include "GUI/HUD/ASHudUserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "GUI/ASTimerCaptionUserWidget.h"
+#include "GameMapsSettings.h"
+#include "ASGameInstance.h"
 
 AASPlayerController::AASPlayerController()
 {
@@ -160,6 +162,21 @@ void AASPlayerController::RemoveFullScreenWidget()
 	{
 		CurrentFullScreenWidget->RemoveFromParent();
 		CurrentFullScreenWidget = nullptr;
+	}
+}
+
+void AASPlayerController::GoToMainMenu()
+{
+	auto GameInstance = GetGameInstance<UASGameInstance>();
+	if (IsValid(GameInstance))
+	{
+		ClientTravel(UGameMapsSettings::GetGameDefaultMap(), ETravelType::TRAVEL_Absolute);
+
+		GameInstance->DestroySession();
+	}
+	else
+	{
+		AS_LOG_S(Error);
 	}
 }
 
