@@ -19,7 +19,7 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	void OnClickedSlot(UASMatchItemSetSlotUserWidget* ClickedSlot);
+	void OnChangedItemSetDataAsset(UASItemSetDataAsset* NewItemSetDataAsset);
 
 protected:
 	UPROPERTY()

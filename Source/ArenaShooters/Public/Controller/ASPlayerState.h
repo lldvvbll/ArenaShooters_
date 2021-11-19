@@ -36,6 +36,10 @@ public:
 	bool ServerSetItemSetDataAsset_Validate(UASItemSetDataAsset* DataAsset);
 	void ServerSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset);
 
+	UFUNCTION(Client, Reliable)
+	void ClientSetItemSetDataAsset(UASItemSetDataAsset* DataAsset);
+	void ClientSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset);
+
 	UASItemSetDataAsset* GetItemSetDataAsset() const;
 	FPrimaryAssetId GetItemSetDataAssetId() const;
 

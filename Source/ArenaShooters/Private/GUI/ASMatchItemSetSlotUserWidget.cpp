@@ -37,6 +37,9 @@ FPrimaryAssetId UASMatchItemSetSlotUserWidget::GetItemSetDataAssetId() const
 
 void UASMatchItemSetSlotUserWidget::ChangeButtonState(bool bIsSelected)
 {
+	if (bSelected == bIsSelected)
+		return;
+
 	bSelected = bIsSelected;
 
 	if (bSelected)
@@ -78,8 +81,6 @@ void UASMatchItemSetSlotUserWidget::OnClickedButton()
 	if (IsValid(PlayerState))
 	{
 		PlayerState->ServerSetItemSetDataAsset(ItemSetDataAsset);
-
-		OnClickedSlot.Broadcast(this);
 	}
 	else
 	{

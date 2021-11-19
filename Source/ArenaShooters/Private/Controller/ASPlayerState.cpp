@@ -98,6 +98,15 @@ bool AASPlayerState::ServerSetItemSetDataAsset_Validate(UASItemSetDataAsset* Dat
 void AASPlayerState::ServerSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset)
 {
 	ItemSetDataAsset = DataAsset;
+
+	ClientSetItemSetDataAsset(ItemSetDataAsset);
+}
+
+void AASPlayerState::ClientSetItemSetDataAsset_Implementation(UASItemSetDataAsset* DataAsset)
+{
+	ItemSetDataAsset = DataAsset;
+
+	OnSetItemSetDataAsset.Broadcast(ItemSetDataAsset);
 }
 
 UASItemSetDataAsset* AASPlayerState::GetItemSetDataAsset() const

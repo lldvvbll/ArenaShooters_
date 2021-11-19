@@ -23,11 +23,15 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 		if (IsValid(PlayerState))
 		{
 			CurItemSetDataAsset = PlayerState->GetItemSetDataAsset();
+
+			PlayerState->OnSetItemSetDataAsset.AddUObject(this, &UASMatchItemSetSelectUserWidget::OnChangedItemSetDataAsset);
 		}
 
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
 		if (IsValid(GameState))
 		{
+			bool bEnable = GameState->GetInnerMatchState() != EInnerMatchState::Finish;
+
 			TArray<UASItemSetDataAsset*> DataAssets = GameState->GetItemSetDataAssets();
 			for (auto& DataAsset : DataAssets)
 			{
@@ -36,6 +40,11 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 				{
 					SlotsScrollBox->AddChild(MatchItemSetSlotWidget);
 
+					if (!bEnable)
+					{
+						MatchItemSetSlotWidget->SetIsEnabled(false);
+					}
+					
 					MatchItemSetSlotWidget->SetDataAsset(DataAsset);
 
 					if (CurItemSetDataAsset != nullptr && DataAsset != nullptr)
@@ -46,8 +55,6 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 					{
 						AS_LOG_S(Error);
 					}
-
-					MatchItemSetSlotWidget->OnClickedSlot.AddUObject(this, &UASMatchItemSetSelectUserWidget::OnClickedSlot);
 				}
 				else
 				{
@@ -77,9 +84,16 @@ void UASMatchItemSetSelectUserWidget::NativeDestruct()
 	}
 }
 
-void UASMatchItemSetSelectUserWidget::OnClickedSlot(UASMatchItemSetSlotUserWidget* ClickedSlot)
+void UASMatchItemSetSelectUserWidget::OnChangedItemSetDataAsset(UASItemSetDataAsset* NewItemSetDataAsset)
 {
-	if (ClickedSlot == nullptr)
+	if (!IsValid(NewItemSetDataAsset))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	FPrimaryAssetId ItemSetDataAssetID = NewItemSetDataAsset->GetPrimaryAssetId();
+	if (!ItemSetDataAssetID.IsValid())
 	{
 		AS_LOG_S(Error);
 		return;
@@ -96,7 +110,7 @@ void UASMatchItemSetSelectUserWidget::OnClickedSlot(UASMatchItemSetSlotUserWidge
 				continue;
 			}
 
-			ItemSetSlotWidget->ChangeButtonState(ItemSetSlotWidget == ClickedSlot);
+			ItemSetSlotWidget->ChangeButtonState(ItemSetSlotWidget->GetItemSetDataAssetId() == ItemSetDataAssetID);
 		}
 	}
 }
