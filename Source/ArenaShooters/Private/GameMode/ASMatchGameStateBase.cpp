@@ -140,6 +140,8 @@ void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
 {
 	InnerMatchState = State;
 
+	AS_LOG(Warning, TEXT("InnerMatchState: %d"), static_cast<int32>(InnerMatchState));
+
 	OnChangedInnerMatchState.Broadcast(InnerMatchState);
 
 	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
