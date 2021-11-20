@@ -40,6 +40,8 @@ public:
 
 	void PlayHitReactMontage();
 
+	void OnMovementChanged(EMovementMode PrevMovementMode, EMovementMode CurMovementMode);
+
 protected:
 	UFUNCTION()
 	void OnMontageEnd(UAnimMontage* Montage, bool bInterrupted);
@@ -52,9 +54,6 @@ protected:
 
 	UFUNCTION()
 	void AnimNotify_HitReact();
-
-	UFUNCTION()
-	void OnLanded(const FHitResult& Hit);
 
 public:
 	DECLARE_EVENT(UASAnimInstance, FOnReloadCompleteEvent);

@@ -286,9 +286,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = true))
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, Category = Action, Meta = (AllowPrivateAccess = true))
-	UASActionComponent* ASAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = Inventory, Meta = (AllowPrivateAccess = true))
 	UASInventoryComponent* ASInventory;
 

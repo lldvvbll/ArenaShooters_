@@ -53,8 +53,6 @@ void UASAnimInstance::NativeBeginPlay()
 	bLocallyControlled = ASChar->IsLocallyControlled();
 
 	OnMontageEnded.AddDynamic(this, &UASAnimInstance::OnMontageEnd);
-
-	ASChar->LandedDelegate.AddDynamic(this, &UASAnimInstance::OnLanded);
 }
 
 bool UASAnimInstance::IsActualSprinted() const
@@ -173,6 +171,32 @@ void UASAnimInstance::PlayHitReactMontage()
 	Montage_Play(HitReactMontage);
 }
 
+void UASAnimInstance::OnMovementChanged(EMovementMode PrevMovementMode, EMovementMode CurMovementMode)
+{
+	if (GetWorld()->IsClient())
+	{
+		if (IsValid(ASChar))
+		{
+			switch (CurMovementMode)
+			{
+			case EMovementMode::MOVE_Walking:
+			case EMovementMode::MOVE_NavWalking:
+				if (PrevMovementMode == EMovementMode::MOVE_Falling)
+				{
+					UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FootstepSound, ASChar->GetActorLocation());
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+}
+
 void UASAnimInstance::OnMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage == nullptr)
@@ -205,20 +229,5 @@ void UASAnimInstance::AnimNotify_HitReact()
 	if (ASChar->IsLocallyControlled())
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), BodyHitSound, ASChar->GetActorLocation());
-	}
-}
-
-void UASAnimInstance::OnLanded(const FHitResult& Hit)
-{
-	if (IsValid(ASChar))
-	{
-		if (ASChar->IsLocallyControlled())
-		{
-			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FootstepSound, ASChar->GetActorLocation());
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

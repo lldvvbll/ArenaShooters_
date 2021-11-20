@@ -10,7 +10,7 @@ void UASItem::BeginDestroy()
 {
 	Super::BeginDestroy();
 
-	AS_LOG(Error, TEXT("ASItem Name: %s"), *GetName());
+	AS_LOG(Warning, TEXT("ASItem Name: %s"), *GetName());
 }
 
 void UASItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

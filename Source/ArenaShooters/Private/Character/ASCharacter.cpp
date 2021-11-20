@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Character/ASActionComponent.h"
 #include "Character/ASInventoryComponent.h"
 #include "Character/ASStatusComponent.h"
 #include "Character/ASDamageComponent.h"
@@ -72,7 +71,6 @@ AASCharacter::AASCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	ASAction = CreateDefaultSubobject<UASActionComponent>(TEXT("ASAction"));
 	ASInventory = CreateDefaultSubobject<UASInventoryComponent>(TEXT("ASInventory"));
 	ASStatus = CreateDefaultSubobject<UASStatusComponent>(TEXT("ASStatus"));
 	ASStatus->OnHealthZero.AddUObject(this, &AASCharacter::Die);
@@ -1128,25 +1126,11 @@ void AASCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 P
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
 
-	if (ASAction != nullptr)
+	EMovementMode CurMovementMode = GetCharacterMovement()->MovementMode.GetValue();
+
+	if (ASAnimInstance != nullptr)
 	{
-		EMovementMode CurMode = GetCharacterMovement()->MovementMode.GetValue();
-		switch (CurMode)
-		{
-		case EMovementMode::MOVE_Walking:		// fallthough
-		case EMovementMode::MOVE_NavWalking:
-			{
-				ASAction->SetMovementState(EMovementState::Grounded);
-			}
-			break;
-		case EMovementMode::MOVE_Falling:
-			{
-				ASAction->SetMovementState(EMovementState::InAir);
-			}
-			break;
-		default:
-			break;
-		}
+		ASAnimInstance->OnMovementChanged(PrevMovementMode, CurMovementMode);
 	}
 	else
 	{
