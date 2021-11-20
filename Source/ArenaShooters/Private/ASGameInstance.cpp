@@ -52,7 +52,7 @@ void UASGameInstance::SearchServer()
 		}
 
 		SessionSearch->QuerySettings.Set(NUMOPENPUBCONN, 1, EOnlineComparisonOp::GreaterThanEquals);
-		SessionSearch->QuerySettings.Set(PREPARED_MATCH, false, EOnlineComparisonOp::Equals);
+		//SessionSearch->QuerySettings.Set(PREPARED_MATCH, false, EOnlineComparisonOp::Equals);
 
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 	}
@@ -441,135 +441,144 @@ bool UASGameInstance::CompareVariants(const FVariantData& A, const FVariantData&
 	{
 	case EOnlineKeyValuePairDataType::Bool:
 		{
-			bool bA, bB;
+			bool bA = false;
+			bool bB = false;
 			A.GetValue(bA);
 			B.GetValue(bB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
 	case EOnlineKeyValuePairDataType::Double:
 		{
-			double bA, bB;
+			double bA = 0.0;
+			double bB = 0.0;
 			A.GetValue(bA);
 			B.GetValue(bB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			case EOnlineComparisonOp::GreaterThanEquals:
-				return (bA == bB || bA > bB); break;
+				return (bA == bB || bA > bB);
 			case EOnlineComparisonOp::LessThanEquals:
-				return (bA == bB || bA < bB); break;
+				return (bA == bB || bA < bB);
 			case EOnlineComparisonOp::GreaterThan:
-				return bA > bB; break;
+				return bA > bB;
 			case EOnlineComparisonOp::LessThan:
-				return bA < bB; break;
+				return bA < bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
 	case EOnlineKeyValuePairDataType::Float:
 		{
-			float tbA, tbB;
-			double bA, bB;
+			float tbA = 0.0f;
+			float tbB = 0.0f;
 			A.GetValue(tbA);
 			B.GetValue(tbB);
-			bA = (double)tbA;
-			bB = (double)tbB;
+			double bA = static_cast<double>(tbA);
+			double bB = static_cast<double>(tbB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			case EOnlineComparisonOp::GreaterThanEquals:
-				return (bA == bB || bA > bB); break;
+				return (bA == bB || bA > bB);
 			case EOnlineComparisonOp::LessThanEquals:
-				return (bA == bB || bA < bB); break;
+				return (bA == bB || bA < bB);
 			case EOnlineComparisonOp::GreaterThan:
-				return bA > bB; break;
+				return bA > bB;
 			case EOnlineComparisonOp::LessThan:
-				return bA < bB; break;
+				return bA < bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
 	case EOnlineKeyValuePairDataType::Int32:
 		{
-			int32 bA, bB;
+			int32 bA = 0;
+			int32 bB = 0;
 			A.GetValue(bA);
 			B.GetValue(bB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			case EOnlineComparisonOp::GreaterThanEquals:
-				return (bA == bB || bA > bB); break;
+				return (bA == bB || bA > bB);
 			case EOnlineComparisonOp::LessThanEquals:
-				return (bA == bB || bA < bB); break;
+				return (bA == bB || bA < bB);
 			case EOnlineComparisonOp::GreaterThan:
-				return bA > bB; break;
+				return bA > bB;
 			case EOnlineComparisonOp::LessThan:
-				return bA < bB; break;
+				return bA < bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
 	case EOnlineKeyValuePairDataType::Int64:
 		{
-			uint64 bA, bB;
+			uint64 bA = 0;
+			uint64 bB = 0;
 			A.GetValue(bA);
 			B.GetValue(bB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			case EOnlineComparisonOp::GreaterThanEquals:
-				return (bA == bB || bA > bB); break;
+				return (bA == bB || bA > bB);
 			case EOnlineComparisonOp::LessThanEquals:
-				return (bA == bB || bA < bB); break;
+				return (bA == bB || bA < bB);
 			case EOnlineComparisonOp::GreaterThan:
-				return bA > bB; break;
+				return bA > bB;
 			case EOnlineComparisonOp::LessThan:
-				return bA < bB; break;
+				return bA < bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
-
 	case EOnlineKeyValuePairDataType::String:
 		{
-			FString bA, bB;
+			FString bA;
+			FString bB;
 			A.GetValue(bA);
 			B.GetValue(bB);
+
 			switch (Comparator)
 			{
 			case EOnlineComparisonOp::Equals:
-				return bA == bB; break;
+				return bA == bB;
 			case EOnlineComparisonOp::NotEquals:
-				return bA != bB; break;
+				return bA != bB;
 			default:
-				return false; break;
+				break;
 			}
 		}
-
 	case EOnlineKeyValuePairDataType::Empty:
 	case EOnlineKeyValuePairDataType::Blob:
 	default:
-		return false; break;
+		break;
 	}
 
 	return false;

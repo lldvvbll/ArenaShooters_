@@ -115,10 +115,10 @@ void UASServerBrowserUserWidget::OnSearchSessionResult(const TArray<FOnlineSessi
 			if (ServerSlot == nullptr)
 				continue;
 
+			ServerListScrollBox->AddChild(ServerSlot);
+
 			ServerSlot->SetServerInfo(Result);
 			ServerSlot->OnButtonClicked.AddUObject(this, &UASServerBrowserUserWidget::OnJoinButtonClicked);
-
-			ServerListScrollBox->AddChild(ServerSlot);
 		}
 
 		if (ServerListScrollBox->GetChildrenCount() <= 0)

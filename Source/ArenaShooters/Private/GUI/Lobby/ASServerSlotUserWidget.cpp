@@ -45,6 +45,22 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	{
 		PingTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%d ms"), SearchResult.PingInMs)));		
 	}
+
+	if (JoinButtonTextBlock != nullptr)
+	{
+		bool bPrepared = false;
+		if (!SearchResult.Session.SessionSettings.Get(PREPARED_MATCH, bPrepared))
+		{
+			AS_LOG_S(Error);
+		}
+
+		if (bPrepared)
+		{
+			JoinButtonTextBlock->SetText(FText::FromString(TEXT("In Progress")));
+
+			SetButtonEnable(false);
+		}
+	}
 }
 
 void UASServerSlotUserWidget::SetButtonEnable(bool bIsEnable)
@@ -64,6 +80,7 @@ void UASServerSlotUserWidget::NativeConstruct()
 	PlayersTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("PlayersTextBlock")));
 	PingTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("PingTextBlock")));
 	JoinButton = Cast<UButton>(GetWidgetFromName(TEXT("JoinButton")));
+	JoinButtonTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TB_JoinButton")));
 
 	if (JoinButton != nullptr)
 	{

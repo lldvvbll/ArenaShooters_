@@ -47,4 +47,7 @@ protected:
 
 	UPROPERTY()
 	UButton* JoinButton;
+
+	UPROPERTY()
+	UTextBlock* JoinButtonTextBlock;
 };
