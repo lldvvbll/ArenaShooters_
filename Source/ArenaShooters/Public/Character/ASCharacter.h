@@ -141,7 +141,7 @@ protected:
 	void Interact();
 
 	bool CanShoot() const;
-	void Shoot();
+	bool Shoot();
 
 	void ResetAimKeyState();
 
@@ -346,7 +346,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Aiming, Meta = (AllowPrivateAccess = true))
 	float AimingSpeedRate;
 
-	bool bPressedShootButton;
+	bool bHoldingShootButton;
 
 	UPROPERTY(ReplicatedUsing = OnRep_ShootingStance)
 	EShootingStanceType ShootingStance;

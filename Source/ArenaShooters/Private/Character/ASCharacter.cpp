@@ -47,7 +47,7 @@ AASCharacter::AASCharacter()
 	AimKeyHoldTime = 0.0f;
 	MaxAimKeyHoldTime = 0.3f;
 	ShootingStance = EShootingStanceType::None;
-	bPressedShootButton = false;
+	bHoldingShootButton = false;
 	bShownFullScreenWidget = false;
 	CurrentBulletSpread = TNumericLimits<float>::Max();
 	MinBulletSpread = TNumericLimits<float>::Max();
@@ -191,9 +191,12 @@ void AASCharacter::Tick(float DeltaSeconds)
 			}
 		}
 
-		if (bPressedShootButton)
+		if (bHoldingShootButton)
 		{
-			Shoot();
+			if (!Shoot())
+			{
+				ReleasedShootButton();
+			}
 		}
 
 		if (bTracePickingUp)
@@ -1066,6 +1069,9 @@ void AASCharacter::TurnOffInvincible()
 
 void AASCharacter::StopAllActions()
 {
+	ResetAimKeyState();
+	ReleasedShootButton();
+
 	if (bSprinted)
 	{
 		ServerSprintEnd();
@@ -1391,7 +1397,7 @@ void AASCharacter::PressedShootButton()
 		break;
 	case EFireMode::FullAuto:
 		{
-			bPressedShootButton = true;
+			bHoldingShootButton = true;
 		}
 		break;
 	default:
@@ -1402,7 +1408,7 @@ void AASCharacter::PressedShootButton()
 
 void AASCharacter::ReleasedShootButton()
 {
-	bPressedShootButton = false;
+	bHoldingShootButton = false;
 }
 
 bool AASCharacter::CanChangeFireMode() const
@@ -1433,7 +1439,7 @@ void AASCharacter::ChangeFireMode()
 	if (!CanChangeFireMode())
 		return;
 
-	if (bPressedShootButton)
+	if (bHoldingShootButton)
 		return;
 
 	TWeakObjectPtr<UASWeapon> Weapon = ASInventory->GetSelectedWeapon();
@@ -1589,82 +1595,84 @@ bool AASCharacter::CanShoot() const
 	return true;
 }
 
-void AASCharacter::Shoot()
+bool AASCharacter::Shoot()
 {
 	if (!CanShoot())
-		return;
+		return false;
 
 	if (ASInventory == nullptr)
 	{
 		AS_LOG_S(Error);
-		return;
+		return false;
 	}
 
 	TWeakObjectPtr<UASWeapon> Weapon = ASInventory->GetSelectedWeapon();
 	if (!Weapon.IsValid())
-		return;
-
-	if (!Weapon->IsPassedFireInterval())
-		return;
+		return false;
 
 	if (Weapon->GetCurrentAmmoCount() <= 0)
 	{
-		// todo: 탄약 없음 알림
-		return;
+		Weapon->PlayEmptyBulletSound();
+		return false;
 	}
 
 	const TWeakObjectPtr<AASWeaponActor>& WeaponActor = Weapon->GetActor();
 	if (!WeaponActor.IsValid())
-		return;
-	
-	switch (ShootingStance)
+		return false;
+
+	if (Weapon->IsPassedFireInterval())
 	{
-	case EShootingStanceType::Aiming:
+		switch (ShootingStance)
 		{
-			FVector CamLoc = FollowCamera->GetComponentLocation();
-			FVector CamForward = FollowCamera->GetForwardVector().GetSafeNormal();
-			FVector MuzzleLoc = WeaponActor->GetMuzzleLocation();
-
-			float LengthToStartLoc = FMath::Abs((CamLoc - MuzzleLoc) | CamForward);
-			FVector TraceStartLoc = CamLoc + (CamForward * LengthToStartLoc);
-			FVector TraceEndLoc = CamLoc + (CamForward * 15000.0f);
-
-			FVector TargetLoc;
-
-			FHitResult HitResult;
-			FCollisionQueryParams QueryParams;
-			QueryParams.AddIgnoredActor(this);
-			if (GetWorld()->LineTraceSingleByProfile(HitResult, TraceStartLoc, TraceEndLoc, TEXT("Bullet"), QueryParams))
+		case EShootingStanceType::Aiming:
 			{
-				TargetLoc = HitResult.Location;
+				FVector CamLoc = FollowCamera->GetComponentLocation();
+				FVector CamForward = FollowCamera->GetForwardVector().GetSafeNormal();
+				FVector MuzzleLoc = WeaponActor->GetMuzzleLocation();
+
+				float LengthToStartLoc = FMath::Abs((CamLoc - MuzzleLoc) | CamForward);
+				FVector TraceStartLoc = CamLoc + (CamForward * LengthToStartLoc);
+				FVector TraceEndLoc = CamLoc + (CamForward * 15000.0f);
+
+				FVector TargetLoc;
+
+				FHitResult HitResult;
+				FCollisionQueryParams QueryParams;
+				QueryParams.AddIgnoredActor(this);
+				if (GetWorld()->LineTraceSingleByProfile(HitResult, TraceStartLoc, TraceEndLoc, TEXT("Bullet"), QueryParams))
+				{
+					TargetLoc = HitResult.Location;
+				}
+				else
+				{
+					TargetLoc = TraceEndLoc;
+				}
+
+				FVector FireDir = (TargetLoc - MuzzleLoc).GetSafeNormal();
+				FRotator FireRot = FRotationMatrix::MakeFromX(FireDir).Rotator();
+				ServerShoot(MuzzleLoc, FireRot);
+
+				Weapon->SetLastFireTick();
 			}
-			else
+			break;
+		case EShootingStanceType::Scoping:
 			{
-				TargetLoc = TraceEndLoc;
+				FVector MuzzleLocation;
+				FRotator MuzzleRotation;
+				WeaponActor->GetMuzzleLocationAndRotation(MuzzleLocation, MuzzleRotation);
+
+				ServerShoot(MuzzleLocation, MuzzleRotation);
+
+				Weapon->SetLastFireTick();
 			}
-			
-			FVector FireDir = (TargetLoc - MuzzleLoc).GetSafeNormal();
-			FRotator FireRot = FRotationMatrix::MakeFromX(FireDir).Rotator();
-			ServerShoot(MuzzleLoc, FireRot);
-			
-			Weapon->SetLastFireTick();
-		}		
-		break;
-	case EShootingStanceType::Scoping:
-		{
-			FVector MuzzleLocation;
-			FRotator MuzzleRotation;
-			WeaponActor->GetMuzzleLocationAndRotation(MuzzleLocation, MuzzleRotation);
-
-			ServerShoot(MuzzleLocation, MuzzleRotation);
-
-			Weapon->SetLastFireTick();
+			break;
+		default:
+			checkNoEntry();
+			break;
 		}
-		break;
-	default:
-		checkNoEntry();
-		break;
-	}
+	}	
+
+	return true;
 }
 
 void AASCharacter::ResetAimKeyState()

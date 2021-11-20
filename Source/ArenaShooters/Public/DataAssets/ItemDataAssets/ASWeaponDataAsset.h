@@ -67,4 +67,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	float BulletSpreadRecoverySpeed;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundWave* EmptyBulletSound;
 };

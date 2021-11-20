@@ -59,6 +59,8 @@ public:
 	float GetBulletSpreadAmountPerShot() const;
 	float GetBulletSpreadRecoverySpeed() const;
 
+	void PlayEmptyBulletSound();
+
 public:
 	DECLARE_EVENT_OneParam(UASWeapon, FOnFireModeChangedEvent, EFireMode);
 	FOnFireModeChangedEvent OnFireModeChanged;

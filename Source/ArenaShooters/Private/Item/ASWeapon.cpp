@@ -255,3 +255,21 @@ float UASWeapon::GetBulletSpreadRecoverySpeed() const
 
 	return (WeaponDA != nullptr ? WeaponDA->BulletSpreadRecoverySpeed : 0.0f);
 }
+
+void UASWeapon::PlayEmptyBulletSound()
+{
+	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
+	check(WeaponDA);
+
+	if (WeaponDA != nullptr)
+	{
+		if (ASWeaponActor.IsValid())
+		{
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponDA->EmptyBulletSound, ASWeaponActor->GetActorLocation());
+		}
+		else
+		{
+			AS_LOG_S(Error);
+		}
+	}
+}
