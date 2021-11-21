@@ -10,6 +10,7 @@
 #include "GUI/ASCrossHairUserWidget.h"
 #include "GUI/ASGameMenuUserWidget.h"
 #include "GameMode/ASMatchGameStateBase.h"
+#include "GameMode/ASMatchGameModeBase.h"
 #include "GUI/ASPrepareInfoUserWidget.h"
 #include "GUI/HUD/ASHudUserWidget.h"
 #include "Net/UnrealNetwork.h"
@@ -383,5 +384,33 @@ void AASPlayerController::OnSetRestartTime(float RestartTime)
 	if (GetNetMode() == NM_Client)
 	{
 		ShowRestartTimerWidget(RestartTime);
+	}
+}
+
+void AASPlayerController::ReadyMatch()
+{
+	ServerReadyMatch();
+}
+
+void AASPlayerController::ServerReadyMatch_Implementation()
+{
+	auto GM = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
+	if (IsValid(GM))
+	{
+		GM->SetPrepareTimer();
+	}
+}
+
+void AASPlayerController::FinishMatch()
+{
+	ServerFinishMatch();
+}
+
+void AASPlayerController::ServerFinishMatch_Implementation()
+{
+	auto GM = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
+	if (IsValid(GM))
+	{
+		GM->FinishMatch();
 	}
 }

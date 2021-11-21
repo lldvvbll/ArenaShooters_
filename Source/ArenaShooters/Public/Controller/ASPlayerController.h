@@ -102,6 +102,20 @@ protected:
 
 	void OnSetRestartTime(float RestartTime);
 
+	UFUNCTION(Exec)
+	void ReadyMatch();
+
+	UFUNCTION(Server, Reliable)
+	void ServerReadyMatch();
+	void ServerReadyMatch_Implementation();
+
+	UFUNCTION(Exec)
+	void FinishMatch();
+
+	UFUNCTION(Server, Reliable)
+	void ServerFinishMatch();
+	void ServerFinishMatch_Implementation();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASCrossHairUserWidget> CrossHairClass;

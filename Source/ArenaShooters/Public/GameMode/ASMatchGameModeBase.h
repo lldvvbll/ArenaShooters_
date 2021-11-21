@@ -22,7 +22,6 @@ public:
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void PreInitializeComponents() override;
-	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer) override;
 	virtual void SetPlayerDefaults(APawn* PlayerPawn) override;
@@ -35,8 +34,9 @@ public:
 	void FinishMatch();
 	virtual void OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController);
 
-protected:
 	void SetPrepareTimer();
+
+protected:
 	void SetProcessTimer();
 	void SetRestartTimer();
 	void OnCalledRestartTimer();

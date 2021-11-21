@@ -19,7 +19,7 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
 	MaxPlayerCount = 16;
-	MinPlayerCount = 1;
+	MinPlayerCount = 4;
 	GoalNumOfKills = 1;
 }
 
@@ -119,12 +119,6 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	}
 }
 
-void AASMatchGameModeBase::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-}
-
 void AASMatchGameModeBase::InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer)
 {
 	Super::InitStartSpot_Implementation(StartSpot, NewPlayer);
@@ -213,24 +207,23 @@ void AASMatchGameModeBase::ProcessMatch()
 
 void AASMatchGameModeBase::FinishMatch()
 {
+	if (!IsValid(ASMatchGameState))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Process)
+		return;
+
 	if (GetWorldTimerManager().IsTimerActive(MatchFinishTimeHandle))
 	{
 		GetWorldTimerManager().ClearTimer(MatchFinishTimeHandle);
 	}
 
-	if (IsValid(ASMatchGameState))
-	{
-		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Finish);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
+	ASMatchGameState->SetInnerMatchState(EInnerMatchState::Finish);
 
-	if (NumPlayers >= MinPlayerCount)
-	{
-		SetRestartTimer();
-	}	
+	SetRestartTimer();
 }
 
 void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)
@@ -285,6 +278,20 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 
 void AASMatchGameModeBase::SetPrepareTimer()
 {
+	if (!IsValid(ASMatchGameState))
+	{
+		AS_LOG_S(Error);
+		return;
+	}
+
+	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
+		return;
+
+	if (GetWorldTimerManager().IsTimerActive(PlayerWaitingTimerHandle))
+	{
+		GetWorldTimerManager().ClearTimer(PlayerWaitingTimerHandle);
+	}
+
 	bSetPrepareTimer = true;
 
 	if (auto GameInstance = GetGameInstance<UASGameInstance>())
@@ -295,15 +302,8 @@ void AASMatchGameModeBase::SetPrepareTimer()
 	float PrepareTimeSec = PrepareTime.GetTotalSeconds();
 	GetWorldTimerManager().SetTimer(PrepareTimerHandle, this, &AASMatchGameModeBase::ProcessMatch, PrepareTimeSec);
 
-	if (IsValid(ASMatchGameState))
-	{
-		float StartTime = ASMatchGameState->GetServerWorldTimeSeconds() + PrepareTimeSec;
-		ASMatchGameState->SetStartTimeForProcess(StartTime);
-	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
+	float StartTime = ASMatchGameState->GetServerWorldTimeSeconds() + PrepareTimeSec;
+	ASMatchGameState->SetStartTimeForProcess(StartTime);
 }
 
 void AASMatchGameModeBase::SetProcessTimer()
