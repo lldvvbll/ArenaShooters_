@@ -42,10 +42,11 @@ void UASAnimInstance::NativeBeginPlay()
 	Super::NativeBeginPlay();
 
 	ASChar = Cast<AASCharacter>(TryGetPawnOwner());
-	if (!::IsValid(ASChar))
+	if (!ensure(IsValid(ASChar)))
 		return;
 
-	if (UCharacterMovementComponent* MoveComp = ASChar->GetCharacterMovement())
+	UCharacterMovementComponent* MoveComp = ASChar->GetCharacterMovement();
+	if (ensure(MoveComp != nullptr))
 	{
 		MaxWalkSpeedCrouched = MoveComp->MaxWalkSpeedCrouched;
 	}
@@ -53,6 +54,8 @@ void UASAnimInstance::NativeBeginPlay()
 	bLocallyControlled = ASChar->IsLocallyControlled();
 
 	OnMontageEnded.AddDynamic(this, &UASAnimInstance::OnMontageEnd);
+
+	ASChar->MovementModeChangedDelegate.AddDynamic(this, &UASAnimInstance::OnMovementChanged);
 }
 
 bool UASAnimInstance::IsActualSprinted() const
@@ -171,19 +174,20 @@ void UASAnimInstance::PlayHitReactMontage()
 	Montage_Play(HitReactMontage);
 }
 
-void UASAnimInstance::OnMovementChanged(EMovementMode PrevMovementMode, EMovementMode CurMovementMode)
+void UASAnimInstance::OnMovementChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
 	if (GetWorld()->IsClient())
 	{
-		if (ensure(IsValid(ASChar)))
+		if (ensure(IsValid(Character)))
 		{
+			EMovementMode CurMovementMode = Character->GetCharacterMovement()->MovementMode.GetValue();
 			switch (CurMovementMode)
 			{
 			case EMovementMode::MOVE_Walking:
 			case EMovementMode::MOVE_NavWalking:
 				if (PrevMovementMode == EMovementMode::MOVE_Falling)
 				{
-					UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FootstepSound, ASChar->GetActorLocation());
+					UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FootstepSound, Character->GetActorLocation());
 				}
 				break;
 			default:

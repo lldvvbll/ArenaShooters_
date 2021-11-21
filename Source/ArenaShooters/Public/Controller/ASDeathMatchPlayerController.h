@@ -42,6 +42,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASDmLeaderBoardUserWidget> DmLeaderBoardWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = UI, Meta = (MultiLine = "true"))
+	FText WelcomeMessage;
+
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	FText ItemSetChangeButtonNotification;
 };

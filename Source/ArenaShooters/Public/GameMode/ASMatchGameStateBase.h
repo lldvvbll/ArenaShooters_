@@ -32,6 +32,9 @@ public:
 	int32 GetMaxNumPlayer() const;
 	void SetMaxNumPlayers(int32 Num);
 
+	int32 GetMinNumPlayer() const;
+	void SetMinNumPlayers(int32 Num);
+
 	int32 GetGoalNumOfKills() const;
 	void SetGoalNumOfKills(int32 Num);
 
@@ -102,6 +105,9 @@ protected:
 
 	UPROPERTY(Replicated)
 	int32 MaxNumPlayers;
+
+	UPROPERTY(Replicated)
+	int32 MinNumPlayers;
 
 	UPROPERTY(Replicated)
 	int32 GoalNumOfKills;

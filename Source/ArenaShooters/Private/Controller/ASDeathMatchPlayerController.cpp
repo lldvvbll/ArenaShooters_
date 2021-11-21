@@ -48,7 +48,12 @@ void AASDeathMatchPlayerController::BeginPlay()
 
 	if (IsLocalPlayerController())
 	{
-		NotifyMessage(ItemSetChangeButtonNotification.ToString(), 10.0f);
+		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
+		if (ensure(IsValid(GameState)))
+		{
+			FText MsgTxt = FText::Format(WelcomeMessage, FText::AsNumber(GameState->GetMinNumPlayer()));
+			NotifyMessage(MsgTxt.ToString(), 10.0f);
+		}
 	}
 }
 

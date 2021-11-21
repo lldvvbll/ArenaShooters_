@@ -18,7 +18,6 @@ UASDamageComponent::UASDamageComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
 	SetIsReplicatedByDefault(true);
-
 }
 
 void UASDamageComponent::InitializeComponent()

@@ -31,6 +31,7 @@ void AASMatchGameModeBase::InitGameState()
 	if (ensure(IsValid(ASMatchGameState)))
 	{
 		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
+		ASMatchGameState->SetMinNumPlayers(MinPlayerCount);
 		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
 		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
 	}

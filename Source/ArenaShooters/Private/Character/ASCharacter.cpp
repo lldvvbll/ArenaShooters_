@@ -962,18 +962,6 @@ void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Incline", this, &AASCharacter::Incline);
 }
 
-void AASCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
-{
-	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
-
-	EMovementMode CurMovementMode = GetCharacterMovement()->MovementMode.GetValue();
-
-	if (ensure(ASAnimInstance != nullptr))
-	{
-		ASAnimInstance->OnMovementChanged(PrevMovementMode, CurMovementMode);
-	}
-}
-
 void AASCharacter::MoveForward(float Value)
 {
 	if (ensure(Controller != nullptr))

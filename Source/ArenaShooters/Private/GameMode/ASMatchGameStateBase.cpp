@@ -21,6 +21,7 @@ void AASMatchGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 	DOREPLIFETIME(AASMatchGameStateBase, ItemFactory);
 	DOREPLIFETIME(AASMatchGameStateBase, MaxNumPlayers);
+	DOREPLIFETIME(AASMatchGameStateBase, MinNumPlayers);
 	DOREPLIFETIME(AASMatchGameStateBase, StartTimeForProcess);
 	DOREPLIFETIME(AASMatchGameStateBase, GoalNumOfKills);
 	DOREPLIFETIME(AASMatchGameStateBase, InnerMatchState);
@@ -100,6 +101,16 @@ int32 AASMatchGameStateBase::GetMaxNumPlayer() const
 void AASMatchGameStateBase::SetMaxNumPlayers(int32 Num)
 {
 	MaxNumPlayers = Num;
+}
+
+int32 AASMatchGameStateBase::GetMinNumPlayer() const
+{
+	return MinNumPlayers;
+}
+
+void AASMatchGameStateBase::SetMinNumPlayers(int32 Num)
+{
+	MinNumPlayers = Num;
 }
 
 int32 AASMatchGameStateBase::GetGoalNumOfKills() const

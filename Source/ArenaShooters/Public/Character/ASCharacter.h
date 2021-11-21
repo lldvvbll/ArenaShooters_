@@ -105,7 +105,6 @@ public:
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);

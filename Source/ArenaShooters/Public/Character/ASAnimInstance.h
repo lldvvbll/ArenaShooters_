@@ -40,7 +40,8 @@ public:
 
 	void PlayHitReactMontage();
 
-	void OnMovementChanged(EMovementMode PrevMovementMode, EMovementMode CurMovementMode);
+	UFUNCTION()
+	void OnMovementChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
 protected:
 	UFUNCTION()
