@@ -253,7 +253,6 @@ void AASCharacter::SetPlayerDefaults()
 	Super::SetPlayerDefaults();
 
 	bDead = false;
-	SetCanBeDamaged(true);
 
 	StopAllActions();
 
@@ -278,6 +277,12 @@ void AASCharacter::SetPlayerDefaults()
 					ASInventory->EquipItemsByItemSetDataAsset(DataAsset);
 				}
 			}
+
+			SetCanBeDamaged(true);
+		}
+		else
+		{
+			SetCanBeDamaged(false);
 		}
 	}
 

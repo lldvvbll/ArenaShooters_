@@ -73,7 +73,7 @@ void UASGameInstance::SetPreparedMatchToSession(bool bPrepared)
 		return;	
 
 	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(NAME_GameSession);
-	if (!ensure(SessionSettings != nullptr))
+	if (SessionSettings == nullptr)
 		return;
 
 	SessionSettings->Set(PREPARED_MATCH, bPrepared, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
