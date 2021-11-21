@@ -28,9 +28,10 @@ void UASWeapon::SetDataAsset(UASItemDataAsset* NewDataAsset)
 const EWeaponType UASWeapon::GetWeaponType() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->WeaponType;
 
-	return WeaponDA->WeaponType;
+	return EWeaponType::None;
 }
 
 TWeakObjectPtr<AASWeaponActor>& UASWeapon::GetActor()
@@ -46,8 +47,7 @@ const TWeakObjectPtr<AASWeaponActor>& UASWeapon::GetActor() const
 AASBullet* UASWeapon::Fire(EShootingStanceType InShootingStance, const FVector& InMuzzleLocation, const FRotator& InMuzzleRotation)
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-	if (WeaponDA == nullptr)
+	if (!ensure(WeaponDA != nullptr))
 		return nullptr;
 
 	if (CurrentAmmoCount <= 0)
@@ -78,13 +78,11 @@ EFireMode UASWeapon::GetFireMode() const
 void UASWeapon::ChangeToNextFireMode()
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	if (WeaponDA == nullptr || WeaponDA->FireModes.Num() == 0)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(WeaponDA != nullptr))
 		return;
-	}
+
+	if (!ensure(WeaponDA->FireModes.Num() > 0))
+		return;
 
 	int32 ModeNum = WeaponDA->FireModes.Num();
 	for (int32 Idx = 0; Idx < ModeNum; ++Idx)
@@ -106,9 +104,10 @@ void UASWeapon::ChangeToNextFireMode()
 FTimespan UASWeapon::GetFireInterval() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->FireInterval : FTimespan::MaxValue());
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->FireInterval;
+	
+	return FTimespan::MaxValue();
 }
 
 bool UASWeapon::IsPassedFireInterval() const
@@ -133,9 +132,10 @@ void UASWeapon::OnRep_CurrentFireMode()
 int32 UASWeapon::GetMaxAmmoCount() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->MaxAmmoCount : 0);
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->MaxAmmoCount;
+	
+	return 0;
 }
 
 int32 UASWeapon::GetCurrentAmmoCount() const
@@ -151,9 +151,10 @@ void UASWeapon::OnRep_CurrentAmmoCount()
 EAmmoType UASWeapon::GetAmmoType() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->AmmoType : EAmmoType::None);
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->AmmoType;
+	
+	return EAmmoType::None;
 }
 
 bool UASWeapon::CanReload() const
@@ -163,11 +164,8 @@ bool UASWeapon::CanReload() const
 
 bool UASWeapon::Reload(TArray<UASAmmo*>& InAmmos)
 {
-	if (InAmmos.Num() <= 0)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InAmmos.Num() > 0))
 		return false;
-	}
 
 	EAmmoType WeaponAmmoType = GetAmmoType();
 
@@ -207,17 +205,16 @@ bool UASWeapon::Reload(TArray<UASAmmo*>& InAmmos)
 FTimespan UASWeapon::GetReloadTime() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->ReloadTime : FTimespan::MaxValue());
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->ReloadTime;
+	
+	return FTimespan::MaxValue();
 }
 
 void UASWeapon::GetRecoil(FVector2D& OutPitch, FVector2D& OutYaw) const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	if (WeaponDA != nullptr)
+	if (ensure(WeaponDA != nullptr))
 	{
 		OutPitch = WeaponDA->RecoilPitch;
 		OutYaw = WeaponDA->RecoilYaw;
@@ -227,49 +224,47 @@ void UASWeapon::GetRecoil(FVector2D& OutPitch, FVector2D& OutYaw) const
 float UASWeapon::GetMinBulletSpread() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->MinBulletSpread : TNumericLimits<float>::Max());
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->MinBulletSpread;
+	
+	return TNumericLimits<float>::Max();
 }
 
 float UASWeapon::GetMaxBulletSpread() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->MaxBulletSpread : TNumericLimits<float>::Max());
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->MaxBulletSpread;
+	
+	return TNumericLimits<float>::Max();
 }
 
 float UASWeapon::GetBulletSpreadAmountPerShot() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->BulletSpreadAmountPerShot : TNumericLimits<float>::Max());
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->BulletSpreadAmountPerShot;
+	
+	return TNumericLimits<float>::Max();
 }
 
 float UASWeapon::GetBulletSpreadRecoverySpeed() const
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	return (WeaponDA != nullptr ? WeaponDA->BulletSpreadRecoverySpeed : 0.0f);
+	if (ensure(WeaponDA != nullptr))
+		return WeaponDA->BulletSpreadRecoverySpeed;
+		
+	return 0.0f;
 }
 
 void UASWeapon::PlayEmptyBulletSound()
 {
 	auto WeaponDA = Cast<UASWeaponDataAsset>(GetDataAsset());
-	check(WeaponDA);
-
-	if (WeaponDA != nullptr)
+	if (ensure(WeaponDA != nullptr))
 	{
-		if (ASWeaponActor.IsValid())
+		if (ensure(ASWeaponActor.IsValid()))
 		{
 			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponDA->EmptyBulletSound, ASWeaponActor->GetActorLocation());
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }

@@ -26,13 +26,9 @@ void AASDeathmatchGameState::AddPlayerState(APlayerState* PlayerState)
 		if (!PlayerState->IsInactive())
 		{
 			auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-			if (IsValid(ASPlayerState))
+			if (ensure(IsValid(ASPlayerState)))
 			{
 				UpdateRanking();
-			}
-			else
-			{
-				AS_LOG_S(Error);
 			}
 		}
 	}
@@ -47,13 +43,9 @@ void AASDeathmatchGameState::RemovePlayerState(APlayerState* PlayerState)
 		if (!PlayerState->IsInactive())
 		{
 			auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-			if (IsValid(ASPlayerState))
+			if (ensure(IsValid(ASPlayerState)))
 			{
 				UpdateRanking();
-			}
-			else
-			{
-				AS_LOG_S(Error);
 			}
 		}
 	}

@@ -45,43 +45,27 @@ void UASHudUserWidget::NativeConstruct()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		GameState->OnSetMatchFinishTime.AddUObject(this, &UASHudUserWidget::OnSetMatchFinishTime);
 		GameState->OnKill.AddUObject(this, &UASHudUserWidget::OnKill);
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 
 	auto ASPlayerController = GetOwningPlayer<AASPlayerController>();
-	if (IsValid(ASPlayerController))
+	if (ensure(IsValid(ASPlayerController)))
 	{
 		auto Char = ASPlayerController->GetPawn<AASCharacter>();
-		if (IsValid(Char))
+		if (ensure(IsValid(Char)))
 		{
 			auto StatusComp = Char->GetStatusComponent();
-			if (IsValid(StatusComp))
+			if (ensure(StatusComp != nullptr))
 			{
 				StatusComp->OnChangeCurrentHealth.AddUObject(this, &UASHudUserWidget::OnChangedCharacterHealth);
 
 				MaxCharHealth = StatusComp->GetMaxHealth();
 				OnChangedCharacterHealth(StatusComp->GetCurrentHealth());
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -90,14 +74,10 @@ void UASHudUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		GameState->OnSetMatchFinishTime.RemoveAll(this);
 		GameState->OnKill.RemoveAll(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -131,7 +111,7 @@ void UASHudUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 void UASHudUserWidget::OnSetMatchFinishTime(float Time)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		bSetMatchFinishTime = true;
 
@@ -143,20 +123,13 @@ void UASHudUserWidget::OnSetMatchFinishTime(float Time)
 			FinishCountDownBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }
 
 void UASHudUserWidget::OnKill(AASPlayerState* KillerPlayerState, AASPlayerState* DeadPlayerState, int32 KillCount)
 {
 	auto MyPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
-	if (!IsValid(MyPlayerState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(MyPlayerState)))
 		return;
-	}
 
 	FString KillerName = IsValid(KillerPlayerState) ? *KillerPlayerState->GetPlayerName() : TEXT("Unknown");
 	FString DeadName = IsValid(DeadPlayerState) ? *DeadPlayerState->GetPlayerName() : TEXT("Unknown");

@@ -28,15 +28,11 @@ void AASMatchGameModeBase::InitGameState()
 	Super::InitGameState();
 
 	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
 		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
 		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	if (auto GameInstance = GetGameInstance<UASGameInstance>())
@@ -77,7 +73,7 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		if (ASMatchGameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 		{
@@ -92,10 +88,6 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 			}
 		}
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }
 
 void AASMatchGameModeBase::PreInitializeComponents()
@@ -103,19 +95,12 @@ void AASMatchGameModeBase::PreInitializeComponents()
 	Super::PreInitializeComponents();
 
 	ASGameInstance = GetGameInstance<UASGameInstance>();
-	if (!IsValid(ASGameInstance))
-	{
-		AS_LOG_S(Error);
-	}
+	ensure(IsValid(ASGameInstance));
 
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (SessionInterface.IsValid())
+	if (ensure(SessionInterface.IsValid()))
 	{
 		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &AASMatchGameModeBase::OnCreateSessionComplete);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -123,12 +108,12 @@ void AASMatchGameModeBase::InitStartSpot_Implementation(AActor* StartSpot, ACont
 {
 	Super::InitStartSpot_Implementation(StartSpot, NewPlayer);
 
-	if (IsValid(NewPlayer))
+	if (ensure(IsValid(NewPlayer)))
 	{
-		if (IsValid(StartSpot))
+		if (ensure(IsValid(StartSpot)))
 		{
 			APawn* Pawn = NewPlayer->GetPawn();
-			if (IsValid(Pawn))
+			if (ensure(IsValid(Pawn)))
 			{
 				FRotator InitialControllerRot = StartSpot->GetActorRotation();
 				InitialControllerRot.Roll = 0.f;
@@ -137,19 +122,7 @@ void AASMatchGameModeBase::InitStartSpot_Implementation(AActor* StartSpot, ACont
 
 				NewPlayer->StartSpot = StartSpot;
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}	
 }
 
@@ -157,7 +130,7 @@ void AASMatchGameModeBase::SetPlayerDefaults(APawn* PlayerPawn)
 {
 	Super::SetPlayerDefaults(PlayerPawn);
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
@@ -167,10 +140,6 @@ void AASMatchGameModeBase::SetPlayerDefaults(APawn* PlayerPawn)
 				Character->TurnOnInvincible(RespawnInvicibleTimeSec);
 			}
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -193,13 +162,9 @@ void AASMatchGameModeBase::ProcessMatch()
 {
 	PrepareAllPlayerStart();
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Process);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	SetProcessTimer();
@@ -207,11 +172,8 @@ void AASMatchGameModeBase::ProcessMatch()
 
 void AASMatchGameModeBase::FinishMatch()
 {
-	if (!IsValid(ASMatchGameState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ASMatchGameState)))
 		return;
-	}
 
 	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Process)
 		return;
@@ -229,60 +191,37 @@ void AASMatchGameModeBase::FinishMatch()
 void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController, AASPlayerController* DeadController)
 {
 	AASPlayerState* DeadPlayerState = nullptr;
-	if (IsValid(DeadController))
+	if (ensure(IsValid(DeadController)))
 	{
 		DeadPlayerState = DeadController->GetPlayerState<AASPlayerState>();
-		if (IsValid(DeadPlayerState))
+		if (ensure(IsValid(DeadPlayerState)))
 		{
 			DeadPlayerState->OnDie();
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	AASPlayerState* KillerPlayerState = nullptr;
 	int32 KillCount = -1;
-	if (IsValid(KillerController))
+	if (ensure(IsValid(KillerController)))
 	{
 		KillerPlayerState = KillerController->GetPlayerState<AASPlayerState>();
-		if (IsValid(KillerPlayerState))
+		if (ensure(IsValid(KillerPlayerState)))
 		{
 			KillerPlayerState->OnKill();
 			KillCount = KillerPlayerState->GetKillCount();
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState, KillCount);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void AASMatchGameModeBase::SetPrepareTimer()
 {
-	if (!IsValid(ASMatchGameState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ASMatchGameState)))
 		return;
-	}
 
 	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		return;
@@ -311,14 +250,10 @@ void AASMatchGameModeBase::SetProcessTimer()
 	float MatchProcessTimeSec = MatchProcessTime.GetTotalSeconds();
 	GetWorldTimerManager().SetTimer(MatchFinishTimeHandle, this, &AASMatchGameModeBase::FinishMatch, MatchProcessTimeSec);
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + MatchProcessTimeSec;
 		ASMatchGameState->SetMatchFinishTime(FinishTime);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -329,14 +264,10 @@ void AASMatchGameModeBase::SetRestartTimer()
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::OnCalledRestartTimer, RestartTime);
 
-	if (IsValid(ASMatchGameState))
+	if (ensure(IsValid(ASMatchGameState)))
 	{
 		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + RestartTime;
 		ASMatchGameState->SetRestartTime(FinishTime);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -354,23 +285,16 @@ void AASMatchGameModeBase::OnCreateSessionComplete(FName SessionName, bool bWasS
 	if (bWasSuccessful)
 	{
 		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-		if (SessionInterface.IsValid())
+		if (ensure(SessionInterface.IsValid()))
 		{
-			if (FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName))
+			FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
+			if (ensure(SessionSettings != nullptr))
 			{
 				if (MaxPlayerCount > SessionSettings->NumPublicConnections)
 				{
 					MaxPlayerCount = SessionSettings->NumPublicConnections;
 				}
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}	
 }

@@ -8,15 +8,21 @@
 void UASAmmo::SetCount(int32 NewCount)
 {
 	auto AmmoDA = Cast<UASAmmoDataAsset>(DataAsset);
-	check(AmmoDA);
-
-	Super::SetCount(FMath::Clamp<int32>(NewCount, 0, (AmmoDA != nullptr ? AmmoDA->MaxBundleCount : 100)));
+	if (ensure(AmmoDA != nullptr))
+	{
+		Super::SetCount(FMath::Clamp<int32>(NewCount, 0, AmmoDA->MaxBundleCount));
+	}
+	else
+	{
+		Super::SetCount(FMath::Clamp<int32>(NewCount, 0, 100));
+	}	
 }
 
 EAmmoType UASAmmo::GetAmmoType() const
 {
 	auto AmmoDA = Cast<UASAmmoDataAsset>(DataAsset);
-	check(AmmoDA);
+	if (ensure(AmmoDA != nullptr))
+		return AmmoDA->AmmoType;
 
-	return (AmmoDA != nullptr ? AmmoDA->AmmoType : EAmmoType::None);
+	return EAmmoType::None;
 }

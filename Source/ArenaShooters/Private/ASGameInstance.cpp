@@ -13,10 +13,10 @@ void UASGameInstance::Init()
 	Super::Init();
 
 	IOnlineSubsystem* OS = IOnlineSubsystem::Get();
-	if (OS != nullptr)
+	if (ensure(OS != nullptr))
 	{
 		IOnlineSessionPtr SessionInterface = OS->GetSessionInterface();
-		if (SessionInterface.IsValid())
+		if (ensure(SessionInterface.IsValid()))
 		{
 			AS_LOG(Warning, TEXT("OnlineSubsystem: %s"), *(OS->GetSubsystemName().ToString()));
 
@@ -26,21 +26,13 @@ void UASGameInstance::Init()
 			SessionInterface->OnRegisterPlayersCompleteDelegates.AddUObject(this, &UASGameInstance::OnRegisterPlayersComplete);
 			SessionInterface->OnUnregisterPlayersCompleteDelegates.AddUObject(this, &UASGameInstance::OnUnregisterPlayersComplete);
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}		
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASGameInstance::SearchServer()
 {
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (SessionInterface.IsValid())
+	if (ensure(SessionInterface.IsValid()))
 	{
 		SessionSearch = MakeShareable(new FOnlineSessionSearch());
 		SessionSearch->MaxSearchResults = 200000;
@@ -56,50 +48,32 @@ void UASGameInstance::SearchServer()
 
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }
 
 void UASGameInstance::JoinServer(const FOnlineSessionSearchResult& SearchResult)
 {
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (SessionInterface.IsValid() && SearchResult.IsValid())
+	if (ensure(SessionInterface.IsValid() && SearchResult.IsValid()))
 	{
 		FNamedOnlineSession* NamedSession = SessionInterface->GetNamedSession(NAME_GameSession);
-		if (NamedSession == nullptr)
+		if (ensure(NamedSession == nullptr))
 		{
 			SessionInterface->JoinSession(0, NAME_GameSession, SearchResult);
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}		
-	}
-	else
-	{
-		AS_LOG_S(Error);
+		}	
 	}
 }
 
 void UASGameInstance::SetPreparedMatchToSession(bool bPrepared)
 {
-	if (GetWorld()->GetNetMode() != NM_DedicatedServer)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(GetWorld()->GetNetMode() == NM_DedicatedServer))
 		return;
-	}
 
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (!SessionInterface.IsValid())
-	{
-		AS_LOG_S(Error);
-		return;
-	}
+	if (!ensure(SessionInterface.IsValid()))
+		return;	
 
 	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(NAME_GameSession);
-	if (SessionSettings == nullptr)
+	if (!ensure(SessionSettings != nullptr))
 		return;
 
 	SessionSettings->Set(PREPARED_MATCH, bPrepared, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
@@ -120,21 +94,13 @@ void UASGameInstance::ClearNetworkFailureMessage()
 void UASGameInstance::DestroySession()
 {
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (SessionInterface.IsValid())
+	if (ensure(SessionInterface.IsValid()))
 	{
 		FNamedOnlineSession* NamedSession = SessionInterface->GetNamedSession(NAME_GameSession);
-		if (NamedSession != nullptr)
+		if (ensure(NamedSession != nullptr))
 		{
 			SessionInterface->DestroySession(NAME_GameSession);
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -145,7 +111,7 @@ void UASGameInstance::OnStart()
 	if (GIsServer)
 	{
 		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-		if (SessionInterface.IsValid())
+		if (ensure(SessionInterface.IsValid()))
 		{
 			FString ServerName = TEXT("ArenaShooters - Test");
 
@@ -189,14 +155,7 @@ void UASGameInstance::OnStart()
 				SessionSettings.bIsLANMatch = true;
 			}
 
-			if (!SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings))
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
+			ensure(SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings));
 		}
 	}
 	else if (GIsClient)
@@ -204,13 +163,9 @@ void UASGameInstance::OnStart()
 		if (!IsOnlineSubsystemSteam())
 		{
 			auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
-			if (PlayerCtrlr != nullptr)
+			if (ensure(PlayerCtrlr != nullptr))
 			{
 				PlayerCtrlr->NotifyMessage(TEXT("You are not logged in to Steam.\nPlease log in to Steam and restart the game."), 10.0f);
-			}
-			else
-			{
-				AS_LOG_S(Error);
 			}
 		}
 
@@ -220,33 +175,21 @@ void UASGameInstance::OnStart()
 
 void UASGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	if (bWasSuccessful)
+	if (ensure(bWasSuccessful))
 	{
 		AS_LOG_S(Warning);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASGameInstance::OnFindSessionComplete(bool bWasSuccessful)
 {
-	if (bWasSuccessful)
+	if (ensure(bWasSuccessful))
 	{
-		if (SessionSearch != nullptr)
+		if (ensure(SessionSearch != nullptr))
 		{
 			TArray<FOnlineSessionSearchResult> FilteredResults = FilterSessionResults(SessionSearch->SearchResults, SessionSearch->QuerySettings);
 			OnSearchSessionResult.Broadcast(FilteredResults);
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}	
 }
 
@@ -263,32 +206,20 @@ void UASGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 
 void UASGameInstance::OnRegisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful)
 {
-	if (!bWasSuccessful)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(bWasSuccessful))
 		return;
-	}
 
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (!SessionInterface.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(SessionInterface.IsValid()))
 		return;
-	}
 
 	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
-	if (SessionSettings == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(SessionSettings != nullptr))
 		return;
-	}
 
 	FNamedOnlineSession* NamedOnlineSession = SessionInterface->GetNamedSession(SessionName);
-	if (NamedOnlineSession == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(NamedOnlineSession != nullptr))
 		return;
-	}
 
 	if (IsOnlineSubsystemSteam())
 	{
@@ -307,32 +238,20 @@ void UASGameInstance::OnRegisterPlayersComplete(FName SessionName, const TArray<
 
 void UASGameInstance::OnUnregisterPlayersComplete(FName SessionName, const TArray<TSharedRef<const FUniqueNetId>>& PlayerIds, bool bWasSuccessful)
 {
-	if (!bWasSuccessful)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(bWasSuccessful))
 		return;
-	}
 
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (!SessionInterface.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(SessionInterface.IsValid()))
 		return;
-	}
 
 	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
-	if (SessionSettings == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(SessionSettings != nullptr))
 		return;
-	}
 
 	FNamedOnlineSession* NamedOnlineSession = SessionInterface->GetNamedSession(SessionName);
-	if (NamedOnlineSession == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(NamedOnlineSession != nullptr))
 		return;
-	}
 
 	if (IsOnlineSubsystemSteam())
 	{
@@ -352,26 +271,17 @@ void UASGameInstance::OnUnregisterPlayersComplete(FName SessionName, const TArra
 void UASGameInstance::TravelBySession(FName SessionName)
 {
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (!SessionInterface.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(SessionInterface.IsValid()))
 		return;
-	}
 
 	FString JoinAddress;
 	SessionInterface->GetResolvedConnectString(SessionName, JoinAddress);
-	if (JoinAddress.IsEmpty())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(!JoinAddress.IsEmpty()))
 		return;
-	}
 
 	auto PlayerCtrlr = GetWorld()->GetFirstPlayerController<AASLobbyPlayerController>();
-	if (PlayerCtrlr == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(PlayerCtrlr)))
 		return;
-	}
 
 	PlayerCtrlr->ClientTravel(JoinAddress, ETravelType::TRAVEL_Absolute);
 }

@@ -11,7 +11,7 @@
 AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (IsValid(DmGameState))
+	if (ensure(IsValid(DmGameState)))
 	{
 		if (DmGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
@@ -24,11 +24,8 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 			for (TActorIterator<APlayerStart> It(World); It; ++It)
 			{
 				APlayerStart* PlayerStart = *It;
-				if (!IsValid(PlayerStart))
-				{
-					AS_LOG_S(Error);
+				if (!ensure(IsValid(PlayerStart)))
 					continue;
-				}
 
 				FVector PlayerStartLocation = PlayerStart->GetActorLocation();
 
@@ -40,14 +37,11 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 						continue;
 
 					auto PlayerController = Cast<AASPlayerController>(Itr->Get());
-					if (IsValid(PlayerController))
+					if (ensure(IsValid(PlayerController)))
 					{
 						auto Pawn = PlayerController->GetPawn();
-						if (!IsValid(Pawn))
-						{
-							AS_LOG_S(Error);
+						if (!ensure(IsValid(Pawn)))
 							continue;
-						}
 
 						float LenSquared = (PlayerStartLocation - Pawn->GetActorLocation()).SizeSquared();
 						if (!bFound || NearestLenSquared > LenSquared)
@@ -55,10 +49,6 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 							NearestLenSquared = LenSquared;
 							bFound = true;
 						}
-					}
-					else
-					{
-						AS_LOG_S(Error);
 					}
 				}
 
@@ -75,10 +65,6 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 			return FoundedStartSpot;
 		}
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
@@ -86,14 +72,10 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 bool AASDeathmatchGameMode::ShouldSpawnAtStartSpot(AController* Player)
 {
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (IsValid(DmGameState))
+	if (ensure(IsValid(DmGameState)))
 	{
 		if (DmGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 			return false;
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	return Super::ShouldSpawnAtStartSpot(Player);
@@ -104,19 +86,15 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 	Super::OnKillCharacter(KillerController, DeadController);
 
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (IsValid(DmGameState))
+	if (ensure(IsValid(DmGameState)))
 	{
 		AASPlayerState* TopRankPlayerState = DmGameState->GetTopRankPlayerState();
-		if (IsValid(TopRankPlayerState))
+		if (ensure(IsValid(TopRankPlayerState)))
 		{
 			if (TopRankPlayerState->GetKillCount() >= GoalNumOfKills)
 			{
 				FinishMatch();
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 
 		if (DmGameState->IsMatchProcess())
@@ -126,10 +104,6 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 				DeadController->SetRespawnTimer(RespawnDelay);
 			}
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -141,20 +115,14 @@ void AASDeathmatchGameMode::PrepareAllPlayerStart()
 	for (TActorIterator<APlayerStart> It(World); It; ++It)
 	{
 		APlayerStart* PlayerStart = *It;
-		if (!IsValid(PlayerStart))
-		{
-			AS_LOG_S(Error);
+		if (!ensure(IsValid(PlayerStart)))
 			continue;
-		}
 
 		PlayerStarts.Emplace(PlayerStart);
 	}
 
-	if (PlayerStarts.Num() <= 0)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(PlayerStarts.Num() > 0))
 		return;
-	}
 
 	// Shuffle
 	int32 LastIdx = PlayerStarts.Num() - 1;
@@ -168,7 +136,7 @@ void AASDeathmatchGameMode::PrepareAllPlayerStart()
 	for (auto Itr = GetWorld()->GetPlayerControllerIterator(); Itr; ++Itr)
 	{
 		auto PlayerController = Cast<AASPlayerController>(Itr->Get());
-		if (IsValid(PlayerController))
+		if (ensure(IsValid(PlayerController)))
 		{
 			PlayerController->StartSpot = PlayerStarts[PlayerStartIdx++];
 
@@ -176,10 +144,6 @@ void AASDeathmatchGameMode::PrepareAllPlayerStart()
 			{
 				PlayerStartIdx = 0;
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }

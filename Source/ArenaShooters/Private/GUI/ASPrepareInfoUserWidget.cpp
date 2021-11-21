@@ -24,7 +24,7 @@ void UASPrepareInfoUserWidget::SetNumPlayers(int32 Num)
 void UASPrepareInfoUserWidget::StartCountDown(float InMatchStartTime)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		bCountDown = true;
 
@@ -40,10 +40,6 @@ void UASPrepareInfoUserWidget::StartCountDown(float InMatchStartTime)
 		{
 			CountDownTextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -70,7 +66,7 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
 		GameState->OnAddedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnAddedPlayerState);
@@ -79,10 +75,6 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 		SetNumPlayers(GameState->GetNumPlayers());
 		SetMaxNumPlayers(GameState->GetMaxNumPlayer());
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }
 
 void UASPrepareInfoUserWidget::NativeDestruct()
@@ -90,15 +82,11 @@ void UASPrepareInfoUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		GameState->OnStartTimeForProcess.RemoveAll(this);
 		GameState->OnAddedPlayerState.RemoveAll(this);
 		GameState->OnRemovedPlayerState.RemoveAll(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -125,25 +113,17 @@ void UASPrepareInfoUserWidget::NativeTick(const FGeometry& MyGeometry, float InD
 void UASPrepareInfoUserWidget::OnAddedPlayerState(APlayerState* AddedPlayerState)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		SetNumPlayers(GameState->PlayerArray.Num());
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASPrepareInfoUserWidget::OnRemovedPlayerState(APlayerState* AddedPlayerState)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		SetNumPlayers(GameState->PlayerArray.Num());
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

@@ -13,7 +13,8 @@ void UASKillLogUserWidget::AddLog(const FString& KillerName, const FString& Dead
 
 	KillLogScrollBox->ClearChildren();
 
-	if (auto KillLogSlotUserWidget = CreateWidget<UASKillLogSlotUserWidget>(this, KillLogSlotUserWidgetClass))
+	auto KillLogSlotUserWidget = CreateWidget<UASKillLogSlotUserWidget>(this, KillLogSlotUserWidgetClass);
+	if (ensure(KillLogSlotUserWidget != nullptr))
 	{
 		FLinearColor LogColor;
 		switch (KillLogType)
@@ -45,10 +46,6 @@ void UASKillLogUserWidget::AddLog(const FString& KillerName, const FString& Dead
 		{
 			KillLogScrollBox->AddChild(LogWidget);
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 

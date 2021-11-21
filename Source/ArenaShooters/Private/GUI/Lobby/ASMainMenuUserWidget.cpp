@@ -9,13 +9,9 @@
 
 void UASMainMenuUserWidget::ShowMainMenu()
 {
-	if (MainMenuWidgetSwitcher != nullptr)
+	if (ensure(MainMenuWidgetSwitcher != nullptr))
 	{
 		MainMenuWidgetSwitcher->SetActiveWidgetIndex(EWidgetIndex::MainMenu);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -64,39 +60,27 @@ void UASMainMenuUserWidget::NativeConstruct()
 
 void UASMainMenuUserWidget::OnClickedFindServerButton()
 {
-	if (MainMenuWidgetSwitcher != nullptr)
+	if (ensure(MainMenuWidgetSwitcher != nullptr))
 	{
 		MainMenuWidgetSwitcher->SetActiveWidgetIndex(EWidgetIndex::FindServer);
 
 		if (bFirstFindServer)
 		{
-			if (ServerBrowserWidget != nullptr)
+			if (ensure(ServerBrowserWidget != nullptr))
 			{
 				bFirstFindServer = false;
 
 				ServerBrowserWidget->SearchServer();
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}		
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASMainMenuUserWidget::OnClickedKeySettingsButton()
 {
-	if (MainMenuWidgetSwitcher != nullptr)
+	if (ensure(MainMenuWidgetSwitcher != nullptr))
 	{
 		MainMenuWidgetSwitcher->SetActiveWidgetIndex(EWidgetIndex::KeySettings);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -112,7 +96,7 @@ void UASMainMenuUserWidget::OnClickedExitButton()
 
 void UASMainMenuUserWidget::OnEscKeyPressed()
 {
-	if (MainMenuWidgetSwitcher != nullptr)
+	if (ensure(MainMenuWidgetSwitcher != nullptr))
 	{
 		switch (MainMenuWidgetSwitcher->GetActiveWidgetIndex())
 		{
@@ -127,9 +111,5 @@ void UASMainMenuUserWidget::OnEscKeyPressed()
 			checkNoEntry();
 			break;
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

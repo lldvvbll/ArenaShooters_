@@ -22,7 +22,7 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 		if (!bCreateRankingWidget)
 		{
 			auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-			if (IsValid(GameState))
+			if (ensure(IsValid(GameState)))
 			{
 				DeathMatchRankingWidget = CreateWidget<UASDeathMatchRankingUserWidget>(this, DeathMatchRankingWidgetClass);
 				if (DeathMatchRankingWidget != nullptr)
@@ -32,20 +32,12 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 					bCreateRankingWidget = true;
 				}
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}
 
 		auto ASPlayerState = GetPlayerState<AASPlayerState>();
-		if (IsValid(ASPlayerState))
+		if (ensure(IsValid(ASPlayerState)))
 		{
 			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASDeathMatchPlayerController::OnChangedDeathCount);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }

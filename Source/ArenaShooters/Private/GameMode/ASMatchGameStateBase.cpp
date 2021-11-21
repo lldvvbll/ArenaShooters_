@@ -42,18 +42,14 @@ void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
 	if (!PlayerState->IsInactive())
 	{
 		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-		if (IsValid(ASPlayerState))
+		if (ensure(IsValid(ASPlayerState)))
 		{
 			if (GetNetMode() == NM_DedicatedServer)
 			{
 				TArray<UASItemSetDataAsset*> DataAssets = GetItemSetDataAssets();
-				if (DataAssets.Num() > 0)
+				if (ensure(DataAssets.Num() > 0))
 				{
 					ASPlayerState->ServerSetItemSetDataAsset(DataAssets[0]);
-				}
-				else
-				{
-					AS_LOG_S(Error);
 				}
 			}
 
@@ -63,10 +59,6 @@ void AASMatchGameStateBase::AddPlayerState(APlayerState* PlayerState)
 			ASPlayerState->OnChangedPlayerId.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerId);
 			ASPlayerState->OnChangedKillCount.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerKillCount);
 			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASMatchGameStateBase::OnChangedPlayerDeathCount);	
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -78,7 +70,7 @@ void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
 	if (!PlayerState->IsInactive())
 	{
 		auto ASPlayerState = Cast<AASPlayerState>(PlayerState);
-		if (IsValid(ASPlayerState))
+		if (ensure(IsValid(ASPlayerState)))
 		{
 			OnRemovedPlayerState.Broadcast(ASPlayerState);
 
@@ -86,10 +78,6 @@ void AASMatchGameStateBase::RemovePlayerState(APlayerState* PlayerState)
 			ASPlayerState->OnChangedPlayerId.RemoveAll(this);
 			ASPlayerState->OnChangedKillCount.RemoveAll(this);
 			ASPlayerState->OnChangedDeathCount.RemoveAll(this);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -147,13 +135,9 @@ void AASMatchGameStateBase::SetInnerMatchState(EInnerMatchState State)
 	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
-		if (IsValid(PlayerController))
+		if (ensure(IsValid(PlayerController)))
 		{
 			PlayerController->OnChangedInnerMatchState(InnerMatchState);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -200,13 +184,9 @@ TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 	for (auto& AssetId : ItemSetAssetIds)
 	{
 		auto ItemSetAsset = AssetManager.GetDataAsset<UASItemSetDataAsset>(AssetId);
-		if (IsValid(ItemSetAsset))
+		if (ensure(IsValid(ItemSetAsset)))
 		{
 			DataAssets.Emplace(ItemSetAsset);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 
@@ -215,11 +195,8 @@ TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 
 bool AASMatchGameStateBase::IsValidItemSetDataAsset(UASItemSetDataAsset* DataAsset) const
 {
-	if (!IsValid(DataAsset))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(DataAsset)))
 		return false;
-	}
 
 	return ItemSetAssetIds.Contains(DataAsset->GetPrimaryAssetId());
 }
@@ -247,21 +224,13 @@ void AASMatchGameStateBase::OnRep_StartTimeForProcess()
 	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
-		if (IsValid(PlayerController))
+		if (ensure(IsValid(PlayerController)))
 		{
 			APawn* Pawn = PlayerController->GetPawn();
-			if (IsValid(Pawn))
+			if (ensure(IsValid(Pawn)))
 			{
 				Pawn->DisableInput(nullptr);
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -271,13 +240,9 @@ void AASMatchGameStateBase::OnRep_InnerMatchState()
 	for (auto Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		auto PlayerController = Cast<AASPlayerController>(Iterator->Get());
-		if (IsValid(PlayerController))
+		if (ensure(IsValid(PlayerController)))
 		{
 			PlayerController->OnChangedInnerMatchState(InnerMatchState);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 

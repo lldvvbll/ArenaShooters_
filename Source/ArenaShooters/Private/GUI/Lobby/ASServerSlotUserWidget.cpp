@@ -30,10 +30,7 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	if (PlayersTextBlock != nullptr)
 	{
 		int32 NumOpenPublicConnections = 0;
-		if (!SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnections))
-		{
-			AS_LOG_S(Error);
-		}
+		ensure(SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnections));
 
 		int32 MaxConnection = SearchResult.Session.SessionSettings.NumPublicConnections;
 		int32 CurConnection = MaxConnection - NumOpenPublicConnections;
@@ -49,10 +46,7 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 	if (JoinButtonTextBlock != nullptr)
 	{
 		bool bPrepared = false;
-		if (!SearchResult.Session.SessionSettings.Get(PREPARED_MATCH, bPrepared))
-		{
-			AS_LOG_S(Error);
-		}
+		ensure(SearchResult.Session.SessionSettings.Get(PREPARED_MATCH, bPrepared));
 
 		if (bPrepared)
 		{

@@ -105,17 +105,11 @@ EArmorSlotType UASInventoryComponent::GetSuitableArmorSlotType(EArmorType ArmorT
 
 bool UASInventoryComponent::IsSuitableWeaponSlot(EWeaponSlotType SlotType, const UASWeapon* Weapon)
 {
-	if (!IsValid(Weapon))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(Weapon)))
 		return false;
-	}
 
-	if (Weapon->GetItemType() != EItemType::Weapon)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(Weapon->GetItemType() == EItemType::Weapon))
 		return false;
-	}
 
 	EWeaponSlotType WeaponSlotType = GetSuitableWeaponSlotType(Weapon->GetWeaponType());
 	return (WeaponSlotType == SlotType);
@@ -123,17 +117,11 @@ bool UASInventoryComponent::IsSuitableWeaponSlot(EWeaponSlotType SlotType, const
 
 bool UASInventoryComponent::IsSuitableArmorSlot(EArmorSlotType SlotType, const UASArmor* Armor)
 {
-	if (!IsValid(Armor))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(Armor)))
 		return false;
-	}
 
-	if (Armor->GetItemType() != EItemType::Armor)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(Armor->GetItemType() == EItemType::Armor))
 		return false;
-	}
 
 	EArmorSlotType ArmorSlotType = GetSuitableArmorSlotType(Armor->GetArmorType());
 	return (ArmorSlotType == SlotType);
@@ -202,18 +190,14 @@ bool UASInventoryComponent::InsertWeapon(EWeaponSlotType SlotType, UASWeapon* Ne
 		return false;
 
 	ItemBoolPair RemoveResultPair = RemoveItemFromWeaponSlot(SlotType);
-	if (!RemoveResultPair.Value)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(RemoveResultPair.Value))
 		return false;
-	}
 
 	ItemPtrBoolPair SetResultPair = SetItemToWeaponSlot(SlotType, NewWeapon);
-	if (!SetResultPair.Value)
+	if (!ensure(SetResultPair.Value))
 	{
 		WeaponSlots[static_cast<int32>(SlotType)] = RemoveResultPair.Key;
 
-		AS_LOG_S(Error);
 		return false;
 	}
 
@@ -229,18 +213,14 @@ bool UASInventoryComponent::InsertArmor(EArmorSlotType SlotType, UASArmor* NewAr
 		return false;
 		
 	ItemBoolPair RemoveResultPair = RemoveItemFromArmorSlot(SlotType);
-	if (!RemoveResultPair.Value)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(RemoveResultPair.Value))
 		return false;
-	}
 
 	ItemPtrBoolPair SetResultPair = SetItemToArmorSlot(SlotType, NewArmor);
-	if (!SetResultPair.Value)
+	if (!ensure(SetResultPair.Value))
 	{
 		ArmorSlots[static_cast<int32>(SlotType)] = RemoveResultPair.Key;
 
-		AS_LOG_S(Error);
 		return false;
 	}
 
@@ -253,11 +233,8 @@ bool UASInventoryComponent::InsertArmor(EArmorSlotType SlotType, UASArmor* NewAr
 bool UASInventoryComponent::SelectWeapon(EWeaponSlotType SlotType)
 {
 	ItemBoolPair ResultPair = GetItemFromWeaponSlot(SlotType);
-	if (!ResultPair.Value)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ResultPair.Value))
 		return false;
-	}
 
 	// 선택하려는 슬롯에 무기가 없다면 실패 처리
 	auto NewWeapon = Cast<UASWeapon>(ResultPair.Key);
@@ -338,14 +315,10 @@ ItemPtrBoolPair UASInventoryComponent::FindItemFromWeaponSlot(EWeaponSlotType Sl
 {
 	ItemPtrBoolPair ResultPair(nullptr, false);
 
-	if (SlotType != EWeaponSlotType::SlotNum)
+	if (ensure(SlotType != EWeaponSlotType::SlotNum))
 	{
 		ResultPair.Key = WeaponSlots[static_cast<int32>(SlotType)];
 		ResultPair.Value = true;
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	return ResultPair;
@@ -357,10 +330,10 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 
 	if (SlotType != EWeaponSlotType::SlotNum)
 	{
-		if (IsValid(NewItem) && NewItem->GetItemType() == EItemType::Weapon)
+		if (ensure(IsValid(NewItem) && NewItem->GetItemType() == EItemType::Weapon))
 		{
 			int32 Idx = static_cast<int32>(SlotType);
-			if (WeaponSlots[Idx] == nullptr)
+			if (ensure(WeaponSlots[Idx] == nullptr))
 			{
 				AActor* CurOwner = GetOwner();
 				if (NewItem->GetOwner() != CurOwner)
@@ -379,13 +352,7 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 			{
 				ResultPair.Key = WeaponSlots[Idx];
 				ResultPair.Value = false;
-
-				AS_LOG_S(Error);
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 	else
@@ -447,10 +414,10 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToArmorSlot(EArmorSlotType SlotTyp
 
 	if (SlotType != EArmorSlotType::SlotNum)
 	{
-		if (NewItem != nullptr && NewItem->GetItemType() == EItemType::Armor)
+		if (ensure(IsValid(NewItem) && NewItem->GetItemType() == EItemType::Armor))
 		{
 			int32 Idx = static_cast<int32>(SlotType);
-			if (ArmorSlots[Idx] == nullptr)
+			if (ensure(ArmorSlots[Idx] == nullptr))
 			{
 				if (NewItem != nullptr)
 				{
@@ -467,13 +434,7 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToArmorSlot(EArmorSlotType SlotTyp
 			{
 				ResultPair.Key = ArmorSlots[Idx];
 				ResultPair.Value = false;
-
-				AS_LOG_S(Error);
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 	else
@@ -514,11 +475,8 @@ ItemBoolPair UASInventoryComponent::RemoveItemFromArmorSlot(EArmorSlotType SlotT
 
 bool UASInventoryComponent::IsEnableToAddItemToInventory(UASItem* NewItem) const
 {
-	if (!IsValid(NewItem))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(NewItem)))
 		return false;
-	}
 
 	switch (NewItem->GetItemType())
 	{
@@ -526,7 +484,7 @@ bool UASInventoryComponent::IsEnableToAddItemToInventory(UASItem* NewItem) const
 	case EItemType::HealingKit:
 		break;	// OK
 	default:
-		AS_LOG_S(Error);
+		checkNoEntry();
 		return false;
 	}
 
@@ -674,11 +632,8 @@ TArray<UASHealingKit*> UASInventoryComponent::GetHealingKits() const
 
 void UASInventoryComponent::ReattachWeaponActor(UASWeapon* InWeapon, const FName& SocketName) const
 {
-	if (!IsValid(InWeapon))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(InWeapon)))
 		return;
-	}
 
 	TWeakObjectPtr<AASWeaponActor>& WeaponActor = InWeapon->GetActor();
 	if (!WeaponActor.IsValid())
@@ -690,11 +645,8 @@ void UASInventoryComponent::ReattachWeaponActor(UASWeapon* InWeapon, const FName
 	WeaponActor->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
 	auto ASChar = Cast<AASCharacter>(GetOwner());
-	if (!IsValid(ASChar))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ASChar)))
 		return;
-	}
 
 	WeaponActor->AttachToComponent(ASChar->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 }
@@ -730,11 +682,8 @@ void UASInventoryComponent::ClearAllItems()
 
 void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* ItemSetDataAsset)
 {
-	if (!IsValid(ItemSetDataAsset))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ItemSetDataAsset)))
 		return;
-	}
 
 	TArray<UASItem*> RemovedItems;
 
@@ -742,11 +691,8 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 	for (auto& ItemPair : ItemSetDataAsset->ItemMap)
 	{
 		FPrimaryAssetId& AssetId = ItemPair.Key;
-		if (!AssetId.IsValid())
-		{
-			AS_LOG_S(Error);
+		if (!ensure(AssetId.IsValid()))
 			continue;
-		}
 
 		EItemType ItemType = UASAssetManager::ConvertAssetIdToItemType(AssetId);
 		switch (ItemType)
@@ -754,7 +700,7 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 		case EItemType::Weapon:
 			{
 				auto Weapon = Cast<UASWeapon>(UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId));
-				if (IsValid(Weapon))
+				if (ensure(IsValid(Weapon)))
 				{
 					UASItem* RemovedItem = nullptr;
 					InsertWeapon(GetSuitableWeaponSlotType(Weapon->GetWeaponType()), Weapon, RemovedItem);
@@ -764,16 +710,12 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 						RemovedItems.Emplace(RemovedItem);
 					}
 				}
-				else
-				{
-					AS_LOG_S(Error);
-				}
 			}
 			break;
 		case EItemType::Armor:
 			{
 				auto Armor = Cast<UASArmor>(UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId));
-				if (IsValid(Armor))
+				if (ensure(IsValid(Armor)))
 				{
 					UASItem* RemovedItem = nullptr;
 					InsertArmor(GetSuitableArmorSlotType(Armor->GetArmorType()), Armor, RemovedItem);
@@ -783,23 +725,15 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 						RemovedItems.Emplace(RemovedItem);
 					}
 				}
-				else
-				{
-					AS_LOG_S(Error);
-				}
 			}
 			break;
 		case EItemType::Ammo:		// fallthrough
 		case EItemType::HealingKit:
 			{
 				auto Item = UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId, ItemPair.Value);
-				if (IsValid(Item))
+				if (ensure(IsValid(Item)))
 				{
 					AddItemToInventory(Item);
-				}
-				else
-				{
-					AS_LOG_S(Error);
 				}
 			}
 			break;
@@ -1004,24 +938,16 @@ void UASInventoryComponent::OnChangedAmmoCountInInventory(EAmmoType AmmoType)
 void UASInventoryComponent::SpawnWeaponActor(UASWeapon& Weapon, const FName& AttachSocket)
 {
 	auto WeaponDataAsset = Cast<UASWeaponDataAsset>(Weapon.GetDataAsset());
-	if (WeaponDataAsset == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(WeaponDataAsset != nullptr))
 		return;
-	}
 
 	auto NewWeaponActor = GetWorld()->SpawnActor<AASWeaponActor>(WeaponDataAsset->ASWeaponActorClass);
-	if (NewWeaponActor == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(NewWeaponActor != nullptr))
 		return;
-	}
 
 	auto ASChar = Cast<AASCharacter>(GetOwner());
-	if (ASChar == nullptr)
+	if (!ensure(ASChar != nullptr))
 	{
-		AS_LOG_S(Error);
-
 		NewWeaponActor->SetActorHiddenInGame(true);
 		NewWeaponActor->Destroy();
 		return;
@@ -1036,24 +962,16 @@ void UASInventoryComponent::SpawnWeaponActor(UASWeapon& Weapon, const FName& Att
 void UASInventoryComponent::SpawnArmorActor(UASArmor& Armor, const FName& AttachSocket)
 {
 	auto ArmorDataAsset = Cast<UASArmorDataAsset>(Armor.GetDataAsset());
-	if (ArmorDataAsset == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ArmorDataAsset != nullptr))
 		return;
-	}
 
 	auto NewArmorActor = GetWorld()->SpawnActor<AASArmorActor>(ArmorDataAsset->ASArmorActorClass);
-	if (NewArmorActor == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(NewArmorActor != nullptr))
 		return;
-	}
 
 	auto ASChar = Cast<AASCharacter>(GetOwner());
-	if (ASChar == nullptr)
+	if (!ensure(ASChar != nullptr))
 	{
-		AS_LOG_S(Error);
-
 		NewArmorActor->SetActorHiddenInGame(true);
 		NewArmorActor->Destroy();
 		return;

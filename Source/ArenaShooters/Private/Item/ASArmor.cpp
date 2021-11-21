@@ -18,17 +18,19 @@ void UASArmor::SetDataAsset(UASItemDataAsset* NewDataAsset)
 	Super::SetDataAsset(NewDataAsset);
 
 	auto ArmorDA = Cast<UASArmorDataAsset>(NewDataAsset);
-	check(ArmorDA);
-
-	SetCurrentDurability(ArmorDA->MaxDurability);
+	if (ensure(ArmorDA != nullptr))
+	{
+		SetCurrentDurability(ArmorDA->MaxDurability);
+	}	
 }
 
 const EArmorType UASArmor::GetArmorType() const
 {
 	auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
-	check(ArmorDA);
+	if (ensure(ArmorDA != nullptr))
+		return ArmorDA->ArmorType;
 
-	return ArmorDA->ArmorType;
+	return EArmorType::None;
 }
 
 TWeakObjectPtr<AASArmorActor>& UASArmor::GetActor()
@@ -44,9 +46,10 @@ const TWeakObjectPtr<AASArmorActor>& UASArmor::GetActor() const
 float UASArmor::GetMaxDurability() const
 {
 	auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
-	check(ArmorDA);
+	if (ensure(ArmorDA != nullptr))
+		return ArmorDA->MaxDurability;
 
-	return (ArmorDA != nullptr ? ArmorDA->MaxDurability : 0.0f);
+	return 0.0f;
 }
 
 float UASArmor::GetCurrentDurability() const
@@ -74,9 +77,7 @@ float UASArmor::TakeDamage(float InDamage)
 	if (CurrentDurability > KINDA_SMALL_NUMBER)
 	{
 		auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
-		check(ArmorDA);
-
-		if (ArmorDA != nullptr)
+		if (ensure(ArmorDA != nullptr))
 		{
 			float ReducedDamage = TakenDamage * ArmorDA->DamageReduceRate;
 			ModifyDurability(-ReducedDamage);
@@ -91,12 +92,10 @@ float UASArmor::TakeDamage(float InDamage)
 bool UASArmor::IsCoveringBone(const FName& BoneName) const
 {
 	auto ArmorDA = Cast<UASArmorDataAsset>(DataAsset);
-	check(ArmorDA);
-
-	if (ArmorDA == nullptr)
-		return false;
-
-	return ArmorDA->CoveringBoneNames.Contains(BoneName);
+	if (ensure(ArmorDA != nullptr))
+		return ArmorDA->CoveringBoneNames.Contains(BoneName);
+	
+	return false;	
 }
 
 void UASArmor::OnRep_CurrentDurability()

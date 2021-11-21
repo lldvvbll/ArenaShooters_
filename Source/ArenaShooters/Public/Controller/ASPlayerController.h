@@ -66,7 +66,7 @@ protected:
 		if (CurrentFullScreenWidget == nullptr)
 		{
 			auto FullScreenWidget = CreateWidget<TWidget>(this, WidgetClass);
-			if (FullScreenWidget != nullptr)
+			if (ensure(FullScreenWidget != nullptr))
 			{
 				FullScreenWidget->OnConstructed.AddUObject(this, &AASPlayerController::OnConstructedFullScreenWidget);
 				FullScreenWidget->OnDestructed.AddUObject(this, &AASPlayerController::OnDestructedFullScreenWidget);
@@ -82,10 +82,6 @@ protected:
 				CurrentFullScreenWidget = FullScreenWidget;
 
 				return FullScreenWidget;
-			}
-			else
-			{
-				AS_LOG_S(Error);
 			}
 		}
 

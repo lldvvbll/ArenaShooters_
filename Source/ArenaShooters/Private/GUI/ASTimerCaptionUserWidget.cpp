@@ -27,14 +27,10 @@ void UASTimerCaptionUserWidget::SetInfo(const FText& Caption, const FDateTime& I
 void UASTimerCaptionUserWidget::SetInfoWithEndTime(const FText& Caption, float EndTimeSec, bool bShowTime/* = true*/)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		float DeltaTime = EndTimeSec - GameState->GetServerWorldTimeSeconds();
 		SetInfoWithDuration(Caption, DeltaTime, bShowTime);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 

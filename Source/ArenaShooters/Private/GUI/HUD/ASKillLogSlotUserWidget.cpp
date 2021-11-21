@@ -66,12 +66,8 @@ void UASKillLogSlotUserWidget::NativeDestruct()
 
 void UASKillLogSlotUserWidget::RemoveLog()
 {
-	if (LogWidgetPtr.IsValid())
+	if (ensure(LogWidgetPtr.IsValid()))
 	{
 		LogWidgetPtr->RemoveLog(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

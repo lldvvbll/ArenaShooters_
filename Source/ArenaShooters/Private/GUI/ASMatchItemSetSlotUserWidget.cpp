@@ -11,11 +11,8 @@
 
 void UASMatchItemSetSlotUserWidget::SetDataAsset(UASItemSetDataAsset* DataAsset)
 {
-	if (!IsValid(DataAsset))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(DataAsset)))
 		return;
-	}
 
 	ItemSetDataAsset = DataAsset;
 
@@ -78,12 +75,8 @@ void UASMatchItemSetSlotUserWidget::OnClickedButton()
 		return;
 
 	auto PlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
-	if (IsValid(PlayerState))
+	if (ensure(IsValid(PlayerState)))
 	{
 		PlayerState->ServerSetItemSetDataAsset(ItemSetDataAsset);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

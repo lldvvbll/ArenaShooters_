@@ -22,11 +22,8 @@ void UASItemUserWidget::SetItem(const TWeakObjectPtr<UASItem>& NewItem)
 {
 	Item = NewItem;
 
-	if (!Item.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(Item.IsValid()))
 		return;
-	}
 
 	Item->OnChangeCount.AddUObject(this, &UASItemUserWidget::OnChangeItemCount);
 

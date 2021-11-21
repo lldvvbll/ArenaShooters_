@@ -28,7 +28,7 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 		}
 
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (IsValid(GameState))
+		if (ensure(IsValid(GameState)))
 		{
 			bool bEnable = GameState->GetInnerMatchState() != EInnerMatchState::Finish;
 
@@ -36,7 +36,7 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 			for (auto& DataAsset : DataAssets)
 			{
 				auto MatchItemSetSlotWidget = CreateWidget<UASMatchItemSetSlotUserWidget>(this, MatchItemSetSlotWidgetClass);
-				if (MatchItemSetSlotWidget != nullptr)
+				if (ensure(MatchItemSetSlotWidget != nullptr))
 				{
 					SlotsScrollBox->AddChild(MatchItemSetSlotWidget);
 
@@ -47,24 +47,12 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 					
 					MatchItemSetSlotWidget->SetDataAsset(DataAsset);
 
-					if (CurItemSetDataAsset != nullptr && DataAsset != nullptr)
+					if (ensure(CurItemSetDataAsset != nullptr && DataAsset != nullptr))
 					{
 						MatchItemSetSlotWidget->ChangeButtonState(DataAsset == CurItemSetDataAsset);
 					}
-					else
-					{
-						AS_LOG_S(Error);
-					}
-				}
-				else
-				{
-					AS_LOG_S(Error);
 				}
 			}			
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -74,41 +62,28 @@ void UASMatchItemSetSelectUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto PlayerState = GetOwningPlayerState<AASPlayerState>();
-	if (IsValid(PlayerState))
+	if (ensure(IsValid(PlayerState)))
 	{
 		PlayerState->OnSetItemSetDataAsset.RemoveAll(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASMatchItemSetSelectUserWidget::OnChangedItemSetDataAsset(UASItemSetDataAsset* NewItemSetDataAsset)
 {
-	if (!IsValid(NewItemSetDataAsset))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(NewItemSetDataAsset)))
 		return;
-	}
 
 	FPrimaryAssetId ItemSetDataAssetID = NewItemSetDataAsset->GetPrimaryAssetId();
-	if (!ItemSetDataAssetID.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ItemSetDataAssetID.IsValid()))
 		return;
-	}
 
 	if (SlotsScrollBox != nullptr)
 	{
 		for (auto& SlotWidget : SlotsScrollBox->GetAllChildren())
 		{
 			auto ItemSetSlotWidget = Cast<UASMatchItemSetSlotUserWidget>(SlotWidget);
-			if (ItemSetSlotWidget == nullptr)
-			{
-				AS_LOG_S(Error);
+			if (!ensure(ItemSetSlotWidget != nullptr))
 				continue;
-			}
 
 			ItemSetSlotWidget->ChangeButtonState(ItemSetSlotWidget->GetItemSetDataAssetId() == ItemSetDataAssetID);
 		}

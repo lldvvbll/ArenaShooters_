@@ -86,11 +86,8 @@ void AASPlayerState::OnDie()
 bool AASPlayerState::ServerSetItemSetDataAsset_Validate(UASItemSetDataAsset* DataAsset)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (!IsValid(GameState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(GameState)))
 		return false;
-	}
 
 	return GameState->IsValidItemSetDataAsset(DataAsset);
 }

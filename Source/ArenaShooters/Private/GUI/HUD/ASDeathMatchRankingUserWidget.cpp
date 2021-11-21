@@ -16,7 +16,7 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 	RankScrollBox = Cast<UScrollBox>(GetWidgetFromName(TEXT("RankScrollBox")));
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		if (GoalNumOfKillsTextBlock != nullptr)
 		{
@@ -27,10 +27,6 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 
 		UpdatePlayerRanking(GameState->GetRankedPlayerStates());
 	}
-	else
-	{
-		AS_LOG_S(Error);
-	}
 }
 
 void UASDeathMatchRankingUserWidget::NativeDestruct()
@@ -38,39 +34,26 @@ void UASDeathMatchRankingUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (IsValid(GameState))
+	if (ensure(IsValid(GameState)))
 	{
 		GameState->OnUpdatedRanking.RemoveAll(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPlayerState>& RankedPlayerStates)
 {
-	if (RankScrollBox == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(RankScrollBox != nullptr))
 		return;
-	}
 
 	RankScrollBox->ClearChildren();
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (!IsValid(GameState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(GameState)))
 		return;
-	}
 
 	auto MyPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
-	if (!IsValid(MyPlayerState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(MyPlayerState)))
 		return;
-	}
 
 	int32 MyIdx = INDEX_NONE;
 	for (int32 Idx = 0; Idx < RankedPlayerStates.Num(); ++Idx)
@@ -107,15 +90,11 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPla
 		if (Idx >= 0 && Idx < NumPlayers)
 		{
 			auto RankingSlot = CreateWidget<UASDmRankingSlotUserWidget>(this, DmRankingSlotWidgetClass);
-			if (RankingSlot != nullptr)
+			if (ensure(RankingSlot != nullptr))
 			{
 				RankingSlot->SetPlayerInfo(RankedPlayerStates[Idx].Ranking, RankedPlayerStates[Idx].PlayerState);
 
 				RankScrollBox->AddChild(RankingSlot);
-			}
-			else
-			{
-				AS_LOG_S(Error);
 			}
 		}
 	}

@@ -153,7 +153,7 @@ bool UASItemScrollBoxWrapperUserWidget::NativeOnDrop(const FGeometry& InGeometry
 		return true;
 
 	TWeakObjectPtr<UASItem> Item = GetASItemFromDragDropOperation(InOperation);
-	if (Item.IsValid())
+	if (ensure(Item.IsValid()))
 	{
 		if (bInventoryScrollBoxWrapper)
 		{
@@ -182,10 +182,6 @@ bool UASItemScrollBoxWrapperUserWidget::NativeOnDrop(const FGeometry& InGeometry
 
 			return true;
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	return false;

@@ -28,21 +28,13 @@ void AASWeaponActor::Tick(float DeltaSeconds)
 
 	if (bBecomeViewTarget)
 	{
-		if (WeaponMesh != nullptr)
+		if (ensure(WeaponMesh != nullptr))
 		{
-			if (ScopeCamera != nullptr)
+			if (ensure(ScopeCamera != nullptr))
 			{
 				FRotator SocketRotator = WeaponMesh->GetSocketRotation(CameraSocketName);
 				ScopeCamera->SetRelativeRotation(FRotator(0.0f, 0.0f, -SocketRotator.Roll));
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}	
 }
@@ -60,39 +52,33 @@ void AASWeaponActor::EndViewTarget(APlayerController* PC)
 
 	bBecomeViewTarget = false;
 
-	if (ScopeCamera != nullptr)
+	if (ensure(ScopeCamera != nullptr))
 	{
 		ScopeCamera->SetRelativeRotation(FRotator::ZeroRotator);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 FVector AASWeaponActor::GetMuzzleLocation() const
 {
-	if (WeaponMesh != nullptr)
+	if (ensure(WeaponMesh != nullptr))
 	{
 		return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 	}
 	else
 	{
-		AS_LOG_S(Error);
 		return GetActorLocation();
 	}	
 }
 
 void AASWeaponActor::GetMuzzleLocationAndRotation(FVector& OutLocation, FRotator& OutRotation) const
 {
-	if (WeaponMesh != nullptr)
+	if (ensure(WeaponMesh != nullptr))
 	{	
 		OutLocation = WeaponMesh->GetSocketLocation(MuzzleSocketName);
 		OutRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
 	}
 	else
 	{
-		AS_LOG_S(Error);
 		OutLocation = GetActorLocation();
 		OutRotation = GetActorRotation();
 	}	

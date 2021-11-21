@@ -78,15 +78,12 @@ void UASDmLeaderBoardUserWidget::UpdateRanking(const TArray<FRankedPlayerState>&
 		{
 			for (int32 Idx = 0; Idx < RankedPlayerStates.Num(); ++Idx)
 			{
-				if (auto SlotWidget = CreateWidget<UASDmLeaderBoardSlotUserWidget>(this, DmLeaderBoardSlotWidgetClass))
+				auto SlotWidget = CreateWidget<UASDmLeaderBoardSlotUserWidget>(this, DmLeaderBoardSlotWidgetClass);
+				if (ensure(SlotWidget != nullptr))
 				{
 					SlotWidget->SetInfo(RankedPlayerStates[Idx].Ranking, RankedPlayerStates[Idx].PlayerState);
 
 					RankingScrollBox->AddChild(SlotWidget);
-				}
-				else
-				{
-					AS_LOG_S(Error);
 				}
 			}
 		}

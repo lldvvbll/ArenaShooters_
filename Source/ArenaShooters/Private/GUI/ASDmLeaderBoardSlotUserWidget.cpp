@@ -8,25 +8,16 @@
 
 void UASDmLeaderBoardSlotUserWidget::SetInfo(int32 Ranking, AASPlayerState* PlayerState)
 {
-	if (!IsValid(PlayerState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(PlayerState)))
 		return;
-	}
 
 	PlayerStatePtr = MakeWeakObjectPtr(PlayerState);
-	if (!PlayerStatePtr.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(PlayerStatePtr.IsValid()))
 		return;
-	}
 
 	auto OwningPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
-	if (!IsValid(OwningPlayerState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(OwningPlayerState)))
 		return;
-	}
 
 	PlayerStatePtr->OnChangedPlayerName.AddUObject(this, &UASDmLeaderBoardSlotUserWidget::OnChangedPlayerName);
 	PlayerStatePtr->OnChangedKillCount.AddUObject(this, &UASDmLeaderBoardSlotUserWidget::OnChangedPlayerKillCount);

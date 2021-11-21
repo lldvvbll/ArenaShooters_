@@ -175,7 +175,7 @@ void UASAnimInstance::OnMovementChanged(EMovementMode PrevMovementMode, EMovemen
 {
 	if (GetWorld()->IsClient())
 	{
-		if (IsValid(ASChar))
+		if (ensure(IsValid(ASChar)))
 		{
 			switch (CurMovementMode)
 			{
@@ -189,10 +189,6 @@ void UASAnimInstance::OnMovementChanged(EMovementMode PrevMovementMode, EMovemen
 			default:
 				break;
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -220,11 +216,8 @@ void UASAnimInstance::AnimNotify_UseHealingKitComplete()
 
 void UASAnimInstance::AnimNotify_HitReact()
 {
-	if (!::IsValid(ASChar))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ASChar)))
 		return;
-	}
 	
 	if (ASChar->IsLocallyControlled())
 	{

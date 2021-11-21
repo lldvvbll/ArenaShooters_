@@ -7,31 +7,39 @@
 void UASHealingKit::SetCount(int32 NewCount)
 {
 	auto HealingKitDA = Cast<UASHealingKitDataAsset>(DataAsset);
-	check(HealingKitDA);
-
-	Super::SetCount(FMath::Clamp<int32>(NewCount, 0, (HealingKitDA != nullptr ? HealingKitDA->MaxBundleCount : 100)));
+	if (ensure(HealingKitDA != nullptr))
+	{
+		Super::SetCount(FMath::Clamp<int32>(NewCount, 0, HealingKitDA->MaxBundleCount));
+	}
+	else
+	{
+		Super::SetCount(FMath::Clamp<int32>(NewCount, 0, 100));
+	}	
 }
 
 EHealingKitType UASHealingKit::GetHealingKitType() const
 {
 	auto HealingKitDA = Cast<UASHealingKitDataAsset>(DataAsset);
-	check(HealingKitDA);
+	if (ensure(HealingKitDA != nullptr))
+		return HealingKitDA->HealingKitType;
 
-	return (HealingKitDA != nullptr ? HealingKitDA->HealingKitType : EHealingKitType::None);
+	return EHealingKitType::None;
 }
 
 float UASHealingKit::GetRecoveryPoint() const
 {
 	auto HealingKitDA = Cast<UASHealingKitDataAsset>(DataAsset);
-	check(HealingKitDA);
-
-	return (HealingKitDA != nullptr ? HealingKitDA->RecoveryPoint : 0.0f);
+	if (ensure(HealingKitDA != nullptr))
+		return HealingKitDA->RecoveryPoint;
+	
+	return 0.0f;
 }
 
 FTimespan UASHealingKit::GetUsingTime() const
 {
 	auto HealingKitDA = Cast<UASHealingKitDataAsset>(DataAsset);
-	check(HealingKitDA);
-
-	return (HealingKitDA != nullptr ? HealingKitDA->UsingTime : FTimespan::MaxValue());
+	if (ensure(HealingKitDA != nullptr))
+		return HealingKitDA->UsingTime;
+	
+	return FTimespan::MaxValue();
 }

@@ -137,13 +137,9 @@ void AASPlayerController::ClearRespawnTimer()
 void AASPlayerController::RespawnPlayer()
 {
 	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
-	if (IsValid(GameMode))
+	if (ensure(IsValid(GameMode)))
 	{
 		GameMode->RestartPlayer(this);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -171,15 +167,11 @@ void AASPlayerController::RemoveFullScreenWidget()
 void AASPlayerController::GoToMainMenu()
 {
 	auto GameInstance = GetGameInstance<UASGameInstance>();
-	if (IsValid(GameInstance))
+	if (ensure(IsValid(GameInstance)))
 	{
 		ClientTravel(UGameMapsSettings::GetGameDefaultMap(), ETravelType::TRAVEL_Absolute);
 
 		GameInstance->DestroySession();
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -213,16 +205,12 @@ void AASPlayerController::BeginPlay()
 		}
 
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (IsValid(GameState))
+		if (ensure(IsValid(GameState)))
 		{
 			if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 			{
 				ShowPrepareInfoWidget();
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }
@@ -331,13 +319,9 @@ void AASPlayerController::RemoveRespawnTimerWidget()
 
 void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* ConstructedWidget)
 {
-	if (CurrentFullScreenWidget == nullptr)
+	if (ensure(CurrentFullScreenWidget == nullptr))
 	{
 		CurrentFullScreenWidget = ConstructedWidget;
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	if (RespawnTimerWidget != nullptr)
@@ -351,13 +335,9 @@ void AASPlayerController::OnConstructedFullScreenWidget(UUserWidget* Constructed
 
 void AASPlayerController::OnDestructedFullScreenWidget(UUserWidget* DestructedWidget)
 {
-	if (CurrentFullScreenWidget == DestructedWidget)
+	if (ensure(CurrentFullScreenWidget == DestructedWidget))
 	{
 		CurrentFullScreenWidget = nullptr;
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	if (RespawnTimerWidget != nullptr)

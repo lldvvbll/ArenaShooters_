@@ -12,38 +12,23 @@
 
 UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, UASItemDataAsset* DataAsset, int32 Count/* = 0*/)
 {
-	if (DataAsset == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(DataAsset != nullptr))
 		return nullptr;
-	}
 
-	if (World == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(World != nullptr))
 		return nullptr;
-	}
 
 	AGameStateBase* GameState = World->GetGameState();
-	if (GameState == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(GameState)))
 		return nullptr;
-	}
 
 	auto ItemFactoryComp = Cast<UASItemFactoryComponent>(GameState->FindComponentByClass(UASItemFactoryComponent::StaticClass()));
-	if (ItemFactoryComp == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ItemFactoryComp != nullptr))
 		return nullptr;
-	}
 
 	auto NewItem = NewObject<UASItem>(World->GetCurrentLevel(), DataAsset->ItemClass);
-	if (NewItem == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(NewItem != nullptr))
 		return nullptr;
-	}
 
 	NewItem->SetDataAsset(DataAsset);
 	NewItem->SetOwner(NewOwner);
@@ -61,31 +46,19 @@ UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, con
 
 bool UASItemFactoryComponent::DeleteItem(UWorld* World, UASItem* InItem)
 {
-	if (!IsValid(InItem))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(InItem)))
 		return false;
-	}
 
-	if (!IsValid(World))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(World)))
 		return false;
-	}
 
 	AGameStateBase* GameState = World->GetGameState();
-	if (!IsValid(GameState))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(GameState)))
 		return nullptr;
-	}
 
 	auto ItemFactoryComp = Cast<UASItemFactoryComponent>(GameState->FindComponentByClass(UASItemFactoryComponent::StaticClass()));
-	if (!IsValid(ItemFactoryComp))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(ItemFactoryComp)))
 		return nullptr;
-	}
 
 	int32 Idx = ItemFactoryComp->ASItems.Find(InItem);
 	if (Idx == INDEX_NONE)

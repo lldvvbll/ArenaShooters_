@@ -65,38 +65,26 @@ void UASGameMenuUserWidget::OnClickedContinueButton()
 
 void UASGameMenuUserWidget::OnClickedKeySettingsButton()
 {
-	if (GameMenuWidgetSwitcher != nullptr)
+	if (ensure(GameMenuWidgetSwitcher != nullptr))
 	{
 		GameMenuWidgetSwitcher->SetActiveWidgetIndex(EWidgetIndex::KeySettings);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASGameMenuUserWidget::OnClickedKeySettingsBackButton()
 {
-	if (GameMenuWidgetSwitcher != nullptr)
+	if (ensure(GameMenuWidgetSwitcher != nullptr))
 	{
 		GameMenuWidgetSwitcher->SetActiveWidgetIndex(EWidgetIndex::GameMenu);
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
 void UASGameMenuUserWidget::OnClickedGoToMainMenuButton()
 {
 	auto PC = GetOwningPlayer<AASPlayerController>();
-	if (IsValid(PC))
+	if (ensure(IsValid(PC)))
 	{
 		PC->GoToMainMenu();
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -107,7 +95,7 @@ void UASGameMenuUserWidget::OnClickedQuitGameButton()
 
 void UASGameMenuUserWidget::OnEscKeyPressed()
 {
-	if (GameMenuWidgetSwitcher != nullptr)
+	if (ensure(GameMenuWidgetSwitcher != nullptr))
 	{
 		switch (GameMenuWidgetSwitcher->GetActiveWidgetIndex())
 		{
@@ -121,9 +109,5 @@ void UASGameMenuUserWidget::OnEscKeyPressed()
 			checkNoEntry();
 			break;
 		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }

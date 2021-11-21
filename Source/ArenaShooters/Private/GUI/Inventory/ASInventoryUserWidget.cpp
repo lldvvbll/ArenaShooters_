@@ -64,27 +64,19 @@ void UASInventoryUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	AASCharacter* ASChar = GetASCharacter();
-	if (IsValid(ASChar))
+	if (ensure(IsValid(ASChar)))
 	{
 		ASChar->OnGroundItemAdd.RemoveAll(this);
 		ASChar->OnGroundItemRemove.RemoveAll(this);
 
 		ASInventoryComp = ASChar->GetInventoryComponent();
-		if (IsValid(ASInventoryComp))
+		if (ensure(IsValid(ASInventoryComp)))
 		{
 			ASInventoryComp->OnAddInventoryItem.RemoveAll(this);
 			ASInventoryComp->OnRemoveInventoryItem.RemoveAll(this);
 			ASInventoryComp->OnInsertWeapon.RemoveAll(this);
 			ASInventoryComp->OnInsertArmor.RemoveAll(this);
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	OnDestructed.Broadcast(this);
@@ -102,41 +94,26 @@ bool UASInventoryUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDr
 	if (Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation))
 		return true;
 
-	if (auto DragDropOp = Cast<UASItemDragDropOperation>(InOperation))
+	auto DragDropOp = Cast<UASItemDragDropOperation>(InOperation);
+	if (ensure(DragDropOp != nullptr))
 	{
 		const TWeakObjectPtr<UASItem>& Item = DragDropOp->GetItem();
-		if (Item.IsValid())
+		if (ensure(Item.IsValid()))
 		{
 			UWidget* SuitableWidget = FindSuitableToDropInventoryWidget(Item);
-			if (SuitableWidget != nullptr)
+			if (ensure(SuitableWidget != nullptr))
 			{
 				UWidget* ParentWidget = DragDropOp->GetParentWidget();
 				if (ParentWidget != SuitableWidget)
 				{
 					auto ASChar = GetOwningPlayerPawn<AASCharacter>();
-					if (IsValid(ASChar))
+					if (ensure(IsValid(ASChar)))
 					{
 						ASChar->PickUpItem(Item.Get());
 					}
-					else
-					{
-						AS_LOG_S(Error);
-					}
 				}
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 
 	return false;
@@ -145,92 +122,61 @@ bool UASInventoryUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDr
 AASCharacter* UASInventoryUserWidget::GetASCharacter() const
 {
 	auto PlayerController = Cast<AASPlayerController>(GetOwningPlayer());
-	if (PlayerController == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(PlayerController != nullptr))
 		return nullptr;
-	}
 
 	return Cast<AASCharacter>(PlayerController->GetCharacter());
 }
 
 void UASInventoryUserWidget::AddItemsToGroundScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items)
 {
-	if (GroundItemScrollBoxWrapperWidget == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(GroundItemScrollBoxWrapperWidget != nullptr))
 		return;
-	}
 
 	GroundItemScrollBoxWrapperWidget->AddItemsToScrollBox(Items);
 }
 
 void UASInventoryUserWidget::RemoveItemsFromGroundScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items)
 {
-	if (GroundItemScrollBoxWrapperWidget == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(GroundItemScrollBoxWrapperWidget != nullptr))
 		return;
-	}
 
 	GroundItemScrollBoxWrapperWidget->RemoveItemsFromScrollBox(Items);
 }
 
 void UASInventoryUserWidget::AddItemsToInventoryScrollBox(const TArray<TWeakObjectPtr<UASItem>>& Items)
 {
-	if (InventoryItemScrollBoxWrapperWidget == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InventoryItemScrollBoxWrapperWidget != nullptr))
 		return;
-	}
 
 	InventoryItemScrollBoxWrapperWidget->AddItemsToScrollBox(Items);
 }
 
 void UASInventoryUserWidget::OnChangedWeapon(EWeaponSlotType SlotType, UASWeapon* RemovedWeapon)
 {
-	if (ASInventoryComp == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ASInventoryComp != nullptr))
 		return;
-	}
 
 	switch (SlotType)
 	{
 	case EWeaponSlotType::Main:
-		if (MainWeaponSlotWidget != nullptr)
+		if (ensure(MainWeaponSlotWidget != nullptr))
 		{
 			ItemPtrBoolPair ItemPair = ASInventoryComp->FindItemFromWeaponSlot(SlotType);
-			if (ItemPair.Value)
+			if (ensure(ItemPair.Value))
 			{
 				MainWeaponSlotWidget->SetASItem(ItemPair.Key);
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	case EWeaponSlotType::Sub:
-		if (SubWeaponSlotWidget != nullptr)
+		if (ensure(SubWeaponSlotWidget != nullptr))
 		{
 			ItemPtrBoolPair ItemPair = ASInventoryComp->FindItemFromWeaponSlot(SlotType);
-			if (ItemPair.Value)
+			if (ensure(ItemPair.Value))
 			{
 				SubWeaponSlotWidget->SetASItem(ItemPair.Key);
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	default:
@@ -244,39 +190,23 @@ void UASInventoryUserWidget::OnChangedArmor(EArmorSlotType SlotType, UASArmor* R
 	switch (SlotType)
 	{
 	case EArmorSlotType::Helmet:
-		if (HelmetSlotWidget != nullptr)
+		if (ensure(HelmetSlotWidget != nullptr))
 		{
 			ItemPtrBoolPair ItemPair = ASInventoryComp->FindItemFromArmorSlot(SlotType);
-			if (ItemPair.Value)
+			if (ensure(ItemPair.Value))
 			{
 				HelmetSlotWidget->SetASItem(ItemPair.Key);
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	case EArmorSlotType::Jacket:
-		if (JacketSlotWidget != nullptr)
+		if (ensure(JacketSlotWidget != nullptr))
 		{
 			ItemPtrBoolPair ItemPair = ASInventoryComp->FindItemFromArmorSlot(SlotType);
-			if (ItemPair.Value)
+			if (ensure(ItemPair.Value))
 			{
 				JacketSlotWidget->SetASItem(ItemPair.Key);
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	default:
@@ -287,22 +217,16 @@ void UASInventoryUserWidget::OnChangedArmor(EArmorSlotType SlotType, UASArmor* R
 
 void UASInventoryUserWidget::OnAddInventoryItem(const TWeakObjectPtr<UASItem>& NewItem)
 {
-	if (InventoryItemScrollBoxWrapperWidget == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InventoryItemScrollBoxWrapperWidget != nullptr))
 		return;
-	}
 
 	InventoryItemScrollBoxWrapperWidget->AddItemsToScrollBox({ NewItem });
 }
 
 void UASInventoryUserWidget::OnRemoveInventoryItem(const TWeakObjectPtr<UASItem>& InItem)
 {
-	if (InventoryItemScrollBoxWrapperWidget == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InventoryItemScrollBoxWrapperWidget != nullptr))
 		return;
-	}
 
 	InventoryItemScrollBoxWrapperWidget->RemoveItemsFromScrollBox({ InItem });
 }
@@ -314,11 +238,8 @@ void UASInventoryUserWidget::BackToGame()
 
 UUserWidget* UASInventoryUserWidget::FindSuitableToDropInventoryWidget(const TWeakObjectPtr<UASItem>& DopItem) const
 {
-	if (!DopItem.IsValid())
-	{
-		AS_LOG_S(Error);
+	if (!ensure(DopItem.IsValid()))
 		return nullptr;
-	}
 	
 	UUserWidget* ReturnWidget = nullptr;
 
@@ -326,47 +247,45 @@ UUserWidget* UASInventoryUserWidget::FindSuitableToDropInventoryWidget(const TWe
 	switch (ItemType)
 	{
 	case EItemType::Weapon:
-		if (auto Weapon = Cast<UASWeapon>(DopItem))
 		{
-			EWeaponSlotType SlotType = UASInventoryComponent::GetSuitableWeaponSlotType(Weapon->GetWeaponType());
-			switch (SlotType)
+			auto Weapon = Cast<UASWeapon>(DopItem);
+			if (ensure(Weapon != nullptr))
 			{
-			case EWeaponSlotType::Main:
-				ReturnWidget = MainWeaponSlotWidget;
-				break;
-			case EWeaponSlotType::Sub:
-				ReturnWidget = SubWeaponSlotWidget;
-				break;
-			default:
-				checkNoEntry();
-				break;
+				EWeaponSlotType SlotType = UASInventoryComponent::GetSuitableWeaponSlotType(Weapon->GetWeaponType());
+				switch (SlotType)
+				{
+				case EWeaponSlotType::Main:
+					ReturnWidget = MainWeaponSlotWidget;
+					break;
+				case EWeaponSlotType::Sub:
+					ReturnWidget = SubWeaponSlotWidget;
+					break;
+				default:
+					checkNoEntry();
+					break;
+				}
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
+		}		
 		break;
 	case EItemType::Armor:
-		if (auto Armor = Cast<UASArmor>(DopItem))
 		{
-			EArmorSlotType SlotType = UASInventoryComponent::GetSuitableArmorSlotType(Armor->GetArmorType());
-			switch (SlotType)
+			auto Armor = Cast<UASArmor>(DopItem);
+			if (ensure(Armor != nullptr))
 			{
-			case EArmorSlotType::Helmet:
-				ReturnWidget = HelmetSlotWidget;
-				break;
-			case EArmorSlotType::Jacket:
-				ReturnWidget = JacketSlotWidget;
-				break;
-			default:
-				checkNoEntry();
-				break;
+				EArmorSlotType SlotType = UASInventoryComponent::GetSuitableArmorSlotType(Armor->GetArmorType());
+				switch (SlotType)
+				{
+				case EArmorSlotType::Helmet:
+					ReturnWidget = HelmetSlotWidget;
+					break;
+				case EArmorSlotType::Jacket:
+					ReturnWidget = JacketSlotWidget;
+					break;
+				default:
+					checkNoEntry();
+					break;
+				}
 			}
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	case EItemType::Ammo:			// fallthrough

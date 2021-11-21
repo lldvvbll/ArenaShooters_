@@ -36,18 +36,12 @@ void UASDamageComponent::InitializeComponent()
 
 void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult& InHit)
 {
-	if (!IsValid(InBullet))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(InBullet)))
 		return;
-	}
 
 	auto InstigatorChar = InBullet->GetOwner<AASCharacter>();
-	if (!IsValid(InstigatorChar))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(InstigatorChar)))
 		return;
-	}
 
 	float Damage = InBullet->GetDamage();
 	float TakenDamage = Damage;
@@ -76,13 +70,9 @@ void UASDamageComponent::OnTakeDamage(AActor* DamagedActor, float Damage, const 
 	if (!bBeforeDead && ASChar->IsDead())
 	{
 		auto GameMode = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
-		if (IsValid(GameMode))
+		if (ensure(IsValid(GameMode)))
 		{
 			GameMode->OnKillCharacter(Cast<AASPlayerController>(InstigatedBy), ASChar->GetController<AASPlayerController>());
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 	}
 }

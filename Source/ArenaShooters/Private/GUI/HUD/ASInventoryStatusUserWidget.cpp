@@ -20,12 +20,14 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 	CurrentAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentAmmoTextBlock")));
 	InventoryAmmoTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("InventoryAmmoTextBlock")));
 
-	if (auto Ctrlr = GetOwningPlayer<AASPlayerController>())
+	auto Ctrlr = GetOwningPlayer<AASPlayerController>();
+	if (ensure(IsValid(Ctrlr)))
 	{
-		if (auto Char = Ctrlr->GetPawn<AASCharacter>())
+		auto Char = Ctrlr->GetPawn<AASCharacter>();
+		if (ensure(IsValid(Char)))
 		{
 			InventoryComp = Char->GetInventoryComponent();
-			if (InventoryComp != nullptr)
+			if (ensure(InventoryComp != nullptr))
 			{
 				InventoryComp->OnChangedSelectedWeapon.AddUObject(this, &UASInventoryStatusUserWidget::OnChangedSelectedWeapon);
 				InventoryComp->OnInsertArmor.AddUObject(this, &UASInventoryStatusUserWidget::OnInsertArmor);
@@ -46,19 +48,7 @@ void UASInventoryStatusUserWidget::NativeConstruct()
 					OnChangedInventoryAmmoCount(0);
 				}
 			}
-			else
-			{
-				AS_LOG_S(Error);
-			}
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
-	}
-	else
-	{
-		AS_LOG_S(Error);
 	}
 }
 
@@ -145,24 +135,15 @@ void UASInventoryStatusUserWidget::OnInsertArmor(EArmorSlotType SlotType, UASArm
 
 void UASInventoryStatusUserWidget::BindProgressBarToArmor(UProgressBar* ProgressBar, EArmorSlotType SlotType)
 {
-	if (InventoryComp == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InventoryComp != nullptr))
 		return;
-	}
 
-	if (ProgressBar == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ProgressBar != nullptr))
 		return;
-	}
 
 	ItemPtrBoolPair ItemPair = InventoryComp->FindItemFromArmorSlot(SlotType);
-	if (!ItemPair.Value)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ItemPair.Value))
 		return;
-	}
 
 	if (UASArmor* Armor = Cast<UASArmor>(ItemPair.Key))
 	{
@@ -187,23 +168,15 @@ void UASInventoryStatusUserWidget::OnChangedArmorDurability(float Durability, fl
 	switch (SlotType)
 	{
 	case EArmorSlotType::Helmet:
-		if (HelmetProgressBar != nullptr)
+		if (ensure(HelmetProgressBar != nullptr))
 		{
 			HelmetProgressBar->SetPercent(Durability / MaxDurability);
 		}
-		else
-		{
-			AS_LOG_S(Error);
-		}
 		break;
 	case EArmorSlotType::Jacket:
-		if (JacketProgressBar != nullptr)
+		if (ensure(JacketProgressBar != nullptr))
 		{
 			JacketProgressBar->SetPercent(Durability / MaxDurability);
-		}
-		else
-		{
-			AS_LOG_S(Error);
 		}
 		break;
 	default:

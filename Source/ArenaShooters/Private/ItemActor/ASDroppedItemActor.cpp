@@ -97,11 +97,8 @@ int32 AASDroppedItemActor::GetItemNum() const
 
 void AASDroppedItemActor::AddItem(UASItem* InItem)
 {
-	if (!IsValid(InItem))
-	{
-		AS_LOG_S(Error);
+	if (!ensure(IsValid(InItem)))
 		return;
-	}
 
 	InItem->SetOwner(this);
 
@@ -123,17 +120,11 @@ void AASDroppedItemActor::AddItems(const TArray<UASItem*>& InItems)
 
 bool AASDroppedItemActor::RemoveItem(UASItem* InItem)
 {
-	if (InItem == nullptr)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(InItem != nullptr))
 		return false;
-	}
 
-	if (ASItems.Remove(InItem) == 0)
-	{
-		AS_LOG_S(Error);
+	if (!ensure(ASItems.Remove(InItem) > 0))
 		return false;
-	}
 
 	InItem->SetOwner(nullptr);
 
