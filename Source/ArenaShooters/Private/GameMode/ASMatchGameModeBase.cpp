@@ -12,15 +12,26 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineSessionSettings.h"
+#include "GameFramework/GameSession.h"
 
 AASMatchGameModeBase::AASMatchGameModeBase()
 {
 	PrepareTime = 10.0f;
 	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
-	MaxPlayerCount = 16;
 	MinPlayerCount = 4;
 	GoalNumOfKills = 1;
+}
+
+void AASMatchGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	int32 MaxPlayerCnt = GetMaxPlayerCount();
+	if (!ensure(MinPlayerCount <= MaxPlayerCnt))
+	{
+		MinPlayerCount = MaxPlayerCnt;
+	}
 }
 
 void AASMatchGameModeBase::InitGameState()
@@ -30,7 +41,7 @@ void AASMatchGameModeBase::InitGameState()
 	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
 	if (ensure(IsValid(ASMatchGameState)))
 	{
-		ASMatchGameState->SetMaxNumPlayers(MaxPlayerCount);
+		ASMatchGameState->SetMaxNumPlayers(GetMaxPlayerCount());
 		ASMatchGameState->SetMinNumPlayers(MinPlayerCount);
 		ASMatchGameState->SetGoalNumOfKills(GoalNumOfKills);
 		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Prepare);
@@ -49,7 +60,7 @@ void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Addre
 	if (!ErrorMessage.IsEmpty())
 		return;
 
-	if (NumPlayers >= MaxPlayerCount)
+	if (NumPlayers >= GetMaxPlayerCount())
 	{
 		ErrorMessage = TEXT("Server is Full");
 		return;
@@ -88,20 +99,6 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 				GetWorldTimerManager().SetTimer(PlayerWaitingTimerHandle, this, &AASMatchGameModeBase::SetPrepareTimer, 10.0f);
 			}
 		}
-	}
-}
-
-void AASMatchGameModeBase::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-
-	ASGameInstance = GetGameInstance<UASGameInstance>();
-	ensure(IsValid(ASGameInstance));
-
-	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-	if (ensure(SessionInterface.IsValid()))
-	{
-		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &AASMatchGameModeBase::OnCreateSessionComplete);
 	}
 }
 
@@ -146,7 +143,12 @@ void AASMatchGameModeBase::SetPlayerDefaults(APawn* PlayerPawn)
 
 int32 AASMatchGameModeBase::GetMaxPlayerCount() const
 {
-	return MaxPlayerCount;
+	if (ensure(GameSession != nullptr))
+	{
+		return GameSession->MaxPlayers;
+	}
+
+	return 16;
 }
 
 int32 AASMatchGameModeBase::GetMinPlayerCount() const
@@ -279,23 +281,4 @@ void AASMatchGameModeBase::OnCalledRestartTimer()
 
 void AASMatchGameModeBase::PrepareAllPlayerStart()
 {
-}
-
-void AASMatchGameModeBase::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
-{
-	if (bWasSuccessful)
-	{
-		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-		if (ensure(SessionInterface.IsValid()))
-		{
-			FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(SessionName);
-			if (ensure(SessionSettings != nullptr))
-			{
-				if (MaxPlayerCount > SessionSettings->NumPublicConnections)
-				{
-					MaxPlayerCount = SessionSettings->NumPublicConnections;
-				}
-			}
-		}
-	}	
 }

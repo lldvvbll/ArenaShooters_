@@ -7,6 +7,7 @@
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Controller/ASLobbyPlayerController.h"
+#include "GameFramework/GameSession.h"
 
 void UASGameInstance::Init()
 {
@@ -43,7 +44,7 @@ void UASGameInstance::SearchServer()
 			SessionSearch->bIsLanQuery = true;
 		}
 
-		SessionSearch->QuerySettings.Set(NUMOPENPUBCONN, 1, EOnlineComparisonOp::GreaterThanEquals);
+		//SessionSearch->QuerySettings.Set(NUMOPENSEAT, 1, EOnlineComparisonOp::GreaterThanEquals);
 		//SessionSearch->QuerySettings.Set(PREPARED_MATCH, false, EOnlineComparisonOp::Equals);
 
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
@@ -73,7 +74,7 @@ void UASGameInstance::SetPreparedMatchToSession(bool bPrepared)
 		return;	
 
 	FOnlineSessionSettings* SessionSettings = SessionInterface->GetSessionSettings(NAME_GameSession);
-	if (SessionSettings == nullptr)
+	if (SessionSettings == nullptr)		// nullable
 		return;
 
 	SessionSettings->Set(PREPARED_MATCH, bPrepared, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
@@ -137,13 +138,20 @@ void UASGameInstance::OnStart()
 				LoadedMapName = TEXT("Unknown");
 			}
 
+			int32 NumMaxPlayers = 16;
+			auto GameMode = GetWorld()->GetAuthGameMode();
+			if (ensure(IsValid(GameMode)) && ensure(GameMode->GameSession != nullptr))
+			{
+				NumMaxPlayers = GameMode->GameSession->MaxPlayers;
+			}
+
 			FOnlineSessionSettings SessionSettings;
 			SessionSettings.bAllowJoinInProgress = true;
 			SessionSettings.bShouldAdvertise = true;
-			SessionSettings.NumPublicConnections = 16;
+			SessionSettings.NumPublicConnections = NumMaxPlayers;
 			SessionSettings.Set(SERVER_NAME, ServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(SETTING_MAPNAME, LoadedMapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-			SessionSettings.Set(NUMOPENPUBCONN, SessionSettings.NumPublicConnections, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			SessionSettings.Set(NUMOPENPUBCONN, NumMaxPlayers, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 			SessionSettings.Set(PREPARED_MATCH, false, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 			if (IsOnlineSubsystemSteam())

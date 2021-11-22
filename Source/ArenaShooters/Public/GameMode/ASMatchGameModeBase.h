@@ -18,10 +18,10 @@ class ARENASHOOTERS_API AASMatchGameModeBase : public AGameMode
 public:
 	AASMatchGameModeBase();
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void InitGameState() override;
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual void PreInitializeComponents() override;
 
 	virtual void InitStartSpot_Implementation(AActor* StartSpot, AController* NewPlayer) override;
 	virtual void SetPlayerDefaults(APawn* PlayerPawn) override;
@@ -43,8 +43,6 @@ protected:
 
 	virtual void PrepareAllPlayerStart();
 
-	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-
 protected:
 	UPROPERTY()
 	UASGameInstance* ASGameInstance;
@@ -62,9 +60,6 @@ protected:
 	FTimespan MatchProcessTime;
 
 	bool bSetPrepareTimer;
-
-	UPROPERTY(EditDefaultsOnly, Category = Setting)
-	int32 MaxPlayerCount;
 
 	UPROPERTY(EditDefaultsOnly, Category = Setting)
 	int32 MinPlayerCount;

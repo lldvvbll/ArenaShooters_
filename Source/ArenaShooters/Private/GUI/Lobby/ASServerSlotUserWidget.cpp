@@ -11,27 +11,27 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 {
 	SearchResult = NewSearchResult;
 
+	FString ServerName = TEXT("Unknown");
+	ensure(SearchResult.Session.SessionSettings.Get(SERVER_NAME, ServerName));
+
+	FString ServerMap = TEXT("Unknown");
+	ensure(SearchResult.Session.SessionSettings.Get(SETTING_MAPNAME, ServerMap));
+
+	int32 NumOpenPublicConnections = 0;
+	ensure(SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnections));
+
 	if (ServerNameTextBlock != nullptr)
 	{
-		FString ServerName = TEXT("Unknown");
-		SearchResult.Session.SessionSettings.Get(SERVER_NAME, ServerName);
-
 		ServerNameTextBlock->SetText(FText::FromString(ServerName));
 	}
 
 	if (ServerMapTextBlock != nullptr)
 	{
-		FString ServerMap = TEXT("Unknown");
-		SearchResult.Session.SessionSettings.Get(SETTING_MAPNAME, ServerMap);
-
 		ServerMapTextBlock->SetText(FText::FromString(ServerMap));
 	}
 
 	if (PlayersTextBlock != nullptr)
 	{
-		int32 NumOpenPublicConnections = 0;
-		ensure(SearchResult.Session.SessionSettings.Get(NUMOPENPUBCONN, NumOpenPublicConnections));
-
 		int32 MaxConnection = SearchResult.Session.SessionSettings.NumPublicConnections;
 		int32 CurConnection = MaxConnection - NumOpenPublicConnections;
 
@@ -51,6 +51,12 @@ void UASServerSlotUserWidget::SetServerInfo(const FOnlineSessionSearchResult& Ne
 		if (bPrepared)
 		{
 			JoinButtonTextBlock->SetText(FText::FromString(TEXT("In Progress")));
+
+			SetButtonEnable(false);
+		}
+		else if (NumOpenPublicConnections < 1)
+		{
+			JoinButtonTextBlock->SetText(FText::FromString(TEXT("Full")));
 
 			SetButtonEnable(false);
 		}
