@@ -42,7 +42,7 @@ void UASDeathMatchRankingUserWidget::NativeDestruct()
 
 void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPlayerState>& RankedPlayerStates)
 {
-	if (!ensure(RankScrollBox != nullptr))
+	if (RankScrollBox == nullptr)
 		return;
 
 	RankScrollBox->ClearChildren();
@@ -52,7 +52,7 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPla
 		return;
 
 	auto MyPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();
-	if (!ensure(IsValid(MyPlayerState)))
+	if (!IsValid(MyPlayerState))
 		return;
 
 	int32 MyIdx = INDEX_NONE;

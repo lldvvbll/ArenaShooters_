@@ -13,27 +13,30 @@ AASDeathMatchPlayerController::AASDeathMatchPlayerController()
 	bCreateRankingWidget = false;
 }
 
+void AASDeathMatchPlayerController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (IsLocalPlayerController())
+	{
+		auto GameState = GetWorld()->GetGameState();
+		if (GameState != nullptr)	// nullable
+		{
+			CreateRankingWidget();
+		}
+		else
+		{
+			GetWorld()->GameStateSetEvent.AddUObject(this, &AASDeathMatchPlayerController::OnSetGameStateToWorld);
+		}
+	}
+}
+
 void AASDeathMatchPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
 	if (IsLocalPlayerController())
 	{
-		if (!bCreateRankingWidget)
-		{
-			auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-			if (ensure(IsValid(GameState)))
-			{
-				DeathMatchRankingWidget = CreateWidget<UASDeathMatchRankingUserWidget>(this, DeathMatchRankingWidgetClass);
-				if (DeathMatchRankingWidget != nullptr)
-				{
-					DeathMatchRankingWidget->AddToViewport(1);
-
-					bCreateRankingWidget = true;
-				}
-			}
-		}
-
 		auto ASPlayerState = GetPlayerState<AASPlayerState>();
 		if (ensure(IsValid(ASPlayerState)))
 		{
@@ -84,10 +87,32 @@ void AASDeathMatchPlayerController::ShowLeaderBoardWidget()
 	ShowFullScreenWidget<UASDmLeaderBoardUserWidget>(DmLeaderBoardWidgetClass);
 }
 
+void AASDeathMatchPlayerController::CreateRankingWidget()
+{
+	if (bCreateRankingWidget)
+		return;
+
+	DeathMatchRankingWidget = CreateWidget<UASDeathMatchRankingUserWidget>(this, DeathMatchRankingWidgetClass);
+	if (DeathMatchRankingWidget != nullptr)
+	{
+		DeathMatchRankingWidget->AddToViewport(1);
+
+		bCreateRankingWidget = true;
+	}
+}
+
 void AASDeathMatchPlayerController::OnChangedDeathCount(int32 NewDeathCount)
 {
 	if (IsLocalPlayerController())
 	{
 		NotifyMessage(ItemSetChangeButtonNotification.ToString(), 3.0f);
+	}
+}
+
+void AASDeathMatchPlayerController::OnSetGameStateToWorld(AGameStateBase* NewGameState)
+{
+	if (IsLocalPlayerController())
+	{
+		CreateRankingWidget();
 	}
 }

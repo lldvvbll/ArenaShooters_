@@ -18,6 +18,7 @@ class ARENASHOOTERS_API AASDeathMatchPlayerController : public AASPlayerControll
 public:
 	AASDeathMatchPlayerController();
 
+	virtual void PostInitializeComponents() override;
 	virtual void OnRep_PlayerState() override;
 
 protected:
@@ -27,8 +28,10 @@ protected:
 	virtual void OnChangedInnerMatchState(EInnerMatchState State) override;
 
 	void ShowLeaderBoardWidget();
+	void CreateRankingWidget();
 
 	void OnChangedDeathCount(int32 NewDeathCount);
+	void OnSetGameStateToWorld(AGameStateBase* NewGameState);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
