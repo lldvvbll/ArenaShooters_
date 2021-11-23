@@ -64,6 +64,9 @@ protected:
 	virtual void OnChangedPlayerDeathCount(int32 Count);
 
 	UFUNCTION()
+	void OnRep_GoalNumOfKills();
+
+	UFUNCTION()
 	void OnRep_StartTimeForProcess();
 
 	UFUNCTION()
@@ -83,6 +86,9 @@ public:
 
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnRemovedPlayerStateEvent, APlayerState*);
 	FOnRemovedPlayerStateEvent OnRemovedPlayerState;
+
+	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnSetGoalNumOfKillsEvent, int32);
+	FOnSetGoalNumOfKillsEvent OnSetGoalNumOfKills;
 
 	DECLARE_EVENT_OneParam(AASMatchGameStateBase, FOnStartTimeForProcessEvent, float);
 	FOnStartTimeForProcessEvent OnStartTimeForProcess;
@@ -109,7 +115,7 @@ protected:
 	UPROPERTY(Replicated)
 	int32 MinNumPlayers;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_GoalNumOfKills)
 	int32 GoalNumOfKills;
 
 	UPROPERTY(ReplicatedUsing = OnRep_StartTimeForProcess)

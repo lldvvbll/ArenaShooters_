@@ -228,6 +228,11 @@ void AASMatchGameStateBase::OnChangedPlayerDeathCount(int32 Count)
 {
 }
 
+void AASMatchGameStateBase::OnRep_GoalNumOfKills()
+{
+	OnSetGoalNumOfKills.Broadcast(GoalNumOfKills);
+}
+
 void AASMatchGameStateBase::OnRep_StartTimeForProcess()
 {
 	OnStartTimeForProcess.Broadcast(StartTimeForProcess);

@@ -24,6 +24,6 @@ protected:
 	virtual void PrepareAllPlayerStart() override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Setting)
 	FTimespan RespawnDelay;
 };

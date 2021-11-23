@@ -141,20 +141,23 @@ void AASCharacter::BeginPlay()
 
 void AASCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (ASInventory != nullptr)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		ASInventory->ClearAllItems();
-	}
+		if (ASInventory != nullptr)
+		{
+			ASInventory->ClearAllItems();
+		}
 
-	TArray<AActor*> AttachedActors;
-	GetAttachedActors(AttachedActors, false);
+		TArray<AActor*> AttachedActors;
+		GetAttachedActors(AttachedActors, false);
 
-	for (auto& AttachedActor : AttachedActors)
-	{
-		if (!IsValid(AttachedActor))
-			continue;
+		for (auto& AttachedActor : AttachedActors)
+		{
+			if (!IsValid(AttachedActor))
+				continue;
 
-		AttachedActor->Destroy();
+			AttachedActor->Destroy();
+		}
 	}
 
 	Super::EndPlay(EndPlayReason);

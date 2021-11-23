@@ -22,6 +22,7 @@ protected:
 	virtual void NativeDestruct() override;
 
 	void UpdatePlayerRanking(const TArray<FRankedPlayerState>& RankedPlayerStates);
+	void OnSetGoalNumOfKills(int32 Num);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Slot)

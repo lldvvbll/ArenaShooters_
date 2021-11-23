@@ -43,6 +43,8 @@ AASDroppedItemActor::AASDroppedItemActor()
 	RootComponent = Collision;
 	SkeletalMeshComp->SetupAttachment(RootComponent);
 	StaticMeshComp->SetupAttachment(RootComponent);
+
+	LifeTime = FTimespan::FromSeconds(60);
 }
 
 void AASDroppedItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -50,13 +52,6 @@ void AASDroppedItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AASDroppedItemActor, ASItems);
-}
-
-void AASDroppedItemActor::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-
 }
 
 void AASDroppedItemActor::SetSkeletalMesh(USkeletalMesh* InSkelMesh)
@@ -95,27 +90,29 @@ int32 AASDroppedItemActor::GetItemNum() const
 	return ASItems.Num();
 }
 
-void AASDroppedItemActor::AddItem(UASItem* InItem)
+void AASDroppedItemActor::AddItem(UASItem* InItem, bool bSetLifeSpan/* = true*/)
 {
 	if (!ensure(IsValid(InItem)))
 		return;
 
 	InItem->SetOwner(this);
 
-	if (GetLifeSpan() > 0.0f)
-	{
-		SetSelfDestroy(0.0f);		// Cancel self destory
-	}
-
 	ASItems.Emplace(InItem);
+
+	if (bSetLifeSpan)
+	{
+		SetLifeSpan(LifeTime.GetTotalSeconds());
+	}		
 }
 
 void AASDroppedItemActor::AddItems(const TArray<UASItem*>& InItems)
 {
 	for (auto& Item : InItems)
 	{
-		AddItem(Item);
+		AddItem(Item, false);
 	}
+
+	SetLifeSpan(LifeTime.GetTotalSeconds());
 }
 
 bool AASDroppedItemActor::RemoveItem(UASItem* InItem)
@@ -176,11 +173,21 @@ void AASDroppedItemActor::BeginPlay()
 			ASItems.Emplace(UASItemFactoryComponent::NewASItem(GetWorld(), this, ItemDataAsset, Count));
 		}
 
-		if (ASItems.Num() <= 0)
+		SetLifeSpan(3.0f);
+	}
+}
+
+void AASDroppedItemActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		for (auto& Item : ASItems)
 		{
-			SetSelfDestroy(3.0f);
+			UASItemFactoryComponent::DeleteItem(GetWorld(), Item);
 		}
-	}	
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AASDroppedItemActor::OnRep_ASItems(TArray<UASItem*>& OldItems)

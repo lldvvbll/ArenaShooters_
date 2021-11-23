@@ -17,7 +17,6 @@ public:
 	AASDroppedItemActor();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void PostInitializeComponents() override;
 
 	void SetSkeletalMesh(USkeletalMesh* InSkelMesh);
 	void SetStaticMesh(UStaticMesh* InStaticMesh);
@@ -25,7 +24,7 @@ public:
 	TArray<TWeakObjectPtr<UASItem>> GetItems() const;
 	int32 GetItemNum() const;
 
-	void AddItem(UASItem* InItem);
+	void AddItem(UASItem* InItem, bool bSetLifeSpan = true);
 	void AddItems(const TArray<UASItem*>& InItems);
 	bool RemoveItem(UASItem* InItem);
 
@@ -35,6 +34,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION()
 	void OnRep_ASItems(TArray<UASItem*>& OldItems);
@@ -58,4 +58,7 @@ protected:
 
 	UPROPERTY(EditInstanceOnly)
 	TMap<FPrimaryAssetId, int32> DropItemDataAssetMap;
+
+	UPROPERTY(EditDefaultsOnly)
+	FTimespan LifeTime;
 };

@@ -18,13 +18,10 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
 	if (ensure(IsValid(GameState)))
 	{
-		if (GoalNumOfKillsTextBlock != nullptr)
-		{
-			GoalNumOfKillsTextBlock->SetText(FText::FromString(FString::FromInt(GameState->GetGoalNumOfKills())));
-		}
-
+		GameState->OnSetGoalNumOfKills.AddUObject(this, &UASDeathMatchRankingUserWidget::OnSetGoalNumOfKills);
 		GameState->OnUpdatedRanking.AddUObject(this, &UASDeathMatchRankingUserWidget::UpdatePlayerRanking);
 
+		OnSetGoalNumOfKills(GameState->GetGoalNumOfKills());
 		UpdatePlayerRanking(GameState->GetRankedPlayerStates());
 	}
 }
@@ -97,5 +94,13 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPla
 				RankScrollBox->AddChild(RankingSlot);
 			}
 		}
+	}
+}
+
+void UASDeathMatchRankingUserWidget::OnSetGoalNumOfKills(int32 Num)
+{
+	if (GoalNumOfKillsTextBlock != nullptr)
+	{
+		GoalNumOfKillsTextBlock->SetText(FText::FromString(FString::FromInt(Num)));
 	}
 }
