@@ -36,7 +36,7 @@ AASCharacter::AASCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-	NormalCamOffset = FVector(0.0f, 30.0f, 100.0f);
+	NormalCamOffset = FVector(0.0f, 30.0f, 85.0f);
 	NormalCamArmLength = 200.0f;
 	AimingCamOffset = FVector(0.0f, 45.0f, 75.0f);
 	AimingCamArmLength = 80.0f;
@@ -63,9 +63,9 @@ AASCharacter::AASCharacter()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetRelativeLocation(NormalCamOffset);
 	CameraBoom->TargetArmLength = NormalCamArmLength;
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->SocketOffset = NormalCamOffset;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -205,21 +205,22 @@ void AASCharacter::Tick(float DeltaSeconds)
 
 		if (ShootingStance == EShootingStanceType::Aiming)
 		{
-			FVector TargetSocketOffset;
+			FVector TargetCamOffset;
 			if (InclineValue > 0.0f)
 			{
-				TargetSocketOffset = AimingCamRightOffset;
+				TargetCamOffset = AimingCamRightOffset;
 			}
 			else if (InclineValue < 0.0f)
 			{
-				TargetSocketOffset = AimingCamLeftOffset;
+				TargetCamOffset = AimingCamLeftOffset;
 			}
 			else
 			{
-				TargetSocketOffset = AimingCamOffset;
+				TargetCamOffset = AimingCamOffset;
 			}
 
-			CameraBoom->SocketOffset = FMath::VInterpConstantTo(CameraBoom->SocketOffset, TargetSocketOffset, DeltaSeconds, InclineSpeed);
+			FVector CurRelativeLoc = CameraBoom->GetRelativeLocation();
+			CameraBoom->SetRelativeLocation(FMath::VInterpConstantTo(CurRelativeLoc, TargetCamOffset, DeltaSeconds, InclineSpeed));
 		}
 	}
 
@@ -1689,7 +1690,7 @@ void AASCharacter::StartAiming()
 	if (ensure(CameraBoom != nullptr))
 	{
 		CameraBoom->TargetArmLength = AimingCamArmLength;
-		CameraBoom->SocketOffset = AimingCamOffset;
+		CameraBoom->SetRelativeLocation(AimingCamOffset);
 	}
 }
 
@@ -1705,7 +1706,7 @@ void AASCharacter::EndAiming()
 	if (CameraBoom != nullptr)
 	{
 		CameraBoom->TargetArmLength = NormalCamArmLength;
-		CameraBoom->SocketOffset = NormalCamOffset;
+		CameraBoom->SetRelativeLocation(NormalCamOffset);
 	}
 }
 
