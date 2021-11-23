@@ -43,12 +43,17 @@ void AASBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitive
 		}
 
 		// todo: 대상에 맞게 동작하도록
-		if (Other == nullptr || !Other->IsA(AASCharacter::StaticClass()))
+		if (Other != nullptr && !Other->IsA(AASCharacter::StaticClass()))
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultSparkParticle, Hit.ImpactPoint);
-			
-			UGameplayStatics::SpawnDecalAttached(DefaultBulletHoleDecal, FVector(15.0f, 3.0f, 3.0f), OtherComp, NAME_None, HitLocation,
-				HitNormal.ToOrientationRotator(), EAttachLocation::KeepWorldPosition, 30.0f);
+			static const FName InvisibleWall_NAME(TEXT("InvisibleWall"));
+
+			if (OtherComp != nullptr && OtherComp->GetCollisionProfileName() != InvisibleWall_NAME)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultSparkParticle, Hit.ImpactPoint);
+
+				UGameplayStatics::SpawnDecalAttached(DefaultBulletHoleDecal, FVector(15.0f, 3.0f, 3.0f), OtherComp, NAME_None, HitLocation,
+					HitNormal.ToOrientationRotator(), EAttachLocation::KeepWorldPosition, 30.0f);
+			}
 		}		
 	}
 }
