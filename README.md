@@ -14,6 +14,6 @@ TPS 게임을 만들어 보면서 언리얼 엔진4를 사용한 Dedicated Serve
 * PC (Winows)
 * Steam 로그인 필요 (OnlineSubsystemSteam 사용)
 
-### 3. 리소스 출처
+### 4. 리소스 출처
 * 에픽게임즈 마켓플레이스의 무료 콘텐츠
 * Free3D (https://free3d.com/)
