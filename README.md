@@ -1,3 +1,19 @@
 # ArenaShooters
 
-Third-Person Multiplayer Shooting Game
+*Third-Person Multiplayer Shooting Game*
+
+### 1. 목적
+TPS 게임을 만들어 보면서 언리얼 엔진4를 사용한 Dedicated Server / Client 구조의 멀티플레이어 게임을 개발하는 방법을 익힌다.
+
+### 2. 개발환경
+* UnrealEngine4 (ver. 4.26.2 / SourceCode 버전)
+* VisualStudio Community 2019
+* GitHub Desktop
+
+### 3. 게임 구동 환경
+* PC (Winows)
+* Steam 로그인 필요 (OnlineSubsystemSteam 사용)
+
+### 3. 리소스 출처
+* 에픽게임즈 마켓플레이스의 무료 콘텐츠
+* Free3D (https://free3d.com/)
