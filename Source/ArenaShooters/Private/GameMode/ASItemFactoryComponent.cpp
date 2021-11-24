@@ -12,11 +12,22 @@
 
 UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, UASItemDataAsset* DataAsset, int32 Count/* = 0*/)
 {
+	if (!ensure(World != nullptr))
+		return nullptr;
+
 	if (!ensure(DataAsset != nullptr))
 		return nullptr;
 
-	if (!ensure(World != nullptr))
-		return nullptr;
+	if (DataAsset->bBundle)
+	{
+		if (!ensure(Count > 0))
+			return nullptr;
+
+		if (!ensure(Count <= DataAsset->MaxBundleCount))
+		{
+			Count = DataAsset->MaxBundleCount;
+		}
+	}
 
 	AGameStateBase* GameState = World->GetGameState();
 	if (!ensure(IsValid(GameState)))

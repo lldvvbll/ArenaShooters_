@@ -20,7 +20,7 @@ AASMatchGameModeBase::AASMatchGameModeBase()
 	MatchProcessTime = FTimespan::FromMinutes(15.0);
 	bSetPrepareTimer = false;
 	MinPlayerCount = 4;
-	GoalNumOfKills = 1;
+	GoalNumOfKills = 10;
 }
 
 void AASMatchGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)

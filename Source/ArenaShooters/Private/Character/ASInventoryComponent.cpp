@@ -694,6 +694,10 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 		if (!ensure(AssetId.IsValid()))
 			continue;
 
+		auto DataAsset = UASAssetManager::Get().GetDataAsset<UASItemDataAsset>(AssetId);
+		if (!ensure(DataAsset != nullptr))
+			continue;
+
 		EItemType ItemType = UASAssetManager::ConvertAssetIdToItemType(AssetId);
 		switch (ItemType)
 		{
@@ -729,11 +733,27 @@ void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* It
 			break;
 		case EItemType::Ammo:		// fallthrough
 		case EItemType::HealingKit:
+			if (ensure(ItemPair.Value > 0) && ensure(DataAsset->MaxBundleCount > 0))
 			{
-				auto Item = UASItemFactoryComponent::NewASItem(World, GetOwner(), AssetId, ItemPair.Value);
-				if (ensure(IsValid(Item)))
+				int32 ItemCnt = ItemPair.Value / DataAsset->MaxBundleCount;
+				int32 RemainBundleCnt = ItemPair.Value % DataAsset->MaxBundleCount;
+
+				for (int32 Idx = 0; Idx < ItemCnt; ++Idx)
 				{
-					AddItemToInventory(Item);
+					auto Item = UASItemFactoryComponent::NewASItem(World, GetOwner(), DataAsset, DataAsset->MaxBundleCount);
+					if (ensure(IsValid(Item)))
+					{
+						ensure(AddItemToInventory(Item));
+					}
+				}
+				
+				if (RemainBundleCnt > 0)
+				{
+					auto Item = UASItemFactoryComponent::NewASItem(World, GetOwner(), DataAsset, RemainBundleCnt);
+					if (ensure(IsValid(Item)))
+					{
+						ensure(AddItemToInventory(Item));
+					}
 				}
 			}
 			break;

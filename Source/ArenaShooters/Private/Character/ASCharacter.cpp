@@ -1769,7 +1769,7 @@ bool AASCharacter::ServerShoot_Validate(const FVector& MuzzleLocation, const FRo
 
 void AASCharacter::ServerShoot_Implementation(const FVector& MuzzleLocation, const FRotator& ShootRotation)
 {
-	if (!ensure(CanShoot()))
+	if (!CanShoot())
 		return;
 
 	if (!ensure(ASInventory != nullptr))
