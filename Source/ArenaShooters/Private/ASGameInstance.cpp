@@ -114,7 +114,7 @@ void UASGameInstance::OnStart()
 		IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
 		if (ensure(SessionInterface.IsValid()))
 		{
-			FString ServerName = TEXT("ArenaShooters - Test");
+			FString ServerName = TEXT("ArenaShooters(Test Server)");
 
 			TArray<FString> Tokens;
 			TArray<FString> Switches;
