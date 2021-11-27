@@ -17,3 +17,6 @@
 ### 4. 리소스 출처
 * 에픽게임즈 마켓플레이스의 무료 콘텐츠
 * Free3D (https://free3d.com/)
+
+### 5. 시연 영상
+https://youtu.be/PibchJPM_NI
