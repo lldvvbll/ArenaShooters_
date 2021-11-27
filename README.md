@@ -2,6 +2,8 @@
 
 *Third-Person Multiplayer Shooting Game*
 
+(이전 히스토리: https://github.com/lldvvbll/ArenaShooters/commits/main)
+
 ### 1. 목적
 * TPS 게임을 만들어 보면서 언리얼 엔진4를 사용한 Dedicated Server / Client 구조의 멀티플레이어 게임을 개발하는 방법을 익힌다.
 
