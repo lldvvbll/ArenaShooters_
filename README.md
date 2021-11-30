@@ -22,3 +22,9 @@
 
 ### 5. 시연 영상
 https://youtu.be/PibchJPM_NI
+
+### 6. 게임 패키지 파일
+#### 1) Steam 연결 버전
+https://drive.google.com/file/d/1vFkwSJMgB_183Idrh7_RunQ6wDU8RnwI/view?usp=sharing
+#### 2) LAN 연결 버전
+https://drive.google.com/file/d/1JKQfP7j5h5wkm_dL1KBgRJAC4op7GAht/view?usp=sharing
