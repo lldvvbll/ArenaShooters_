@@ -1,6 +1,6 @@
 # ArenaShooters
 
-*Third-Person Multiplayer Shooting Game*
+*Multiplayer Third-Person Shooting Game*
 
 (이전 히스토리: https://github.com/lldvvbll/ArenaShooters/commits/main)
 
