@@ -11,7 +11,7 @@
 AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (ensure(IsValid(DmGameState)))
+	if (ensure(DmGameState))
 	{
 		if (DmGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
@@ -72,7 +72,7 @@ AActor* AASDeathmatchGameMode::ChoosePlayerStart_Implementation(AController* Pla
 bool AASDeathmatchGameMode::ShouldSpawnAtStartSpot(AController* Player)
 {
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (ensure(IsValid(DmGameState)))
+	if (ensure(DmGameState))
 	{
 		if (DmGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 			return false;
@@ -86,7 +86,7 @@ void AASDeathmatchGameMode::OnKillCharacter(AASPlayerController* KillerControlle
 	Super::OnKillCharacter(KillerController, DeadController);
 
 	auto DmGameState = GetGameState<AASDeathmatchGameState>();
-	if (ensure(IsValid(DmGameState)))
+	if (ensure(DmGameState))
 	{
 		AASPlayerState* TopRankPlayerState = DmGameState->GetTopRankPlayerState();
 		if (ensure(IsValid(TopRankPlayerState)))

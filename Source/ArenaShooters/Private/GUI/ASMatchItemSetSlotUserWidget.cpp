@@ -11,7 +11,7 @@
 
 void UASMatchItemSetSlotUserWidget::SetDataAsset(UASItemSetDataAsset* DataAsset)
 {
-	if (!ensure(IsValid(DataAsset)))
+	if (!ensure(DataAsset))
 		return;
 
 	ItemSetDataAsset = DataAsset;

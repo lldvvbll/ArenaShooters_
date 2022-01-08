@@ -645,7 +645,7 @@ void UASInventoryComponent::ReattachWeaponActor(UASWeapon* InWeapon, const FName
 	WeaponActor->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
 	auto ASChar = Cast<AASCharacter>(GetOwner());
-	if (!ensure(IsValid(ASChar)))
+	if (!ensure(ASChar))
 		return;
 
 	WeaponActor->AttachToComponent(ASChar->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, SocketName);

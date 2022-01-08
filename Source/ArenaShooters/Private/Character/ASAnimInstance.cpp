@@ -42,7 +42,7 @@ void UASAnimInstance::NativeBeginPlay()
 	Super::NativeBeginPlay();
 
 	ASChar = Cast<AASCharacter>(TryGetPawnOwner());
-	if (!ensure(IsValid(ASChar)))
+	if (!ensure(ASChar != nullptr))
 		return;
 
 	UCharacterMovementComponent* MoveComp = ASChar->GetCharacterMovement();
@@ -220,7 +220,7 @@ void UASAnimInstance::AnimNotify_UseHealingKitComplete()
 
 void UASAnimInstance::AnimNotify_HitReact()
 {
-	if (!ensure(IsValid(ASChar)))
+	if (!ensure(ASChar))
 		return;
 	
 	if (ASChar->IsLocallyControlled())

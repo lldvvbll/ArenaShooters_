@@ -206,7 +206,7 @@ TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 
 bool AASMatchGameStateBase::IsValidItemSetDataAsset(UASItemSetDataAsset* DataAsset) const
 {
-	if (!ensure(IsValid(DataAsset)))
+	if (!ensure(DataAsset))
 		return false;
 
 	return ItemSetAssetIds.Contains(DataAsset->GetPrimaryAssetId());

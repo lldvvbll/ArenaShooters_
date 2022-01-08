@@ -39,7 +39,7 @@ void AASMatchGameModeBase::InitGameState()
 	Super::InitGameState();
 
 	ASMatchGameState = Cast<AASMatchGameStateBase>(GameState);
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		ASMatchGameState->SetMaxNumPlayers(GetMaxPlayerCount());
 		ASMatchGameState->SetMinNumPlayers(MinPlayerCount);
@@ -66,7 +66,7 @@ void AASMatchGameModeBase::PreLogin(const FString& Options, const FString& Addre
 		return;
 	}
 
-	if (IsValid(ASMatchGameState))
+	if (ASMatchGameState)
 	{
 		if (bSetPrepareTimer || ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
@@ -85,7 +85,7 @@ void AASMatchGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		if (ASMatchGameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 		{
@@ -128,7 +128,7 @@ void AASMatchGameModeBase::SetPlayerDefaults(APawn* PlayerPawn)
 {
 	Super::SetPlayerDefaults(PlayerPawn);
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
 		{
@@ -165,7 +165,7 @@ void AASMatchGameModeBase::ProcessMatch()
 {
 	PrepareAllPlayerStart();
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		ASMatchGameState->SetInnerMatchState(EInnerMatchState::Process);
 	}
@@ -175,7 +175,7 @@ void AASMatchGameModeBase::ProcessMatch()
 
 void AASMatchGameModeBase::FinishMatch()
 {
-	if (!ensure(IsValid(ASMatchGameState)))
+	if (!ensure(ASMatchGameState))
 		return;
 
 	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Process)
@@ -215,7 +215,7 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 		}
 	}
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		ASMatchGameState->MulticastOnKill(KillerPlayerState, DeadPlayerState, KillCount);
 	}
@@ -223,7 +223,7 @@ void AASMatchGameModeBase::OnKillCharacter(AASPlayerController* KillerController
 
 void AASMatchGameModeBase::SetPrepareTimer()
 {
-	if (!ensure(IsValid(ASMatchGameState)))
+	if (!ensure(ASMatchGameState))
 		return;
 
 	if (ASMatchGameState->GetInnerMatchState() != EInnerMatchState::Prepare)
@@ -253,7 +253,7 @@ void AASMatchGameModeBase::SetProcessTimer()
 	float MatchProcessTimeSec = MatchProcessTime.GetTotalSeconds();
 	GetWorldTimerManager().SetTimer(MatchFinishTimeHandle, this, &AASMatchGameModeBase::FinishMatch, MatchProcessTimeSec);
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + MatchProcessTimeSec;
 		ASMatchGameState->SetMatchFinishTime(FinishTime);
@@ -267,7 +267,7 @@ void AASMatchGameModeBase::SetRestartTimer()
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &AASMatchGameModeBase::OnCalledRestartTimer, RestartTime);
 
-	if (ensure(IsValid(ASMatchGameState)))
+	if (ensure(ASMatchGameState))
 	{
 		float FinishTime = ASMatchGameState->GetServerWorldTimeSeconds() + RestartTime;
 		ASMatchGameState->SetRestartTime(FinishTime);

@@ -45,7 +45,7 @@ void UASHudUserWidget::NativeConstruct()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnSetMatchFinishTime.AddUObject(this, &UASHudUserWidget::OnSetMatchFinishTime);
 		GameState->OnKill.AddUObject(this, &UASHudUserWidget::OnKill);
@@ -74,7 +74,7 @@ void UASHudUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnSetMatchFinishTime.RemoveAll(this);
 		GameState->OnKill.RemoveAll(this);
@@ -111,7 +111,7 @@ void UASHudUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 void UASHudUserWidget::OnSetMatchFinishTime(float Time)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		bSetMatchFinishTime = true;
 

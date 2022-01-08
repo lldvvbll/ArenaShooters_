@@ -30,7 +30,7 @@ UASItem* UASItemFactoryComponent::NewASItem(UWorld* World, AActor* NewOwner, UAS
 	}
 
 	AGameStateBase* GameState = World->GetGameState();
-	if (!ensure(IsValid(GameState)))
+	if (!ensure(GameState))
 		return nullptr;
 
 	auto ItemFactoryComp = Cast<UASItemFactoryComponent>(GameState->FindComponentByClass(UASItemFactoryComponent::StaticClass()));
@@ -60,15 +60,15 @@ bool UASItemFactoryComponent::DeleteItem(UWorld* World, UASItem* InItem)
 	if (!ensure(IsValid(InItem)))
 		return false;
 
-	if (!ensure(IsValid(World)))
+	if (!ensure(World))
 		return false;
 
 	AGameStateBase* GameState = World->GetGameState();
-	if (!ensure(IsValid(GameState)))
+	if (!ensure(GameState))
 		return nullptr;
 
 	auto ItemFactoryComp = Cast<UASItemFactoryComponent>(GameState->FindComponentByClass(UASItemFactoryComponent::StaticClass()));
-	if (!ensure(IsValid(ItemFactoryComp)))
+	if (!ensure(ItemFactoryComp))
 		return nullptr;
 
 	int32 Idx = ItemFactoryComp->ASItems.Find(InItem);

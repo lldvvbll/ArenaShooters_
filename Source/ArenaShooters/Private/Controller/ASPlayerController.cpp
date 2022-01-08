@@ -120,7 +120,7 @@ void AASPlayerController::SetRespawnTimer(FTimespan Delay)
 	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &AASPlayerController::OnCalledRespawnTimer, RespawnDelaySec);
 	
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (IsValid(GameState))
+	if (GameState)
 	{
 		RespawnTime = GameState->GetServerWorldTimeSeconds() + RespawnDelaySec;
 	}
@@ -137,7 +137,7 @@ void AASPlayerController::ClearRespawnTimer()
 void AASPlayerController::RespawnPlayer()
 {
 	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
-	if (ensure(IsValid(GameMode)))
+	if (ensure(GameMode))
 	{
 		GameMode->RestartPlayer(this);
 	}
@@ -167,7 +167,7 @@ void AASPlayerController::RemoveFullScreenWidget()
 void AASPlayerController::GoToMainMenu()
 {
 	auto GameInstance = GetGameInstance<UASGameInstance>();
-	if (ensure(IsValid(GameInstance)))
+	if (ensure(GameInstance))
 	{
 		ClientTravel(UGameMapsSettings::GetGameDefaultMap(), ETravelType::TRAVEL_Absolute);
 
@@ -205,7 +205,7 @@ void AASPlayerController::BeginPlay()
 		}
 
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (ensure(IsValid(GameState)))
+		if (ensure(GameState))
 		{
 			if (GameState->GetInnerMatchState() == EInnerMatchState::Prepare)
 			{
@@ -375,7 +375,7 @@ void AASPlayerController::ReadyMatch()
 void AASPlayerController::ServerReadyMatch_Implementation()
 {
 	auto GM = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
-	if (IsValid(GM))
+	if (GM != nullptr)
 	{
 		GM->SetPrepareTimer();
 	}
@@ -389,7 +389,7 @@ void AASPlayerController::FinishMatch()
 void AASPlayerController::ServerFinishMatch_Implementation()
 {
 	auto GM = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
-	if (IsValid(GM))
+	if (GM != nullptr)
 	{
 		GM->FinishMatch();
 	}

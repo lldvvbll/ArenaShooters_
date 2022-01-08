@@ -131,7 +131,7 @@ void AASCharacter::BeginPlay()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnChangedInnerMatchState.AddUObject(this, &AASCharacter::OnChangedInnerMatchState);
 
@@ -266,7 +266,7 @@ void AASCharacter::SetPlayerDefaults()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		if (GameState->IsMatchProcess())
 		{
@@ -2174,7 +2174,7 @@ AActor* AASCharacter::FindPickableActor() const
 	FVector CamForward = FollowCamera->GetForwardVector().GetSafeNormal();
 
 	auto PC = GetController<APlayerController>();
-	if (IsValid(PC) && PC->PlayerCameraManager != nullptr)
+	if (ensure(PC != nullptr) && ensure(PC->PlayerCameraManager != nullptr))
 	{
 		CamLoc = PC->PlayerCameraManager->GetCameraLocation();
 		CamForward = PC->PlayerCameraManager->GetCameraRotation().Vector();

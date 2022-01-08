@@ -28,7 +28,7 @@ void UASMatchItemSetSelectUserWidget::NativeConstruct()
 		}
 
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (ensure(IsValid(GameState)))
+		if (ensure(GameState))
 		{
 			bool bEnable = GameState->GetInnerMatchState() != EInnerMatchState::Finish;
 
@@ -70,7 +70,7 @@ void UASMatchItemSetSelectUserWidget::NativeDestruct()
 
 void UASMatchItemSetSelectUserWidget::OnChangedItemSetDataAsset(UASItemSetDataAsset* NewItemSetDataAsset)
 {
-	if (!ensure(IsValid(NewItemSetDataAsset)))
+	if (!ensure(NewItemSetDataAsset))
 		return;
 
 	FPrimaryAssetId ItemSetDataAssetID = NewItemSetDataAsset->GetPrimaryAssetId();

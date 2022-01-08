@@ -17,7 +17,7 @@ void UASDmLeaderBoardUserWidget::NativeConstruct()
 	RankingScrollBox = Cast<UScrollBox>(GetWidgetFromName(TEXT("RankingScrollBox")));
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (IsValid(GameState))
+	if (GameState)
 	{
 		GameState->OnUpdatedRanking.AddUObject(this, &UASDmLeaderBoardUserWidget::UpdateRanking);
 
@@ -54,7 +54,7 @@ void UASDmLeaderBoardUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (IsValid(GameState))
+	if (GameState)
 	{
 		GameState->OnUpdatedRanking.RemoveAll(this);
 	}
@@ -74,7 +74,7 @@ void UASDmLeaderBoardUserWidget::UpdateRanking(const TArray<FRankedPlayerState>&
 		RankingScrollBox->ClearChildren();
 
 		auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-		if (IsValid(GameState))
+		if (GameState)
 		{
 			for (int32 Idx = 0; Idx < RankedPlayerStates.Num(); ++Idx)
 			{

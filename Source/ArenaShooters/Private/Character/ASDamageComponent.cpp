@@ -69,7 +69,7 @@ void UASDamageComponent::OnTakeDamage(AActor* DamagedActor, float Damage, const 
 	if (!bBeforeDead && ASChar->IsDead())
 	{
 		auto GameMode = GetWorld()->GetAuthGameMode<AASMatchGameModeBase>();
-		if (ensure(IsValid(GameMode)))
+		if (ensure(GameMode))
 		{
 			GameMode->OnKillCharacter(Cast<AASPlayerController>(InstigatedBy), ASChar->GetController<AASPlayerController>());
 		}

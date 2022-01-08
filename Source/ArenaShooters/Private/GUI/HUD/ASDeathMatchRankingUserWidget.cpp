@@ -16,7 +16,7 @@ void UASDeathMatchRankingUserWidget::NativeConstruct()
 	RankScrollBox = Cast<UScrollBox>(GetWidgetFromName(TEXT("RankScrollBox")));
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnSetGoalNumOfKills.AddUObject(this, &UASDeathMatchRankingUserWidget::OnSetGoalNumOfKills);
 		GameState->OnUpdatedRanking.AddUObject(this, &UASDeathMatchRankingUserWidget::UpdatePlayerRanking);
@@ -31,7 +31,7 @@ void UASDeathMatchRankingUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnUpdatedRanking.RemoveAll(this);
 	}
@@ -45,7 +45,7 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPla
 	RankScrollBox->ClearChildren();
 
 	auto GameState = GetWorld()->GetGameState<AASDeathmatchGameState>();
-	if (!ensure(IsValid(GameState)))
+	if (!ensure(GameState))
 		return;
 
 	auto MyPlayerState = GetOwningPlayer()->GetPlayerState<AASPlayerState>();

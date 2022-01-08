@@ -24,7 +24,7 @@ void UASPrepareInfoUserWidget::SetNumPlayers(int32 Num)
 void UASPrepareInfoUserWidget::StartCountDown(float InMatchStartTime)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		bCountDown = true;
 
@@ -66,7 +66,7 @@ void UASPrepareInfoUserWidget::NativeConstruct()
 	}
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnStartTimeForProcess.AddUObject(this, &UASPrepareInfoUserWidget::StartCountDown);
 		GameState->OnAddedPlayerState.AddUObject(this, &UASPrepareInfoUserWidget::OnAddedPlayerState);
@@ -82,7 +82,7 @@ void UASPrepareInfoUserWidget::NativeDestruct()
 	Super::NativeDestruct();
 
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		GameState->OnStartTimeForProcess.RemoveAll(this);
 		GameState->OnAddedPlayerState.RemoveAll(this);
@@ -113,7 +113,7 @@ void UASPrepareInfoUserWidget::NativeTick(const FGeometry& MyGeometry, float InD
 void UASPrepareInfoUserWidget::OnAddedPlayerState(APlayerState* AddedPlayerState)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		SetNumPlayers(GameState->PlayerArray.Num());
 	}
@@ -122,7 +122,7 @@ void UASPrepareInfoUserWidget::OnAddedPlayerState(APlayerState* AddedPlayerState
 void UASPrepareInfoUserWidget::OnRemovedPlayerState(APlayerState* AddedPlayerState)
 {
 	auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-	if (ensure(IsValid(GameState)))
+	if (ensure(GameState))
 	{
 		SetNumPlayers(GameState->PlayerArray.Num());
 	}

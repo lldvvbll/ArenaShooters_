@@ -38,7 +38,7 @@ void AASDeathMatchPlayerController::OnRep_PlayerState()
 	if (IsLocalPlayerController())
 	{
 		auto ASPlayerState = GetPlayerState<AASPlayerState>();
-		if (ensure(IsValid(ASPlayerState)))
+		if (ensure(ASPlayerState))
 		{
 			ASPlayerState->OnChangedDeathCount.AddUObject(this, &AASDeathMatchPlayerController::OnChangedDeathCount);
 		}
@@ -52,7 +52,7 @@ void AASDeathMatchPlayerController::BeginPlay()
 	if (IsLocalPlayerController())
 	{
 		auto GameState = GetWorld()->GetGameState<AASMatchGameStateBase>();
-		if (ensure(IsValid(GameState)))
+		if (ensure(GameState))
 		{
 			FText MsgTxt = FText::Format(WelcomeMessage, FText::AsNumber(GameState->GetMinNumPlayer()));
 			NotifyMessage(MsgTxt.ToString(), 10.0f);

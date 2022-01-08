@@ -140,7 +140,7 @@ void UASGameInstance::OnStart()
 
 			int32 NumMaxPlayers = 16;
 			auto GameMode = GetWorld()->GetAuthGameMode();
-			if (ensure(IsValid(GameMode)) && ensure(GameMode->GameSession != nullptr))
+			if (ensure(GameMode != nullptr) && ensure(GameMode->GameSession != nullptr))
 			{
 				NumMaxPlayers = GameMode->GameSession->MaxPlayers;
 			}
