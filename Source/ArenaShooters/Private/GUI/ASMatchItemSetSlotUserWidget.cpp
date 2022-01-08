@@ -29,7 +29,7 @@ void UASMatchItemSetSlotUserWidget::SetDataAsset(UASItemSetDataAsset* DataAsset)
 
 FPrimaryAssetId UASMatchItemSetSlotUserWidget::GetItemSetDataAssetId() const
 {
-	return IsValid(ItemSetDataAsset) ? ItemSetDataAsset->GetPrimaryAssetId() : FPrimaryAssetId();
+	return (ItemSetDataAsset != nullptr) ? ItemSetDataAsset->GetPrimaryAssetId() : FPrimaryAssetId();
 }
 
 void UASMatchItemSetSlotUserWidget::ChangeButtonState(bool bIsSelected)

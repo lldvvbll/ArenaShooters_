@@ -13,7 +13,7 @@ void UASAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (!::IsValid(ASChar))
+	if (ASChar == nullptr)
 		return;
 	
 	bInAir = ASChar->GetCharacterMovement()->IsFalling();

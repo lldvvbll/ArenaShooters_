@@ -682,7 +682,7 @@ void UASInventoryComponent::ClearAllItems()
 
 void UASInventoryComponent::EquipItemsByItemSetDataAsset(UASItemSetDataAsset* ItemSetDataAsset)
 {
-	if (!ensure(IsValid(ItemSetDataAsset)))
+	if (!ensure(ItemSetDataAsset))
 		return;
 
 	TArray<UASItem*> RemovedItems;

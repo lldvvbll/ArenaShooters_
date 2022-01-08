@@ -70,7 +70,7 @@ void UASInventoryUserWidget::NativeDestruct()
 		ASChar->OnGroundItemRemove.RemoveAll(this);
 
 		ASInventoryComp = ASChar->GetInventoryComponent();
-		if (ensure(IsValid(ASInventoryComp)))
+		if (ensure(ASInventoryComp))
 		{
 			ASInventoryComp->OnAddInventoryItem.RemoveAll(this);
 			ASInventoryComp->OnRemoveInventoryItem.RemoveAll(this);

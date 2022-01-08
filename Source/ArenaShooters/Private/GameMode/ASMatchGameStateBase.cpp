@@ -195,7 +195,7 @@ TArray<UASItemSetDataAsset*> AASMatchGameStateBase::GetItemSetDataAssets() const
 	for (auto& AssetId : ItemSetAssetIds)
 	{
 		auto ItemSetAsset = AssetManager.GetDataAsset<UASItemSetDataAsset>(AssetId);
-		if (ensure(IsValid(ItemSetAsset)))
+		if (ensure(ItemSetAsset))
 		{
 			DataAssets.Emplace(ItemSetAsset);
 		}
