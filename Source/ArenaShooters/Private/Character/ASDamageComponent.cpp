@@ -25,12 +25,17 @@ void UASDamageComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	ASChar = GetOwner<AASCharacter>();
+	verify(ASChar != nullptr);
 	ASChar->OnTakeAnyDamage.AddDynamic(this, &UASDamageComponent::OnTakeDamage);
 
 	ASStatus = ASChar->GetStatusComponent();
+	verify(ASStatus != nullptr);
+
 	ASInventory = ASChar->GetInventoryComponent();
+	verify(ASInventory != nullptr);
 	
 	DamageDataAsset = UASAssetManager::Get().GetDataAsset<UASDamageDataAsset>(DamageAssetId);
+	check(DamageDataAsset != nullptr);
 }
 
 void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult& InHit)
@@ -51,7 +56,7 @@ void UASDamageComponent::TakeBulletDamage(AASBullet* InBullet, const FHitResult&
 		TakenDamage = Armor->TakeDamage(TakenDamage);
 	}
 
-	if (DamageDataAsset != nullptr)
+	if (ensure(DamageDataAsset != nullptr))
 	{
 		TakenDamage *= DamageDataAsset->GetDamageRateByBone(ASChar->GetMesh(), InHit.BoneName);
 	}

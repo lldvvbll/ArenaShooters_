@@ -35,6 +35,7 @@ void UASInventoryComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	InventoryDataAsset = UASAssetManager::Get().GetDataAsset<UASInventoryDataAsset>(InventoryAssetId);
+	check(InventoryDataAsset);
 }
 
 void UASInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -335,6 +336,8 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 			int32 Idx = static_cast<int32>(SlotType);
 			if (ensure(WeaponSlots[Idx] == nullptr))
 			{
+				// 슬롯에 아이템이 없는 경우 아이템 소유주 설정을 하고 슬롯에 할당한다.
+
 				AActor* CurOwner = GetOwner();
 				if (NewItem->GetOwner() != CurOwner)
 				{
@@ -343,6 +346,7 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 
 				WeaponSlots[Idx] = NewItem;
 
+				// 슬롯에 할당된 아이템을 리턴하게 한다.
 				ResultPair.Key = WeaponSlots[Idx];
 				ResultPair.Value = true;
 
@@ -350,6 +354,7 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToWeaponSlot(EWeaponSlotType SlotT
 			}
 			else
 			{
+				// 슬롯에 아이템이 있는 경우 실패 처리한다.
 				ResultPair.Key = WeaponSlots[Idx];
 				ResultPair.Value = false;
 			}
@@ -419,12 +424,15 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToArmorSlot(EArmorSlotType SlotTyp
 			int32 Idx = static_cast<int32>(SlotType);
 			if (ensure(ArmorSlots[Idx] == nullptr))
 			{
+				// 슬롯에 아이템이 없는 경우 아이템 소유주 설정을 하고 슬롯에 할당한다.
+
 				if (NewItem != nullptr)
 				{
 					NewItem->SetOwner(GetOwner());
 				}
 				ArmorSlots[Idx] = NewItem;
 
+				// 슬롯에 할당된 아이템을 리턴하게 한다.
 				ResultPair.Key = ArmorSlots[Idx];
 				ResultPair.Value = true;
 
@@ -432,6 +440,7 @@ ItemPtrBoolPair UASInventoryComponent::SetItemToArmorSlot(EArmorSlotType SlotTyp
 			}
 			else
 			{
+				// 슬롯에 아이템이 있는 경우 실패 처리한다.
 				ResultPair.Key = ArmorSlots[Idx];
 				ResultPair.Value = false;
 			}
@@ -503,6 +512,7 @@ bool UASInventoryComponent::AddItemToInventory(UASItem* NewItem)
 
 		if (OldItem != nullptr && (OldItem->GetMaxCount() - OldItem->GetCount() >= NewItemCount))
 		{
+			// 이미 같은 종류의 아이템이 인벤토리에 있는 경우 이미 있는 아이템으로 합친다.
 			NewItem->ModifyCount(-NewItemCount);
 			OldItem->ModifyCount(NewItemCount);
 
@@ -1074,6 +1084,8 @@ void UASInventoryComponent::OnRep_SelectedWeapon(UASWeapon* OldWeapon)
 
 UASItem* UASInventoryComponent::FindItemFromInventory(UASItem* ComparingItem) const
 {
+	// 인벤토리에서 어셋 아이디가 같은 아이템을 찾아서 반환한다.
+
 	if (IsValid(ComparingItem))
 	{
 		for (auto& ASItem : InventoryItems)
