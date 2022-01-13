@@ -398,6 +398,8 @@ void AASCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 
 			if (!bTracePickingUp && GroundItemActorSet.Num() > 0)
 			{
+				// 아이템 줍기 트레이스 시작
+
 				bTracePickingUp = true;
 				PickingUpTraceElapseTime = 0.0f;
 			}
@@ -648,6 +650,9 @@ void AASCharacter::ServerDropItem_Implementation(UASItem* InItem)
 		{
 			if (Ammo->GetAmmoType() == SelectedWeapon->GetAmmoType())
 			{
+				// 재장전 중에 무기에 사용되는 탄약과 동일 타입의 탄약 아이템을 드랍하게 되면
+				// 드랍한 탄약으로 재장전을 하는 문제가 발생할 수 있다.
+				// 안전하게 재장전을 멈춘다.
 				MulticastStopReloadMontage();
 			}
 		}
@@ -1405,6 +1410,7 @@ bool AASCharacter::Shoot()
 				FVector CamForward = FollowCamera->GetForwardVector().GetSafeNormal();
 				FVector MuzzleLoc = WeaponActor->GetMuzzleLocation();
 
+				// 트래이스의 시작 위치는 카메라에서 총구로의 벡터를 카메라 전방 벡터로 내적한 지점이다.
 				float LengthToStartLoc = FMath::Abs((CamLoc - MuzzleLoc) | CamForward);
 				FVector TraceStartLoc = CamLoc + (CamForward * LengthToStartLoc);
 				FVector TraceEndLoc = CamLoc + (CamForward * 15000.0f);
@@ -1423,6 +1429,7 @@ bool AASCharacter::Shoot()
 					TargetLoc = TraceEndLoc;
 				}
 
+				// 총구 위치에서 충돌 지점으로 발사한다
 				FVector FireDir = (TargetLoc - MuzzleLoc).GetSafeNormal();
 				FRotator FireRot = FRotationMatrix::MakeFromX(FireDir).Rotator();
 				ServerShoot(MuzzleLoc, FireRot);
@@ -1436,6 +1443,7 @@ bool AASCharacter::Shoot()
 				FRotator MuzzleRotation;
 				WeaponActor->GetMuzzleLocationAndRotation(MuzzleLocation, MuzzleRotation);
 
+				// 총구 위치에서 총구 전방으로 발사한다
 				ServerShoot(MuzzleLocation, MuzzleRotation);
 
 				Weapon->SetLastFireTick();
@@ -1782,6 +1790,7 @@ void AASCharacter::ServerShoot_Implementation(const FVector& MuzzleLocation, con
 	FRotator MuzzleRot = ShootRotation;
 	if (ShootingStance == EShootingStanceType::Aiming)
 	{
+		// 탄퍼짐 효과가 원형으로 적용 되기 위해 Pitch를 우선 랜덤하게 구하고 Yaw는 대각선으로 취급하여 구한다
 		float RandPitch = FMath::RandRange(-CurrentBulletSpread, CurrentBulletSpread);
 		float MaxYaw = FMath::Sqrt(CurrentBulletSpread * CurrentBulletSpread - RandPitch * RandPitch);
 		float RandYaw = FMath::RandRange(-MaxYaw, MaxYaw);
