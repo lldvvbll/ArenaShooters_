@@ -19,6 +19,7 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	virtual bool IsSuitableSlot(const TWeakObjectPtr<UASItem>& InItem) override;
@@ -31,6 +32,4 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	EArmorSlotType ArmorSlotType;
-
-	FDelegateHandle OnChangedArmorDurabilityDelegateHandle;
 };

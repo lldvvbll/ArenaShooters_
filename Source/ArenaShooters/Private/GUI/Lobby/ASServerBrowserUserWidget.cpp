@@ -65,7 +65,7 @@ void UASServerBrowserUserWidget::NativeConstruct()
 
 	if (auto GameInst = GetGameInstance<UASGameInstance>())
 	{
-		OnSearchSessionResultDelegateHandle = GameInst->OnSearchSessionResult.AddUObject(this, &UASServerBrowserUserWidget::OnSearchSessionResult);
+		GameInst->OnSearchSessionResult.AddUObject(this, &UASServerBrowserUserWidget::OnSearchSessionResult);
 	}
 }
 
@@ -75,7 +75,7 @@ void UASServerBrowserUserWidget::NativeDestruct()
 
 	if (auto GameInst = GetGameInstance<UASGameInstance>())
 	{
-		GameInst->OnSearchSessionResult.Remove(OnSearchSessionResultDelegateHandle);
+		GameInst->OnSearchSessionResult.RemoveAll(this);
 	}
 }
 

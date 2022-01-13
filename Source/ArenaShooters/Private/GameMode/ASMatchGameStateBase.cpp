@@ -33,6 +33,7 @@ void AASMatchGameStateBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	// 미리 로딩해 두기 위해 호출
 	TArray<UASItemSetDataAsset*> DummyArrayForAssetLoading = GetItemSetDataAssets();
 }
 

@@ -60,13 +60,9 @@ void UASItemScrollBoxWrapperUserWidget::RemoveItemsFromScrollBox(const TArray<TW
 		return;
 	}
 
-	int32 ItemWidgetNum = ItemScrollBox->GetChildrenCount();
-
-	TArray<int32> RemoveItemIndices;
-	RemoveItemIndices.Reserve(ItemWidgetNum);
-	
 	for (auto& Item : Items)
 	{
+		int32 ItemWidgetNum = ItemScrollBox->GetChildrenCount();
 		for (int32 Idx = 0; Idx < ItemWidgetNum; ++Idx)
 		{
 			auto ItemWidget = Cast<UASItemUserWidget>(ItemScrollBox->GetChildAt(Idx));
@@ -76,14 +72,9 @@ void UASItemScrollBoxWrapperUserWidget::RemoveItemsFromScrollBox(const TArray<TW
 			if (ItemWidget->HasItem(Item))
 			{
 				CachedItemWidgets.Remove(ItemWidget);
-				RemoveItemIndices.Emplace(Idx);
+				ItemScrollBox->RemoveChild(ItemWidget);
 			}
 		}
-	}
-
-	for (auto& Idx : RemoveItemIndices)
-	{
-		ItemScrollBox->RemoveChildAt(Idx);
 	}
 }
 

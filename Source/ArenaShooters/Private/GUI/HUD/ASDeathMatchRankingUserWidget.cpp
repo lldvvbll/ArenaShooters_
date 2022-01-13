@@ -68,6 +68,8 @@ void UASDeathMatchRankingUserWidget::UpdatePlayerRanking(const TArray<FRankedPla
 
 	int32 NumPlayers = RankedPlayerStates.Num();
 
+	// 기본적으로 자신의 랭크 위, 아래 한 명씩만 보여준다.
+	// 최상위 랭크일 경우에는 아래 두명, 최하위 랭크일 경우에는 위 두명을 보여준다.
 	TArray<int32> Indices;
 	if (MyIdx == 0)
 	{

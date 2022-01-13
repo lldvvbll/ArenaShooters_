@@ -55,8 +55,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 	TSubclassOf<UASServerSlotUserWidget> ServerSlotWidgetClass;
 
-	FDelegateHandle OnSearchSessionResultDelegateHandle;
-
 	UPROPERTY()
 	USizeBox* ServerNotFoundSizeBox;
 };

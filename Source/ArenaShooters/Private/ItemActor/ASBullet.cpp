@@ -42,11 +42,11 @@ void AASBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitive
 			TraceParticle->Deactivate();
 		}
 
-		// todo: 대상에 맞게 동작하도록
 		if (Other != nullptr && !Other->IsA(AASCharacter::StaticClass()))
 		{
 			static const FName InvisibleWall_NAME(TEXT("InvisibleWall"));
 
+			// 보이지 않는 벽에 충돌 했을 경우에는 이펙트와 사운드를 출력하지 않는다.
 			if (OtherComp != nullptr && OtherComp->GetCollisionProfileName() != InvisibleWall_NAME)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DefaultSparkParticle, Hit.ImpactPoint);

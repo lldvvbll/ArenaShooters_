@@ -16,7 +16,7 @@ void UASWeaponSlotUserWidget::SetASItem(TWeakObjectPtr<UASItem>& NewItem)
 
 	if (UASWeapon* OldWeapon = (OldItem.IsValid() ? Cast<UASWeapon>(OldItem) : nullptr))
 	{
-		OldWeapon->OnCurrentAmmoCountChanged.Remove(OnCurrentAmmoCountChangedEventHandle);
+		OldWeapon->OnCurrentAmmoCountChanged.RemoveAll(this);
 		MaxAmmoCount = 0;
 	}
 
@@ -48,15 +48,9 @@ void UASWeaponSlotUserWidget::NativeDestruct()
 
 	if (UASWeapon* Weapon = (Item.IsValid() ? Cast<UASWeapon>(Item) : nullptr))
 	{
-		Weapon->OnCurrentAmmoCountChanged.Remove(OnCurrentAmmoCountChangedEventHandle);
+		Weapon->OnCurrentAmmoCountChanged.RemoveAll(this);
 		MaxAmmoCount = 0;
 	}
-}
-
-void UASWeaponSlotUserWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
-
 }
 
 bool UASWeaponSlotUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

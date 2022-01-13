@@ -80,6 +80,7 @@ void AASDeathmatchGameState::UpdateRanking()
 		}
 	}
 
+	// 킬 수가 높은 순, 데스가 적은 순, 둘 다 같다면 아이디 순
 	RankedPlayerStates.Sort(
 		[](const FRankedPlayerState& Left, const FRankedPlayerState& Right)
 		{
@@ -108,6 +109,7 @@ void AASDeathmatchGameState::UpdateRanking()
 			return Left.PlayerState->GetPlayerId() < Right.PlayerState->GetPlayerId();
 		});
 
+	// 기본적으로 정렬 된 순서대로 랭킹을 매기지만 킬 수, 데스 수가 같으면 동일 랭크이다
 	for (int32 Idx = 0; Idx < RankedPlayerStates.Num(); ++Idx)
 	{
 		FRankedPlayerState& RankedPlayerState = RankedPlayerStates[Idx];

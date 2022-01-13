@@ -16,12 +16,12 @@ void UASArmorSlotUserWidget::SetASItem(TWeakObjectPtr<UASItem>& NewItem)
 
 	if (UASArmor* OldArmor = (OldItem.IsValid() ? Cast<UASArmor>(OldItem) : nullptr))
 	{
-		OldArmor->OnChangedDurability.Remove(OnChangedArmorDurabilityDelegateHandle);
+		OldArmor->OnChangedDurability.RemoveAll(this);
 	}
 
 	if (UASArmor* NewArmor = (Item.IsValid() ? Cast<UASArmor>(Item) : nullptr))
 	{
-		OnChangedArmorDurabilityDelegateHandle = NewArmor->OnChangedDurability.AddUObject(this, &UASArmorSlotUserWidget::OnChangedArmorDurability);
+		NewArmor->OnChangedDurability.AddUObject(this, &UASArmorSlotUserWidget::OnChangedArmorDurability);
 
 		OnChangedArmorDurability(NewArmor->GetCurrentDurability(), NewArmor->GetMaxDurability());
 	}
@@ -38,12 +38,22 @@ void UASArmorSlotUserWidget::NativeConstruct()
 	DurabilityTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("DurabilityTextBlock")));
 }
 
+void UASArmorSlotUserWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (UASArmor* Armor = (Item.IsValid() ? Cast<UASArmor>(Item) : nullptr))
+	{
+		Armor->OnChangedDurability.RemoveAll(this);
+	}
+}
+
 bool UASArmorSlotUserWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	if (Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation))
 		return true;
 
-	if (GetOperationParentWidget(InOperation) != nullptr)
+	if (GetOperationParentWidget(InOperation) != this)
 	{
 		TWeakObjectPtr<UASItem> ArmorItem = GetASItemFromDragDropOperation(InOperation);
 		if (IsSuitableSlot(ArmorItem))

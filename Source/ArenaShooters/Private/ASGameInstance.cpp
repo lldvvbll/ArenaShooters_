@@ -116,6 +116,7 @@ void UASGameInstance::OnStart()
 		{
 			FString ServerName = TEXT("ArenaShooters(Test Server)");
 
+			// 실행 명령줄에 서버명이 있는지 찾아본다.
 			TArray<FString> Tokens;
 			TArray<FString> Switches;
 			FCommandLine::Parse(FCommandLine::Get(), Tokens, Switches);
